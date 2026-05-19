@@ -1,9 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from 'src/types';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  
+  @Post('register')
+  @ResponseMessage('User created successfully')
+  register(@Body() dto: CreateUserDto) {
+    return this.authService.register(dto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  @ResponseMessage('User login successfully')
+  login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  me(@CurrentUser() user: AuthenticatedUser) {
+    return this.authService.getProfile(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  logout() {
+    return this.authService.logout();
+  }
 }
