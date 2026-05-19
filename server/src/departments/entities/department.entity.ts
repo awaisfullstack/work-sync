@@ -1,4 +1,13 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  CreatedAt,
+  DataType,
+  HasMany,
+  Model,
+  Table,
+  UpdatedAt,
+} from 'sequelize-typescript';
+import { User } from 'src/users/entities/user.entity';
 @Table({
   tableName: 'departments',
   timestamps: true,
@@ -18,4 +27,15 @@ export class Department extends Model<Department> {
     unique: true,
   })
   declare name: string;
+
+  @HasMany(() => User)
+  declare users?: User[];
+
+  @CreatedAt
+  @Column({ field: 'created_at' })
+  declare createdAt: Date;
+
+  @UpdatedAt
+  @Column({ field: 'updated_at' })
+  declare updatedAt: Date;
 }

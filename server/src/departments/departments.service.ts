@@ -1,26 +1,73 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { Department } from './entities/department.entity';
 
 @Injectable()
 export class DepartmentsService {
-  create(createDepartmentDto: CreateDepartmentDto) {
-    return 'This action adds a new department';
+  constructor(
+    @InjectModel(Department)
+    private readonly departmentModel: typeof Department,
+  ) {}
+
+  async create(dto: CreateDepartmentDto): Promise<Department> {
+    const isExist = await this.departmentModel.findOne({
+      where: { name: dto.name },
+    });
+
+    if (isExist) {
+      throw new ConflictException('Department name already exists');
+    }
+
+    return await this.departmentModel.create(dto as any);
   }
 
-  findAll() {
-    return `This action returns all departments`;
+  async findAll(): Promise<Department[]> {
+    return this.departmentModel.findAll({
+      order: [['createdAt', 'DESC']],
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} department`;
+  async findOne(id: string): Promise<Department> {
+    const department = await this.departmentModel.findByPk(id);
+
+    if (!department) {
+      throw new NotFoundException('Department not found');
+    }
+
+    return department;
   }
 
-  update(id: number, updateDepartmentDto: UpdateDepartmentDto) {
-    return `This action updates a #${id} department`;
+  async update(
+    id: string,
+    updateDto: UpdateDepartmentDto,
+  ): Promise<Department> {
+    const department = this.findOne(id);
+
+    if (updateDto.name) {
+      const isExistSameName = await this.departmentModel.findOne({
+        where: { name: updateDto.name },
+      });
+
+      if (isExistSameName && isExistSameName.id !== id) {
+        throw new ConflictException('Department name already exists');
+      }
+    }
+    await (await department).update(updateDto);
+
+    return department;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} department`;
+  async remove(id: string): Promise<null> {
+    const department = await this.findOne(id);
+
+    await department.destroy();
+
+    return null;
   }
 }
