@@ -10,6 +10,7 @@ import { databaseConfig } from './config/database.config';
 import { DepartmentsModule } from './departments/departments.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
+import { ShiftsModule } from './shifts/shifts.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -26,6 +27,7 @@ import configuration from './config/configuration';
     DepartmentsModule,
     ProjectsModule,
     TasksModule,
+    ShiftsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
