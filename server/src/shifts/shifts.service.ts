@@ -1,26 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { CreateShiftDto } from './dto/create-shift.dto';
-import { UpdateShiftDto } from './dto/update-shift.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { User } from 'src/users/entities/user.entity';
+import { Shift } from './entities/shift.entity';
 
+type ShiftWithWorkedTime = {
+  id: string;
+  userId: string;
+  clockInAt: Date;
+  clockOutAt: Date | null;
+  workedMinutes: number;
+  workedHours: number;
+  employee?: User;
+};
 @Injectable()
 export class ShiftsService {
-  create(createShiftDto: CreateShiftDto) {
-    return 'This action adds a new shift';
-  }
+  constructor(
+    @InjectModel(Shift)
+    private readonly shiftModel: typeof Shift,
 
-  findAll() {
-    return `This action returns all shifts`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} shift`;
-  }
-
-  update(id: number, updateShiftDto: UpdateShiftDto) {
-    return `This action updates a #${id} shift`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} shift`;
-  }
+    @InjectModel(User)
+    private readonly userModel: typeof User,
+  ) {}
 }
