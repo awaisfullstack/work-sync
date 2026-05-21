@@ -11,6 +11,8 @@ import { DepartmentsModule } from './departments/departments.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { ShiftsModule } from './shifts/shifts.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { ActivityLogsModule } from './activity-logs/activity-logs.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -28,6 +30,8 @@ import configuration from './config/configuration';
     ProjectsModule,
     TasksModule,
     ShiftsModule,
+    DashboardModule,
+    ActivityLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

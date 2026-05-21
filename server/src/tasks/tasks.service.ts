@@ -19,6 +19,11 @@ import { AssignTaskDto } from './dto/assign-task.dto';
 import { AddTaskCommentDto } from './dto/add-task-comment.dto';
 import { GetTasksQueryDto } from './dto/get-tasks-query.dto';
 import { Op, WhereOptions } from 'sequelize';
+import { ActivityLogsService } from 'src/activity-logs/activity-logs.service';
+import {
+  ActivityAction,
+  ActivityEntityType,
+} from 'src/activity-logs/entities/activity-log.entity';
 
 @Injectable()
 export class TasksService {
@@ -43,6 +48,8 @@ export class TasksService {
 
     @InjectModel(User)
     private readonly userModel: typeof User,
+
+    private readonly activityLogsService: ActivityLogsService,
   ) {}
 
   private isAdmin(user: AuthenticatedUser): boolean {
@@ -140,12 +147,37 @@ export class TasksService {
       statusId: todoStatus.id,
     });
 
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.TASK_CREATED,
+      entityType: ActivityEntityType.TASK,
+      entityId: task.id,
+      projectId: task.projectId,
+      message: `Task "${task.title}" was created.`,
+      metadata: {
+        title: task.title,
+        dueDate: task.dueDate,
+      },
+    });
+
     if (assignedUserId) {
       await this.taskAssignmentModel.create({
         userId: assignedUserId,
         taskId: task.id,
         assignedBy: user.id,
       } as TaskAssignment);
+
+      await this.activityLogsService.create({
+        actorId: user.id,
+        action: ActivityAction.TASK_ASSIGNED,
+        entityType: ActivityEntityType.TASK,
+        entityId: task.id,
+        projectId: task.projectId,
+        message: `A user was assigned to task "${task.title}".`,
+        metadata: {
+          assignedUserId,
+        },
+      });
     }
 
     return this.findOne(task.id, user);
@@ -334,6 +366,18 @@ export class TasksService {
       statusId: taskStatus.id,
     });
 
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.TASK_STATUS_UPDATED,
+      entityType: ActivityEntityType.TASK,
+      entityId: task.id,
+      projectId: task.projectId,
+      message: `Task "${task.title}" status was updated to ${status}.`,
+      metadata: {
+        status,
+      },
+    });
+
     return this.findOne(id, user);
   }
 
@@ -360,6 +404,18 @@ export class TasksService {
       userId: dto.userId,
       assignedBy: user.id,
     } as TaskAssignment);
+
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.TASK_ASSIGNED,
+      entityType: ActivityEntityType.TASK,
+      entityId: task.id,
+      projectId: task.projectId,
+      message: `A user was assigned to task "${task.title}".`,
+      metadata: {
+        assignedUserId: dto.userId,
+      },
+    });
 
     return this.findOne(taskId, user);
   }
@@ -397,11 +453,25 @@ export class TasksService {
   ): Promise<TaskComment> {
     const task = await this.findOne(taskId, user);
 
-    return this.taskCommentModel.create({
+    const comment = await this.taskCommentModel.create({
       taskId: task.id,
       userId: user.id,
       comment: dto.comment,
     } as TaskComment);
+
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.TASK_COMMENT_ADDED,
+      entityType: ActivityEntityType.TASK_COMMENT,
+      entityId: comment.id,
+      projectId: task.projectId,
+      message: `A comment was added on task "${task.title}".`,
+      metadata: {
+        taskId: task.id,
+      },
+    });
+
+    return comment;
   }
 
   async remove(id: string, user: AuthenticatedUser): Promise<void> {

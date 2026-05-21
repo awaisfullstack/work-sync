@@ -9,6 +9,7 @@ import { TaskComment } from './entities/task-comment';
 import { User } from 'src/users/entities/user.entity';
 import { Project } from 'src/projects/entities/project.entity';
 import { ProjectMember } from 'src/projects/entities/project-member.entity';
+import { ActivityLogsModule } from 'src/activity-logs/activity-logs.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProjectMember } from 'src/projects/entities/project-member.entity';
       Project,
       ProjectMember,
     ]),
+    ActivityLogsModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],
