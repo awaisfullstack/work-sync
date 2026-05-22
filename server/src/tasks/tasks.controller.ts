@@ -100,4 +100,21 @@ export class TasksController {
   remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.tasksService.remove(id, user);
   }
+
+  @Get(':id/comments')
+  getTaskComments(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.tasksService.getTaskComments(id, user);
+  }
+
+  @Delete(':id/comments/:commentId')
+  deleteTaskComment(
+    @Param('id') id: string,
+    @Param('commentId') commentId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.tasksService.deleteTaskComment(id, commentId, user);
+  }
 }

@@ -38,16 +38,12 @@ export class ProjectsController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
-  findAll(@Query() query: ProjectQueryDto) {
-    return this.projectsService.findAll(query);
-  }
-
-  @Get('my-projects')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.EMPLOYEE)
-  getMyProjects(@CurrentUser() user: AuthenticatedUser) {
-    return this.projectsService.getMyProjects(user.id);
+  @Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
+  findAll(
+    @Query() query: ProjectQueryDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.projectsService.findAll(query, user);
   }
 
   @Get(':id')

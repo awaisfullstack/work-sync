@@ -33,7 +33,6 @@ export class ProjectMember extends Model<ProjectMember> {
   @Column({
     type: DataType.UUID,
     allowNull: false,
-    field: 'project_id',
   })
   declare projectId: string;
 
@@ -41,7 +40,6 @@ export class ProjectMember extends Model<ProjectMember> {
   @Column({
     type: DataType.UUID,
     allowNull: false,
-    field: 'user_id',
   })
   declare userId: string;
 
@@ -49,7 +47,6 @@ export class ProjectMember extends Model<ProjectMember> {
     type: DataType.ENUM(...Object.values(ProjectMemberRole)),
     allowNull: false,
     defaultValue: ProjectMemberRole.MEMBER,
-    field: 'role_in_project',
   })
   declare roleInProject: ProjectMemberRole;
 
@@ -57,7 +54,6 @@ export class ProjectMember extends Model<ProjectMember> {
     type: DataType.DATE,
     allowNull: false,
     defaultValue: DataType.NOW,
-    field: 'joined_at',
   })
   declare joinedAt: Date;
 

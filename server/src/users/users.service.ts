@@ -108,7 +108,7 @@ export class UsersService {
     });
 
     return {
-      users: rows,
+      items: rows,
       pagination: {
         total: count,
         page,

@@ -150,7 +150,7 @@ export class ShiftsService {
     });
 
     return {
-      shifts: rows,
+      items: rows,
       pagination: {
         total: count,
         page,

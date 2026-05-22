@@ -250,9 +250,9 @@ export class TasksService {
 
       if (projectIds.length === 0) {
         return {
-          tasks: [],
+          items: [],
           pagination: {
-            totalItems: 0,
+            total: 0,
             page,
             limit,
             totalPages: 0,
@@ -275,7 +275,7 @@ export class TasksService {
     });
 
     return {
-      tasks: rows,
+      items: rows,
       pagination: {
         total: count,
         page,
@@ -478,5 +478,64 @@ export class TasksService {
     const task = await this.findOne(id, user);
 
     await task.destroy();
+  }
+
+  async getTaskComments(taskId: string, user: AuthenticatedUser) {
+    const task = await this.findOne(taskId, user);
+
+    const comments = await this.taskCommentModel.findAll({
+      where: {
+        taskId: task.id,
+      },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'email', 'role'],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+
+    return comments;
+  }
+
+  async deleteTaskComment(
+    taskId: string,
+    commentId: string,
+    user: AuthenticatedUser,
+  ): Promise<void> {
+    const task = await this.findOne(taskId, user);
+
+    const comment = await this.taskCommentModel.findOne({
+      where: {
+        id: commentId,
+        taskId: task.id,
+      },
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Task comment not found');
+    }
+
+    const isCommentOwner = comment.userId === user.id;
+
+    if (!this.isAdmin(user) && !isCommentOwner) {
+      throw new ForbiddenException('You can only delete your own comment');
+    }
+
+    await comment.destroy();
+
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.TASK_COMMENT_DELETED,
+      entityType: ActivityEntityType.TASK_COMMENT,
+      entityId: comment.id,
+      projectId: task.projectId,
+      message: `A comment was deleted from task "${task.title}".`,
+      metadata: {
+        taskId: task.id,
+        commentId: comment.id,
+      },
+    });
   }
 }

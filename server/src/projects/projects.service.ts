@@ -12,8 +12,9 @@ import { ProjectMember } from './entities/project-member.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { ProjectStatus } from './enums/project-status.enum';
 import { ProjectQueryDto } from './dto/project-query.dto';
-import { Op, WhereOptions } from 'sequelize';
+import { Includeable, Op, WhereOptions } from 'sequelize';
 import { AddProjectMemberDto } from './dto/add-project-member.dto';
+import { AuthenticatedUser } from 'src/types';
 
 @Injectable()
 export class ProjectsService {
@@ -38,7 +39,7 @@ export class ProjectsService {
     });
   }
 
-  async findAll(query: ProjectQueryDto) {
+  async findAll(query: ProjectQueryDto, user: AuthenticatedUser) {
     const page = query.page || 1;
     const limit = query.limit || 10;
     const offset = (page - 1) * limit;
@@ -64,22 +65,37 @@ export class ProjectsService {
     if (query.status) {
       where.status = query.status;
     }
+
+    const include: Includeable[] = [
+      {
+        model: User,
+        as: 'createdBy',
+        attributes: ['id', 'name', 'email', 'role'],
+      },
+    ];
+
+    if (user.role === UserRole.EMPLOYEE) {
+      include.push({
+        model: ProjectMember,
+        as: 'members',
+        required: true,
+        where: {
+          userId: user.id,
+        },
+        attributes: [],
+      });
+    }
+
     const { rows, count } = await this.projectModel.findAndCountAll({
       where,
       limit,
       offset,
       order: [['createdAt', 'DESC']],
-      include: [
-        {
-          model: User,
-          as: 'createdBy',
-          attributes: ['id', 'name', 'email', 'role'],
-        },
-      ],
+      include,
     });
 
     return {
-      data: rows,
+      items: rows,
       pagination: {
         total: count,
         page,
@@ -216,25 +232,6 @@ export class ProjectsService {
       ],
       order: [['createdAt', 'DESC']],
     });
-  }
-
-  async getMyProjects(userId: string): Promise<Project[]> {
-    const memberships = await this.projectMemberModel.findAll({
-      where: { userId },
-      include: [
-        {
-          model: Project,
-          as: 'project',
-          where: {
-            status: {
-              [Op.ne]: ProjectStatus.ARCHIVED,
-            },
-          },
-        },
-      ],
-    });
-
-    return memberships.map((membership) => membership.project);
   }
 
   async ensureEmployeeCanAccessProject(

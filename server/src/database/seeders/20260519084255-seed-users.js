@@ -38,9 +38,33 @@ module.exports = {
     const password = await bcrypt.hash('Password@123', 10);
 
     const users = [
-      {
+       {
         name: 'Admin User',
         email: 'admin@worksync.com',
+        role: 'ADMIN',
+        department_id: null,
+      },
+      {
+        name: 'Admin User 2',
+        email: 'admin2@worksync.com',
+        role: 'ADMIN',
+        department_id: null,
+      },
+      {
+        name: 'Admin User 3',
+        email: 'admin3@worksync.com',
+        role: 'ADMIN',
+        department_id: null,
+      },
+      {
+        name: 'Admin User 4',
+        email: 'admin4@worksync.com',
+        role: 'ADMIN',
+        department_id: null,
+      },
+      {
+        name: 'Admin User 5',
+        email: 'admin5@worksync.com',
         role: 'ADMIN',
         department_id: null,
       },
@@ -218,6 +242,10 @@ module.exports = {
     await queryInterface.bulkDelete('users', {
       email: [
         'admin@worksync.com',
+        'admin2@worksync.com',
+        'admin3@worksync.com',
+        'admin4@worksync.com',
+        'admin5@worksync.com',
         'awais@worksync.com',
         'ali.raza@worksync.com',
         'hassan.ahmed@worksync.com',

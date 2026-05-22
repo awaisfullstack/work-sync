@@ -62,7 +62,6 @@ export class Project extends Model<
   @Column({
     type: DataType.UUID,
     allowNull: false,
-    field: 'created_by_id',
   })
   declare createdById: string;
 
@@ -75,7 +74,6 @@ export class Project extends Model<
   @Column({
     type: DataType.DATE,
     allowNull: true,
-    field: 'archived_at',
   })
   declare archivedAt: Date | null;
 

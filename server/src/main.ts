@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  setupSwagger(app);
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port') || 5000;

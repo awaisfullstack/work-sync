@@ -17,9 +17,11 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from 'src/users/entities/user.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('departments')
+@ApiBearerAuth('access-token')
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
