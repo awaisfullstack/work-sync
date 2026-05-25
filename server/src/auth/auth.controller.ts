@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -18,6 +19,7 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from 'src/users/entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import type { Response } from 'express';
 
 @Controller('auth')
 @ApiBearerAuth('access-token')
@@ -35,8 +37,22 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @ResponseMessage('User login successfully')
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.authService.login(loginDto);
+    // Set the access token in a cookie
+    response.cookie('access_token', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    });
+
+    return {
+      user: result.user,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,7 +64,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('logout')
-  logout() {
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('access_token');
     return this.authService.logout();
   }
 }

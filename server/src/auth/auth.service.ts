@@ -44,7 +44,9 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto) {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ user: Partial<User>; accessToken: string }> {
     const user = await this.usersService.findByEmail(loginDto.email);
 
     if (!user) {
@@ -95,7 +97,7 @@ export class AuthService {
   }
 
   private sanitizeUser(user: User) {
-    const plainUser = user.get({ plain: true }) as Record<string, unknown>;
+    const plainUser = user.get({ plain: true }) as Record<string, any>;
 
     delete plainUser.password;
 
