@@ -40,7 +40,7 @@ export function LoginForm({
   const {
     register,
     handleSubmit,
-    setError,
+  
     reset,
     formState: { errors },
   } = useForm<LoginFormValues>({
@@ -57,7 +57,7 @@ export function LoginForm({
       const response = await login(values).unwrap();
       if (response.success) {
         dispatch(setUser(response.data.user));
-        router.push("/dashboard");
+        router.replace("/dashboard");
         toast.success(response.message || "Login successful!");
         reset();
       }

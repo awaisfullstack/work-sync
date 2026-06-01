@@ -121,7 +121,7 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.userModel.findByPk(id, {
       attributes: {
-        exclude: ['password'],
+        exclude: ['password', 'departmentId', 'createdAt', 'updatedAt'],
       },
       include: [
         {

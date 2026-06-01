@@ -1,11 +1,6 @@
-
 import { baseApi } from "@/lib/api/baseApi";
-import type {
-  ApiResponse,
-  AuthResponseData,
-  AuthUser,
-  LoginRequest,
-} from "./authTypes";
+import type { AuthResponseData, AuthUser, LoginRequest } from "./authTypes";
+import { ApiResponse } from "@/types/api-response";
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -36,8 +31,4 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const {
-  useLoginMutation,
-  useGetMeQuery,
-  useLogoutMutation,
-} = authApi;
+export const { useLoginMutation, useGetMeQuery, useLogoutMutation } = authApi;

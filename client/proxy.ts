@@ -1,5 +1,3 @@
-// src/middleware.ts
-
 import { NextRequest, NextResponse } from "next/server";
 
 const ACCESS_TOKEN_KEY = "access_token";
@@ -16,13 +14,12 @@ const protectedRoutes = [
 
 const authRoutes = ["/login", "/register"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const token = request.cookies.get(ACCESS_TOKEN_KEY)?.value;
 
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route)
   );
 
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
