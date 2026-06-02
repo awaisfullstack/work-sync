@@ -1,0 +1,13 @@
+import type { AuthUser } from "@/features/auth/authTypes";
+
+export function isAdmin(user: AuthUser | null | undefined) {
+  return user?.role === "ADMIN";
+}
+
+export function canManageProjectMembers(user: AuthUser | null | undefined) {
+  return isAdmin(user);
+}
+
+export function canEditProject(user: AuthUser | null | undefined) {
+  return isAdmin(user);
+}

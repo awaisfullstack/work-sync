@@ -1,7 +1,9 @@
 import type { UserRole } from "@/features/auth/authTypes";
 
 export type ProjectStatus = "ACTIVE" | "COMPLETED" | "ARCHIVED";
+export type ProjectSortBy = "createdAt" | "updatedAt" | "deadline" | "title";
 
+export type SortOrder = "ASC" | "DESC";
 export interface ProjectUser {
   id: string;
   name: string;
@@ -9,13 +11,36 @@ export interface ProjectUser {
   role: UserRole;
 }
 
+export interface ProjectMemberUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  department?: {
+    id: string;
+    name: string;
+  } | null;
+}
+
 export interface ProjectMember {
   id: string;
   userId: string;
   projectId: string;
-  user?: ProjectUser;
+  user?: ProjectMemberUser;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface ProjectTaskSummary {
+  id: string;
+  title: string;
+  status: "TODO" | "IN_PROGRESS" | "COMPLETED";
+  dueDate: string;
+  assignedUser?: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
 }
 
 export interface Project {
@@ -23,11 +48,12 @@ export interface Project {
   title: string;
   description: string | null;
   status: ProjectStatus;
-  deadline: string | null;
+  deadline: string;
   createdById: string;
   createdBy: ProjectUser;
   archivedAt: string | null;
-  members?: ProjectMember[];
+  members: ProjectMember[];
+  membersCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,6 +63,8 @@ export interface ProjectQuery {
   limit?: number;
   search?: string;
   status?: ProjectStatus | "";
+  sortBy?: ProjectSortBy;
+  sortOrder?: SortOrder;
 }
 
 export interface CreateProjectPayload {

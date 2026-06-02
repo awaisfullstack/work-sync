@@ -90,12 +90,46 @@ export class ProjectsService {
       where,
       limit,
       offset,
-      order: [['createdAt', 'DESC']],
+      order: [[query.sortBy || 'createdAt', query.sortOrder || 'DESC']],
       include,
+      distinct: true,
+    });
+
+    const projectIds = rows.map((project) => project.id);
+    const projectMembers = projectIds.length
+      ? await this.projectMemberModel.findAll({
+          where: {
+            projectId: {
+              [Op.in]: projectIds,
+            },
+          },
+          attributes: ['id', 'projectId', 'userId'],
+          raw: true,
+        })
+      : [];
+
+    console.log('projectMembers', projectMembers);
+
+    const membersByProjectId = projectMembers.reduce<
+      Record<string, { id: string; projectId: string; userId: string }[]>
+    >((acc, member) => {
+      acc[member.projectId] ??= [];
+      acc[member.projectId].push(member);
+
+      return acc;
+    }, {});
+
+    const items = rows.map((project) => {
+      const members = membersByProjectId[project.id] ?? [];
+
+      return {
+        ...project.toJSON(),
+        membersCount: members.length,
+      };
     });
 
     return {
-      items: rows,
+      items,
       pagination: {
         total: count,
         page,

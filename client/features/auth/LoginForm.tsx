@@ -11,12 +11,10 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { useLoginMutation } from "./authApi";
@@ -107,10 +105,6 @@ export function LoginForm({
               <Button disabled={isLoading} type="submit">
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
-              <FieldDescription className="text-center">
-                Don&apos;t have an account?{" "}
-                <Link href="/register">Sign up</Link>
-              </FieldDescription>
             </Field>
           </FieldGroup>
         </form>

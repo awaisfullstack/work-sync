@@ -23,4 +23,12 @@ export class ProjectQueryDto {
   @IsInt()
   @Min(1)
   limit: number = 10;
+
+  @IsOptional()
+  @IsEnum(['createdAt', 'updatedAt', 'deadline', 'title'])
+  sortBy?: 'createdAt' | 'updatedAt' | 'deadline' | 'title';
+
+  @IsOptional()
+  @IsEnum(['ASC', 'DESC'])
+  sortOrder?: 'ASC' | 'DESC';
 }
