@@ -30,6 +30,12 @@ export class UsersController {
   }
 
   @Roles(UserRole.ADMIN)
+  @Get('options')
+  findUserOptions() {
+    return this.usersService.findUserOptions();
+  }
+
+  @Roles(UserRole.ADMIN)
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);

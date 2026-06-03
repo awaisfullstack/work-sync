@@ -1,61 +1,74 @@
 "use client";
 
-import { ProjectRowActions } from "@/features/projects/components/ProjectRowActions";
-import { ProjectStatusBadge } from "@/features/projects/components/ProjectStatusBadge";
-import type { Project } from "@/features/projects/projectTypes";
 import {
   formatProjectDate,
   getDeadlineStatus,
 } from "@/features/projects/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
+import { TaskStatusBadge } from "./components/TaskStatusBadge";
+import { Task } from "./taskTypes";
+import { TaskRowActions } from "./components/TaskRowActions";
 
-export const columns: ColumnDef<Project>[] = [
+export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: "title",
-    header: "Project",
+    header: "Task",
     cell: ({ row }) => {
-      const project = row.original;
+      const task = row.original;
 
       return (
         <div>
         <Link
-          href={`/projects/${project.id}`}
+          href={`/tasks/${task.id}`}
           className="font-medium text-slate-900 hover:text-blue-700"
         >
-          {project.title}
+          {task.title}
         </Link>
 
         <p className="mt-1 truncate max-w-[300px] text-sm text-slate-500">
-          {project.description}
+          {task.description}
         </p>
       </div>
       );
     },
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => <ProjectStatusBadge status={row.original.status} />,
-  },
-  {
-    id: "members",
-    header: "Members",
+    accessorKey: "projectId",
+    header: "Project",
     cell: ({ row }) => {
-      const membersCount = row.original.membersCount ?? 0;
-
       return (
-        <span className="text-sm text-slate-700">
-          {membersCount} {membersCount === 1 ? "member" : "members"}
-        </span>
+        <div>
+          <p className="text-sm font-medium text-slate-900">
+            {row.original.project?.title ?? "Unknown Project"}
+          </p>
+        </div>
+      );
+    },
+  },
+   {
+    accessorKey: "creator",
+    header: "Created By",
+    cell: ({ row }) => {
+      return (
+        <div>
+          <p className="text-sm font-medium text-slate-900">
+            {row.original.creator?.name ?? "Unknown"}
+          </p>
+        </div>
       );
     },
   },
   {
-    accessorKey: "deadline",
-    header: "Deadline",
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => <TaskStatusBadge status={row.original.status.name} />,
+  },
+  {
+    accessorKey: "dueDate",
+    header: "Due Date",
     cell: ({ row }) => {
-      const deadline = row.original.deadline ?? "";
+      const deadline = row.original.dueDate ?? "";
       const deadlineStatus = getDeadlineStatus(deadline);
 
       return (
@@ -80,24 +93,8 @@ export const columns: ColumnDef<Project>[] = [
     },
   },
   {
-    accessorKey: "createdBy",
-    header: "Created By",
-    cell: ({ row }) => {
-      return (
-        <div>
-          <p className="text-sm font-medium text-slate-900">
-            {row.original.createdBy?.name ?? "Unknown"}
-          </p>
-          <p className="text-xs text-slate-500">
-            {formatProjectDate(row.original.createdAt)}
-          </p>
-        </div>
-      );
-    },
-  },
-  {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => <ProjectRowActions project={row.original} />,
-  },
+    cell: ({ row }) => <TaskRowActions task={row.original} />,
+  }, 
 ];

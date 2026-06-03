@@ -1,10 +1,15 @@
 import { baseApi } from "@/lib/api/baseApi";
-import { isSuccessResponse, type ApiResponse, type PaginatedResponse } from "@/types/api-response";
+import {
+  isSuccessResponse,
+  type ApiResponse,
+  type PaginatedResponse,
+} from "@/types/api-response";
 import type {
   AssignProjectMemberPayload,
   CreateProjectPayload,
   Project,
   ProjectMember,
+  ProjectOption,
   ProjectQuery,
   UpdateProjectPayload,
 } from "./projectTypes";
@@ -46,6 +51,22 @@ export const projectsApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [
         { type: "Projects" as const, id },
       ],
+    }),
+    getProjectOptions: builder.query<ApiResponse<ProjectOption[]>, void>({
+      query: () => ({
+        url: "/projects/options",
+        method: "GET",
+      }),
+      providesTags: (result) =>
+        isSuccessResponse(result)
+          ? [
+              ...result.data.map((project) => ({
+                type: "Projects" as const,
+                id: project.id,
+              })),
+              { type: "Projects" as const, id: "LIST" },
+            ]
+          : [{ type: "Projects" as const, id: "LIST" }],
     }),
     createProject: builder.mutation<ApiResponse<Project>, CreateProjectPayload>(
       {
@@ -104,7 +125,7 @@ export const projectsApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-     getProjectMembers: builder.query<ApiResponse<ProjectMember[]>, string>({
+    getProjectMembers: builder.query<ApiResponse<ProjectMember[]>, string>({
       query: (id) => ({
         url: `/projects/${id}/members`,
         method: "GET",
@@ -133,6 +154,7 @@ export const projectsApi = baseApi.injectEndpoints({
 export const {
   useGetProjectsQuery,
   useGetProjectByIdQuery,
+  useGetProjectOptionsQuery,
   useCreateProjectMutation,
   useUpdateProjectMutation,
   useArchiveProjectMutation,

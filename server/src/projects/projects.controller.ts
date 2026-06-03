@@ -46,6 +46,12 @@ export class ProjectsController {
     return this.projectsService.findAll(query, user);
   }
 
+  @Get('options')
+  @UseGuards(RolesGuard)
+  findProjectOptions(@CurrentUser() user: AuthenticatedUser) {
+    return this.projectsService.findProjectOptions(user);
+  }
+
   @Get(':id')
   async findOne(
     @Param('id') id: string,

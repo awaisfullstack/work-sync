@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MoreHorizontal, Archive, Pencil, Eye } from "lucide-react";
+import { MoreHorizontal, Pencil, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -13,29 +13,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Project } from "../projectTypes";
-import { useArchiveProjectMutation } from "../projectsApi";
+import { Task } from "../taskTypes";
+import { useDeleteTaskMutation } from "../tasksApi";
+import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
 import { Role } from "@/constants";
 
-interface ProjectRowActionsProps {
-  project: Project;
+interface TaskRowActionsProps {
+  task: Task;
 }
 
-export function ProjectRowActions({ project }: ProjectRowActionsProps) {
+export function TaskRowActions({ task }: TaskRowActionsProps) {
   const user = useAppSelector((state) => state.auth.user);
   const router = useRouter();
-  const [archiveProject, { isLoading }] = useArchiveProjectMutation();
+  const [deleteTask, { isLoading }] = useDeleteTaskMutation();
 
-  async function handleArchive() {
+  async function handleDelete() {
     const confirmed = window.confirm(
-      `Are you sure you want to archive "${project.title}"?`,
+      `Are you sure you want to delete "${task.title}"?`,
     );
 
     if (!confirmed) return;
-
-    await archiveProject(project.id).unwrap();
-    router.refresh();
+    try {
+      await deleteTask(task.id).unwrap();
+      router.refresh();
+      toast.success("Task deleted successfully");
+    } catch {
+      toast.error("Failed to delete task");
+    }
   }
 
   return (
@@ -43,7 +48,7 @@ export function ProjectRowActions({ project }: ProjectRowActionsProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Open project actions</span>
+          <span className="sr-only">Open task actions</span>
         </Button>
       </DropdownMenuTrigger>
 
@@ -53,7 +58,7 @@ export function ProjectRowActions({ project }: ProjectRowActionsProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href={`/projects/${project.id}`} className="cursor-pointer">
+          <Link href={`/tasks/${task.id}`} className="cursor-pointer">
             <Eye className="mr-2 h-4 w-4" />
             View
           </Link>
@@ -61,29 +66,21 @@ export function ProjectRowActions({ project }: ProjectRowActionsProps) {
         {user?.role === Role.ADMIN && (
           <>
             <DropdownMenuItem asChild>
-              <Link
-                href={`/projects/${project.id}/edit`}
-                className="cursor-pointer"
-              >
+              <Link href={`/tasks/${task.id}/edit`} className="cursor-pointer">
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
 
-            {project.status !== "ARCHIVED" && (
-              <>
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem
-                  disabled={isLoading}
-                  onClick={handleArchive}
-                  className="cursor-pointer text-red-600 focus:text-red-600"
-                >
-                  <Archive className="mr-2 h-4 w-4" />
-                  Archive
-                </DropdownMenuItem>
-              </>
-            )}
+            <DropdownMenuItem
+              disabled={isLoading}
+              onClick={handleDelete}
+              className="cursor-pointer text-red-600 focus:text-red-600"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>

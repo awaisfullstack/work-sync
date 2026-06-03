@@ -4,6 +4,7 @@ import {
   IsIn,
   IsInt,
   IsOptional,
+  IsString,
   IsUUID,
   Max,
   Min,
@@ -13,16 +14,16 @@ import { TaskStatusName } from '../entities/task-status.entity';
 
 export class GetTasksQueryDto {
   @IsOptional()
+  @IsString()
+  search?: string;
+
+  @IsOptional()
   @IsEnum(TaskStatusName)
   status?: TaskStatusName;
 
   @IsOptional()
   @IsUUID()
   projectId?: string;
-
-  @IsOptional()
-  @IsUUID()
-  assignedUserId?: string;
 
   @IsOptional()
   @IsDateString()

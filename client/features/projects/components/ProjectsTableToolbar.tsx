@@ -16,9 +16,9 @@ import type {
   ProjectSortBy,
   ProjectStatus,
   SortOrder,
-} from "../../features/projects/projectTypes";
+} from "../projectTypes";
 
-interface TableToolbarProps {
+interface ProjectsTableToolbarProps {
   search: string;
   status: ProjectStatus | "ALL";
   sortBy: ProjectSortBy;
@@ -30,7 +30,7 @@ interface TableToolbarProps {
   onReset: () => void;
 }
 
-export function TableToolbar({
+export function ProjectsTableToolbar({
   search,
   status,
   sortBy,
@@ -40,7 +40,7 @@ export function TableToolbar({
   onSortByChange,
   onSortOrderChange,
   onReset,
-}: TableToolbarProps) {
+}: ProjectsTableToolbarProps) {
   const hasFilters =
     search.length > 0 ||
     status !== "ALL" ||

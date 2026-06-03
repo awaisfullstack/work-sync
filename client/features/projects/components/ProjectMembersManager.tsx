@@ -32,7 +32,7 @@ import {
   useRemoveProjectMemberMutation,
 } from "../projectsApi";
 import type { Project } from "../projectTypes";
-import { useGetUsersQuery } from "@/features/users/usersApi";
+import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
 import { isSuccessResponse } from "@/types/api-response";
@@ -60,17 +60,10 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [error, setError] = useState("");
 
-  const { data: usersResponse, isLoading: isUsersLoading } = useGetUsersQuery(
-    {
-      page: 1,
-      limit: 100,
-      role: "EMPLOYEE",
-    },
-    {
+  const { data: usersResponse, isLoading: isUsersLoading } =
+    useGetUserOptionsQuery(undefined, {
       skip: !canManage,
-      
-    }
-  );
+    });
 
   const [assignProjectMember, { isLoading: isAssigning }] =
     useAssignProjectMemberMutation();
@@ -85,9 +78,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
   }, [members]);
 
   const assignableUsers = useMemo(() => {
-    const users = isSuccessResponse(usersResponse)
-      ? usersResponse.data.items
-      : [];
+    const users = isSuccessResponse(usersResponse) ? usersResponse.data : [];
 
     return users.filter((user) => !assignedUserIds.has(user.id));
   }, [usersResponse, assignedUserIds]);
@@ -165,8 +156,8 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                   </Button>
                 </PopoverTrigger>
 
-                <PopoverContent className="w-[300px] p-0" align="end">
-                  <Command>
+                <PopoverContent className="max-h-64 overflow-y-auto w-[300px] p-0" align="end">
+                  <Command className="">
                     <CommandInput placeholder="Search employee..." />
 
                     <CommandEmpty>No employee found.</CommandEmpty>

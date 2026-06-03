@@ -5,6 +5,14 @@ export interface Department {
   name: string;
 }
 
+export interface UserOption {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  departmentId?: string | null;
+}
+
 export interface AuthUser {
   id: string;
   name: string;

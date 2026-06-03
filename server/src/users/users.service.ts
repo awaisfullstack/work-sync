@@ -118,6 +118,17 @@ export class UsersService {
     };
   }
 
+  async findUserOptions() {
+    return this.userModel.findAll({
+      where: {
+        role: UserRole.EMPLOYEE,
+        isActive: true,
+      },
+      attributes: ['id', 'name', 'email', 'role', 'departmentId'],
+      order: [['name', 'ASC']],
+    });
+  }
+
   async findOne(id: string): Promise<User> {
     const user = await this.userModel.findByPk(id, {
       attributes: {

@@ -190,6 +190,23 @@ export class TasksService {
 
     const taskWhere: WhereOptions<Task> = {};
 
+    if (query.search) {
+      Object.assign(taskWhere, {
+        [Op.or]: [
+          {
+            title: {
+              [Op.iLike]: `%${query.search}%`,
+            },
+          },
+          {
+            description: {
+              [Op.iLike]: `%${query.search}%`,
+            },
+          },
+        ],
+      });
+    }
+
     if (query.projectId) {
       taskWhere.projectId = query.projectId;
     }
@@ -215,28 +232,12 @@ export class TasksService {
       },
       {
         model: Project,
-        attributes: ['id', 'title', 'status'],
+        attributes: ['id', 'title'],
       },
       {
         model: User,
         as: 'creator',
         attributes: ['id', 'name', 'email'],
-      },
-      {
-        model: TaskAssignment,
-        attributes: ['id', 'assignedAt', 'unassignedAt'],
-        where: {
-          unassignedAt: null,
-          ...(query.assignedUserId ? { userId: query.assignedUserId } : {}),
-        },
-        required: Boolean(query.assignedUserId),
-        include: [
-          {
-            model: User,
-            as: 'user',
-            attributes: ['id', 'name', 'email'],
-          },
-        ],
       },
     ];
 
@@ -267,6 +268,9 @@ export class TasksService {
 
     const { rows, count } = await this.taskModel.findAndCountAll({
       where: taskWhere,
+      attributes: {
+        exclude: ['statusId', 'projectId', 'createdBy'],
+      },
       include,
       distinct: true,
       limit,

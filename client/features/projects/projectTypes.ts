@@ -11,6 +11,11 @@ export interface ProjectUser {
   role: UserRole;
 }
 
+export interface ProjectOption {
+  id: string;
+  title: string;
+}
+
 export interface ProjectMemberUser {
   id: string;
   name: string;
@@ -51,8 +56,8 @@ export interface Project {
   deadline: string;
   createdById: string;
   createdBy: ProjectUser;
-  archivedAt: string | null;
-  members: ProjectMember[];
+  archivedAt?: string | null;
+  members?: ProjectMember[];
   membersCount?: number;
   createdAt: string;
   updatedAt: string;

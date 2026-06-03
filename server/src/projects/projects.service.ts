@@ -139,6 +139,37 @@ export class ProjectsService {
     };
   }
 
+  async findProjectOptions(
+    user: AuthenticatedUser,
+  ): Promise<Pick<Project, 'id' | 'title'>[]> {
+    const where: WhereOptions<Project> = {};
+
+    if (user.role === UserRole.EMPLOYEE) {
+      return this.projectModel.findAll({
+        attributes: ['id', 'title'],
+        include: [
+          {
+            model: ProjectMember,
+            as: 'members',
+            attributes: [],
+            where: {
+              userId: user.id,
+            },
+            required: true,
+          },
+        ],
+        where,
+        order: [['title', 'ASC']],
+      });
+    }
+
+    return this.projectModel.findAll({
+      attributes: ['id', 'title'],
+      where,
+      order: [['title', 'ASC']],
+    });
+  }
+
   async findOne(id: string): Promise<Project> {
     const project = await this.projectModel.findByPk(id, {
       include: [

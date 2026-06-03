@@ -6,6 +6,11 @@ export type TaskSortBy = "createdAt" | "updatedAt" | "dueDate" | "title";
 
 export type SortOrder = "ASC" | "DESC";
 
+export interface Status {
+  id: string;
+  name: TaskStatus;
+}
+
 export interface TaskUser {
   id: string;
   name: string;
@@ -13,14 +18,32 @@ export interface TaskUser {
   role: UserRole;
 }
 
+export interface TaskProjectSummary {
+  id: string;
+  title: string;
+}
+
+export interface TaskAssignment {
+  id: string;
+  taskId: string;
+  userId: string;
+  unassignedAt?: string | null;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
 export interface Task {
   id: string;
   title: string;
   description: string | null;
-  status: TaskStatus;
+  status: Status;
   dueDate: string;
-  projectId: string;
-  createdBy: string;
+  projectId?: string;
+  project: TaskProjectSummary;
+  assignments?: TaskAssignment[];
   creator: TaskUser;
   createdAt: string;
   updatedAt: string;
@@ -30,6 +53,9 @@ export interface TaskQuery {
   page?: number;
   limit?: number;
   search?: string;
+  projectId?: string;
+  startDate?: string;
+  endDate?: string;
   status?: TaskStatus | "";
   sortBy?: TaskSortBy;
   sortOrder?: SortOrder;
@@ -38,14 +64,23 @@ export interface TaskQuery {
 export interface CreateTaskPayload {
   title: string;
   description: string;
-  status: TaskStatus;
   dueDate: string;
+  projectId: string;
+  assignedUserId?: string;
 }
 
 export interface UpdateTaskPayload {
   title?: string;
   description?: string;
-  status?: TaskStatus;
   dueDate?: string;
 }
 
+export interface UpdateTaskStatusPayload {
+  id: string;
+  status: TaskStatus;
+}
+
+export interface AssignTaskPayload {
+  id: string;
+  userId: string;
+}

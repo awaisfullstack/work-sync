@@ -1,5 +1,5 @@
 import { baseApi } from "@/lib/api/baseApi";
-import { UserRole } from "../auth/authTypes";
+import { UserOption, UserRole } from "../auth/authTypes";
 import type { ApiResponse, PaginatedResponse } from "@/types/api-response";
 
 export interface User {
@@ -23,7 +23,10 @@ export interface GetUsersQuery {
 
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getUsers: builder.query<ApiResponse<PaginatedResponse<User>>, GetUsersQuery>({
+    getUsers: builder.query<
+      ApiResponse<PaginatedResponse<User>>,
+      GetUsersQuery
+    >({
       query: (params) => ({
         url: "/users",
         method: "GET",
@@ -36,7 +39,14 @@ export const usersApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Users"],
     }),
+    getUserOptions: builder.query<ApiResponse<UserOption[]>, void>({
+      query: () => ({
+        url: "/users/options",
+        method: "GET",
+      }),
+      providesTags: ["Users"],
+    }),
   }),
 });
 
-export const { useGetUsersQuery } = usersApi;
+export const { useGetUsersQuery, useGetUserOptionsQuery } = usersApi;
