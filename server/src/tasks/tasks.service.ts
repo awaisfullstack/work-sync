@@ -319,16 +319,6 @@ export class TasksService {
             },
           ],
         },
-        {
-          model: TaskComment,
-          required: false,
-          include: [
-            {
-              model: User,
-              attributes: ['id', 'name', 'email'],
-            },
-          ],
-        },
       ],
     });
 

@@ -11,6 +11,8 @@ import {
   TaskQuery,
   UpdateTaskStatusPayload,
   UpdateTaskPayload,
+  TaskComment,
+  CreateTaskCommentRequest,
 } from "./taskTypes";
 
 export const tasksApi = baseApi.injectEndpoints({
@@ -131,6 +133,44 @@ export const tasksApi = baseApi.injectEndpoints({
         { type: "Tasks" as const, id: "LIST" },
       ],
     }),
+    getTaskComments: builder.query<ApiResponse<TaskComment[]>, string>({
+      query: (taskId) => ({
+        url: `/tasks/${taskId}/comments`,
+        method: "GET",
+      }),
+      providesTags: (_result, _error, taskId) => [
+        { type: "Tasks", id: `${taskId}-comments` },
+      ],
+    }),
+    addTaskComment: builder.mutation<
+      ApiResponse<TaskComment>,
+      CreateTaskCommentRequest
+    >({
+      query: ({ taskId, comment }) => ({
+        url: `/tasks/${taskId}/comments`,
+        method: "POST",
+        body: { comment },
+      }),
+      invalidatesTags: (_result, _error, { taskId }) => [
+        { type: "Tasks", id: `${taskId}-comments` },
+        { type: "Tasks", id: taskId },
+        "ActivityLogs",
+      ],
+    }),
+    deleteTaskComment: builder.mutation<
+      ApiResponse<null>,
+      { taskId: string; commentId: string }
+    >({
+      query: ({ taskId, commentId }) => ({
+        url: `/tasks/${taskId}/comments/${commentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, { taskId }) => [
+        { type: "Tasks", id: `${taskId}-comments` },
+        { type: "Tasks", id: taskId },
+        "ActivityLogs",
+      ],
+    }),
   }),
 });
 
@@ -143,4 +183,7 @@ export const {
   useAssignTaskMutation,
   useUnassignTaskMutation,
   useDeleteTaskMutation,
+  useGetTaskCommentsQuery,
+  useAddTaskCommentMutation,
+  useDeleteTaskCommentMutation,
 } = tasksApi;

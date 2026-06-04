@@ -118,6 +118,32 @@ export class UsersService {
     };
   }
 
+  // users.service.ts
+
+  async getUserStats() {
+    const [totalUsers, totalAdmins, totalEmployees] = await Promise.all([
+      this.userModel.count(),
+
+      this.userModel.count({
+        where: {
+          role: UserRole.ADMIN,
+        },
+      }),
+
+      this.userModel.count({
+        where: {
+          role: UserRole.EMPLOYEE,
+        },
+      }),
+    ]);
+
+    return {
+      totalUsers,
+      totalAdmins,
+      totalEmployees,
+    };
+  }
+
   async findUserOptions() {
     return this.userModel.findAll({
       where: {
@@ -132,7 +158,7 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.userModel.findByPk(id, {
       attributes: {
-        exclude: ['password', 'departmentId', 'createdAt', 'updatedAt'],
+        exclude: ['password'],
       },
       include: [
         {
@@ -233,6 +259,20 @@ export class UsersService {
     return {
       id: user.id,
       isActive: user.isActive,
+    };
+  }
+
+  async remove(id: string): Promise<{ id: string }> {
+    const user = await this.userModel.findByPk(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await user.destroy();
+
+    return {
+      id,
     };
   }
 }

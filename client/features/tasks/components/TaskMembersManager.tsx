@@ -27,18 +27,16 @@ import {
 import { useAppSelector } from "@/store/hooks";
 import { canManageProjectMembers } from "@/lib/auth/permissions";
 
-import {
-  useAssignProjectMemberMutation,
-  useRemoveProjectMemberMutation,
-} from "../projectsApi";
-import type { Project } from "../projectTypes";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
 import { isSuccessResponse } from "@/types/api-response";
+import { Task } from "../taskTypes";
+import { useAssignTaskMutation, useUnassignTaskMutation } from "../tasksApi";
+import { toast } from "sonner";
 
-interface ProjectMembersManagerProps {
-  project: Project;
+interface TaskMembersManagerProps {
+  task: Task;
 }
 
 function getInitials(name?: string) {
@@ -52,7 +50,7 @@ function getInitials(name?: string) {
     .toUpperCase();
 }
 
-export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
+export function TaskMembersManager({ task }: TaskMembersManagerProps) {
   const currentUser = useAppSelector((state) => state.auth.user);
   const canManage = canManageProjectMembers(currentUser);
 
@@ -65,13 +63,13 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
       skip: !canManage,
     });
 
-  const [assignProjectMember, { isLoading: isAssigning }] =
-    useAssignProjectMemberMutation();
+  const [assignTaskMember, { isLoading: isAssigning }] =
+    useAssignTaskMutation();
 
-  const [removeProjectMember, { isLoading: isRemoving }] =
-    useRemoveProjectMemberMutation();
+  const [unassignTaskMember, { isLoading: isRemoving }] =
+    useUnassignTaskMutation();
 
-  const members = useMemo(() => project.members ?? [], [project.members]);
+  const members = useMemo(() => task.assignments ?? [], [task.assignments]);
 
   const assignedUserIds = useMemo(() => {
     return new Set(members.map((member) => member.userId));
@@ -93,8 +91,8 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
     setError("");
 
     try {
-      await assignProjectMember({
-        projectId: project.id,
+      await assignTaskMember({
+        id: task.id,
         userId: selectedUserId,
       }).unwrap();
 
@@ -107,7 +105,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
 
   async function handleRemoveMember(userId: string, name?: string) {
     const confirmed = window.confirm(
-      `Remove ${name ?? "this user"} from this project?`
+      `Remove ${name ?? "this user"} from this task?`
     );
 
     if (!confirmed) return;
@@ -115,8 +113,8 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
     setError("");
 
     try {
-      await removeProjectMember({
-        projectId: project.id,
+      await unassignTaskMember({
+        id: task.id,
         userId,
       }).unwrap();
     } catch (error) {
@@ -129,10 +127,10 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
       <CardHeader>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <CardTitle>Project Members</CardTitle>
+            <CardTitle>Task Assignments</CardTitle>
             <p className="mt-1 text-sm text-slate-500">
               {members.length} {members.length === 1 ? "member" : "members"}{" "}
-              assigned to this project.
+              assigned to this task.
             </p>
           </div>
 
@@ -219,7 +217,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
               No members assigned
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              Assign employees to this project to start collaboration.
+              Assign employees to this task to start collaboration.
             </p>
           </div>
         ) : (
@@ -244,12 +242,6 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                     <p className="truncate text-sm text-slate-500">
                       {member.user?.email ?? member.userId}
                     </p>
-
-                    {member.user?.department?.name && (
-                      <p className="text-xs text-slate-400">
-                        {member.user.department.name}
-                      </p>
-                    )}
                   </div>
                 </div>
 
@@ -274,7 +266,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
 
         {!canManage && (
           <p className="mt-4 text-sm text-slate-500">
-            Only admins can assign or remove project members.
+            Only admins can assign or unassign task members.
           </p>
         )}
       </CardContent>

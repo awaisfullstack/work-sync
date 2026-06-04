@@ -18,6 +18,26 @@ export interface TaskUser {
   role: UserRole;
 }
 
+export interface TaskComment {
+  id: string;
+  taskId: string;
+  userId: string;
+  comment: string;
+  createdAt: string;
+  updatedAt?: string;
+
+  user?: TaskUser;
+}
+
+export interface TaskStatusHistory {
+  id: string;
+  taskId: string;
+  status: TaskStatus;
+  createdAt: string;
+
+  changedBy?: TaskUser;
+}
+
 export interface TaskProjectSummary {
   id: string;
   title: string;
@@ -28,7 +48,7 @@ export interface TaskAssignment {
   taskId: string;
   userId: string;
   unassignedAt?: string | null;
-  user?: {
+  user: {
     id: string;
     name: string;
     email: string;
@@ -47,6 +67,9 @@ export interface Task {
   creator: TaskUser;
   createdAt: string;
   updatedAt: string;
+
+  comments?: TaskComment[];
+  statusHistory?: TaskStatusHistory[];
 }
 
 export interface TaskQuery {
@@ -67,6 +90,11 @@ export interface CreateTaskPayload {
   dueDate: string;
   projectId: string;
   assignedUserId?: string;
+}
+
+export interface CreateTaskCommentRequest {
+  taskId: string;
+  comment: string;
 }
 
 export interface UpdateTaskPayload {

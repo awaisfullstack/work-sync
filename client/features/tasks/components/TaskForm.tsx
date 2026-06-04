@@ -212,44 +212,7 @@ export function TaskForm({ mode, task }: TaskFormProps) {
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <div className="grid w-full gap-2">
-          <Label>Project</Label>
-          <Controller
-            name="projectId"
-            control={control}
-            render={({ field }) => (
-              <Select
-                value={field.value}
-                onValueChange={field.onChange}
-                disabled={
-                  isSubmitting || isProjectsLoading || mode === "update"
-                }
-              >
-                <SelectTrigger className="w-auto" onBlur={field.onBlur}>
-                  <SelectValue
-                    placeholder={
-                      isProjectsLoading
-                        ? "Loading projects..."
-                        : "Select project"
-                    }
-                  />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.projectId?.message && (
-            <p className="text-sm text-red-600">{errors.projectId.message}</p>
-          )}
-        </div>
-
+        
         <div className="grid w-full gap-2">
           <Label>Status</Label>
           <Controller
@@ -277,46 +240,7 @@ export function TaskForm({ mode, task }: TaskFormProps) {
             <p className="text-sm text-red-600">{errors.status.message}</p>
           )}
         </div>
-      </div>
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <div className="grid w-full gap-2">
-          <Label>Assign To</Label>
-          <Controller
-            name="assignedUserId"
-            control={control}
-            render={({ field }) => (
-              <Select
-                value={field.value}
-                onValueChange={field.onChange}
-                disabled={isSubmitting || isUsersLoading}
-              >
-                <SelectTrigger className="w-auto" onBlur={field.onBlur}>
-                  <SelectValue
-                    placeholder={
-                      isUsersLoading ? "Loading users..." : "Select employee"
-                    }
-                  />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name} - {user.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.assignedUserId?.message && (
-            <p className="text-sm text-red-600">
-              {errors.assignedUserId.message}
-            </p>
-          )}
-        </div>
-
-        <div className="grid gap-2">
+         <div className="grid gap-2">
           <Label htmlFor="dueDate">Due Date</Label>
           <Controller
             name="dueDate"
@@ -335,6 +259,85 @@ export function TaskForm({ mode, task }: TaskFormProps) {
             <p className="text-sm text-red-600">{errors.dueDate.message}</p>
           )}
         </div>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2">
+        {mode === "create" && (
+          <div className="grid w-full gap-2">
+            <Label>Project</Label>
+            <Controller
+              name="projectId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={
+                    isSubmitting || isProjectsLoading || mode === "update"
+                  }
+                >
+                  <SelectTrigger className="w-auto" onBlur={field.onBlur}>
+                    <SelectValue
+                      placeholder={
+                        isProjectsLoading
+                          ? "Loading projects..."
+                          : "Select project"
+                      }
+                    />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.projectId?.message && (
+              <p className="text-sm text-red-600">{errors.projectId.message}</p>
+            )}
+          </div>
+        )}
+        {mode === "create" && (
+          <div className="grid w-full gap-2">
+            <Label>Assign To</Label>
+            <Controller
+              name="assignedUserId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isSubmitting || isUsersLoading}
+                >
+                  <SelectTrigger className="w-auto" onBlur={field.onBlur}>
+                    <SelectValue
+                      placeholder={
+                        isUsersLoading ? "Loading users..." : "Select employee"
+                      }
+                    />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} - {user.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.assignedUserId?.message && (
+              <p className="text-sm text-red-600">
+                {errors.assignedUserId.message}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-3">

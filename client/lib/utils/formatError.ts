@@ -1,6 +1,7 @@
 import { isErrorResponse } from "@/types/api-response";
 
 export function formatApiError(error: unknown): string {
+  
   if (isErrorResponse(error)) {
     return Array.isArray(error.message)
       ? error.message.join(", ")

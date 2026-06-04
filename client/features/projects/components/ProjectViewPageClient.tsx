@@ -16,6 +16,7 @@ import { ProjectMembersManager } from "./ProjectMembersManager";
 import { formatApiError } from "@/lib/utils/formatError";
 import { isSuccessResponse } from "@/types/api-response";
 import FetchByIdError from "@/components/shared/FetchByIdError";
+import ProjectViewSkeleton from "./ProjectViewSkeleton";
 // import { ProjectTasksSummary } from "./ProjectTasksSummary";
 
 interface ProjectViewPageClientProps {
@@ -28,7 +29,9 @@ export default function ProjectViewPageClient({
   const currentUser = useAppSelector((state) => state.auth.user);
 
   const { data, isLoading, isFetching, isError, refetch } =
-    useGetProjectByIdQuery(projectId);
+    useGetProjectByIdQuery(projectId, {
+      skip: !projectId,
+    });
 
   const [archiveProject, { isLoading: isArchiving }] =
     useArchiveProjectMutation();
@@ -51,14 +54,8 @@ export default function ProjectViewPageClient({
     }
   }
 
-  if (isLoading) {
-    return (
-      <section className="space-y-6">
-        <div className="h-8 w-40 animate-pulse rounded-lg bg-slate-100" />
-        <div className="h-64 animate-pulse rounded-2xl bg-slate-100" />
-        <div className="h-72 animate-pulse rounded-2xl bg-slate-100" />
-      </section>
-    );
+  if (isLoading || isFetching) {
+    return <ProjectViewSkeleton />;
   }
 
   if (isError || !project) {
@@ -119,10 +116,6 @@ export default function ProjectViewPageClient({
           </div>
         )}
       </div>
-
-      {isFetching && (
-        <p className="text-sm text-slate-500">Refreshing project details...</p>
-      )}
 
       <ProjectDetailsCard project={project} />
 

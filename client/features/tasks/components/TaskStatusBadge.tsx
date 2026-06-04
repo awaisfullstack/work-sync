@@ -7,9 +7,9 @@ interface TaskStatusBadgeProps {
 
 const statusClasses: Record<TaskStatus, string> = {
   COMPLETED:
-    "border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-50",
+    "border-green-200 bg-green-50 text-green-700 hover:bg-green-50",
   IN_PROGRESS: "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-50",
-  TODO: "border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-50",
+  TODO: "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-50",
 };
 
 export function TaskStatusBadge({ status }: TaskStatusBadgeProps) {

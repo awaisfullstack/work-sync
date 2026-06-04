@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -18,12 +17,15 @@ import {
 } from "@/components/ui/sidebar";
 import {
   CaretUpDownIcon,
-  SparkleIcon,
-  CheckCircleIcon,
-  CreditCardIcon,
-  BellIcon,
   SignOutIcon,
 } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { useLogoutMutation } from "@/features/auth/authApi";
+import { logout as logoutState } from "@/features/auth/authSlice";
+import { baseApi } from "@/lib/api/baseApi";
+import { useAppDispatch } from "@/store/hooks";
 
 export function NavUser({
   user,
@@ -35,6 +37,22 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [logout, { isLoading }] = useLogoutMutation();
+
+  async function handleLogout() {
+    try {
+      await logout().unwrap();
+    } catch {
+      // Local logout should still complete if the session is already expired.
+    } finally {
+      dispatch(logoutState());
+      dispatch(baseApi.util.resetApiState());
+      router.replace("/login");
+      toast.success("Logged out successfully");
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -88,9 +106,9 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem>
+            <DropdownMenuItem disabled={isLoading} onClick={handleLogout}>
               <SignOutIcon />
-              Log out
+              {isLoading ? "Logging out..." : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
