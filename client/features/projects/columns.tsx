@@ -3,10 +3,7 @@
 import { ProjectRowActions } from "@/features/projects/components/ProjectRowActions";
 import { ProjectStatusBadge } from "@/features/projects/components/ProjectStatusBadge";
 import type { Project } from "@/features/projects/projectTypes";
-import {
-  formatProjectDate,
-  getDeadlineStatus,
-} from "@/features/projects/utils";
+import { formatDate, formatDate2, getDeadlineStatus } from "@/lib/utils/formatDate";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 
@@ -61,7 +58,7 @@ export const columns: ColumnDef<Project>[] = [
       return (
         <div>
           <p className="text-sm font-medium text-slate-900">
-            {formatProjectDate(deadline)}
+            {formatDate(deadline)}
           </p>
 
           <p
@@ -89,7 +86,7 @@ export const columns: ColumnDef<Project>[] = [
             {row.original.createdBy?.name ?? "Unknown"}
           </p>
           <p className="text-xs text-slate-500">
-            {formatProjectDate(row.original.createdAt)}
+            {formatDate2(row.original.createdAt)}
           </p>
         </div>
       );

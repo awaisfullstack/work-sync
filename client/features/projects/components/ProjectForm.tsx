@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +83,7 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
     try {
       if (mode === "create") {
         await createProject(values).unwrap();
+        toast.success("Project created successfully");
       }
 
       if (mode === "update" && project) {
@@ -89,13 +91,16 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
           id: project.id,
           body: values,
         }).unwrap();
+        toast.success("Project updated successfully");
       }
 
       router.push("/projects");
     } catch (error) {
+      const message = formatApiError(error);
       setError("root", {
-        message: formatApiError(error),
+        message,
       });
+      toast.error(message);
     }
   }
 

@@ -1,10 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,14 +41,9 @@ export function DepartmentRowActions({
   const currentUser = useAppSelector((state) => state.auth.user);
   const router = useRouter();
   const [deleteDepartment, { isLoading }] = useDeleteDepartmentMutation();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   async function handleDelete() {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${department.name}"?`,
-    );
-
-    if (!confirmed) return;
-
     try {
       await deleteDepartment(department.id).unwrap();
       router.refresh();
@@ -48,54 +54,77 @@ export function DepartmentRowActions({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Open department actions</span>
-        </Button>
-      </DropdownMenuTrigger>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Open department actions</span>
+          </Button>
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild>
-          <Link
-            href={`/departments/${department.id}`}
-            className="cursor-pointer"
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            View
-          </Link>
-        </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/departments/${department.id}`}
+              className="cursor-pointer"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              View
+            </Link>
+          </DropdownMenuItem>
 
-        {currentUser?.role === Role.ADMIN && (
-          <>
-            <DropdownMenuItem asChild>
-              <Link
-                href={`/departments/${department.id}/edit`}
-                className="cursor-pointer"
+          {currentUser?.role === Role.ADMIN && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/departments/${department.id}/edit`}
+                  className="cursor-pointer"
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                disabled={isLoading}
+                onSelect={() => setDeleteDialogOpen(true)}
+                className="cursor-pointer text-red-600 focus:text-red-600"
               >
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete department?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`This will permanently delete "${department.name}". This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
               disabled={isLoading}
               onClick={handleDelete}
-              className="cursor-pointer text-red-600 focus:text-red-600"
+              className="bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20"
             >
-              <Trash2 className="mr-2 h-4 w-4" />
               Delete
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

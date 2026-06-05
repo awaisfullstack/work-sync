@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,7 @@ export function UserForm({ mode, user }: UserFormProps) {
     try {
       if (mode === "create") {
         await createUser(values as CreateUserFormValues).unwrap();
+        toast.success("User created successfully");
       }
 
       if (mode === "update" && user) {
@@ -81,13 +83,16 @@ export function UserForm({ mode, user }: UserFormProps) {
             departmentId: values.departmentId,
           },
         }).unwrap();
+        toast.success("User updated successfully");
       }
 
       router.push("/users");
     } catch (error) {
+      const message = formatApiError(error);
       setError("root", {
-        message: formatApiError(error),
+        message,
       });
+      toast.error(message);
     }
   }
 

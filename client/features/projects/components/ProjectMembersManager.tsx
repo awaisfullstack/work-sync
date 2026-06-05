@@ -2,8 +2,20 @@
 
 import { useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Trash2, UserPlus } from "lucide-react";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,12 +29,20 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { useAppSelector } from "@/store/hooks";
 import { canManageProjectMembers } from "@/lib/auth/permissions";
@@ -31,11 +51,12 @@ import {
   useAssignProjectMemberMutation,
   useRemoveProjectMemberMutation,
 } from "../projectsApi";
-import type { Project } from "../projectTypes";
+import type { Project, ProjectMemberRole } from "../projectTypes";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
 import { isSuccessResponse } from "@/types/api-response";
+import { formatDate } from "@/lib/utils/formatDate";
 
 interface ProjectMembersManagerProps {
   project: Project;
@@ -52,12 +73,23 @@ function getInitials(name?: string) {
     .toUpperCase();
 }
 
+const projectMemberRoleLabels: Record<ProjectMemberRole, string> = {
+  MEMBER: "Member",
+  LEAD: "Lead",
+};
+
 export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
   const currentUser = useAppSelector((state) => state.auth.user);
   const canManage = canManageProjectMembers(currentUser);
 
   const [open, setOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedRole, setSelectedRole] =
+    useState<ProjectMemberRole>("MEMBER");
+  const [memberToRemove, setMemberToRemove] = useState<{
+    userId: string;
+    name?: string;
+  } | null>(null);
   const [error, setError] = useState("");
 
   const { data: usersResponse, isLoading: isUsersLoading } =
@@ -96,31 +128,36 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
       await assignProjectMember({
         projectId: project.id,
         userId: selectedUserId,
+        roleInProject: selectedRole,
       }).unwrap();
 
       setSelectedUserId("");
+      setSelectedRole("MEMBER");
       setOpen(false);
+      toast.success("Project member assigned successfully");
     } catch (error) {
-      setError(formatApiError(error));
+      const message = formatApiError(error);
+      setError(message);
+      toast.error(message);
     }
   }
 
-  async function handleRemoveMember(userId: string, name?: string) {
-    const confirmed = window.confirm(
-      `Remove ${name ?? "this user"} from this project?`
-    );
-
-    if (!confirmed) return;
+  async function handleRemoveMember() {
+    if (!memberToRemove) return;
 
     setError("");
 
     try {
       await removeProjectMember({
         projectId: project.id,
-        userId,
+        userId: memberToRemove.userId,
       }).unwrap();
+      setMemberToRemove(null);
+      toast.success("Project member removed successfully");
     } catch (error) {
-      setError(formatApiError(error));
+      const message = formatApiError(error);
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -160,39 +197,62 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                   <Command className="">
                     <CommandInput placeholder="Search employee..." />
 
-                    <CommandEmpty>No employee found.</CommandEmpty>
+                    <CommandList
+                      style={{
+                        maxHeight:
+                          "max(8rem, min(16rem, calc(var(--radix-popover-content-available-height, 20rem) - 3.5rem)))",
+                      }}
+                    >
+                      <CommandEmpty>No employee found.</CommandEmpty>
 
-                    <CommandGroup className="max-h-64 overflow-y-auto">
-                      {assignableUsers.map((user) => (
-                        <CommandItem
-                          key={user.id}
-                          value={`${user.name} ${user.email}`}
-                          onSelect={() => {
-                            setSelectedUserId(user.id);
-                            setOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              selectedUserId === user.id
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
+                      <CommandGroup>
+                        {assignableUsers.map((user) => (
+                          <CommandItem
+                            key={user.id}
+                            value={`${user.name} ${user.email}`}
+                            onSelect={() => {
+                              setSelectedUserId(user.id);
+                              setOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedUserId === user.id
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
 
-                          <div>
-                            <p className="font-medium">{user.name}</p>
-                            <p className="text-xs text-slate-500">
-                              {user.email}
-                            </p>
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
+                            <div>
+                              <p className="font-medium">{user.name}</p>
+                              <p className="text-xs text-slate-500">
+                                {user.email}
+                              </p>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
+
+              <Select
+                value={selectedRole}
+                onValueChange={(value) =>
+                  setSelectedRole(value as ProjectMemberRole)
+                }
+              >
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="MEMBER">Member</SelectItem>
+                  <SelectItem value="LEAD">Lead</SelectItem>
+                </SelectContent>
+              </Select>
 
               <Button
                 onClick={handleAssignMember}
@@ -227,7 +287,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
             {members.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between gap-4 rounded-xl border p-3"
+                className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <Avatar>
@@ -253,20 +313,42 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                   </div>
                 </div>
 
-                {canManage && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={isRemoving}
-                    onClick={() =>
-                      handleRemoveMember(member.userId, member.user?.name)
-                    }
-                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Remove member</span>
-                  </Button>
-                )}
+                <div className="flex items-center justify-between gap-3 sm:justify-end">
+                  <div className="flex flex-col items-start gap-1 sm:items-end">
+                    <Badge
+                      variant={
+                        member.roleInProject === "LEAD"
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
+                      {projectMemberRoleLabels[member.roleInProject] ??
+                        member.roleInProject}
+                    </Badge>
+
+                    <p className="text-xs text-slate-500">
+                      Joined {formatDate(member.joinedAt)}
+                    </p>
+                  </div>
+
+                  {canManage && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={isRemoving}
+                      onClick={() =>
+                        setMemberToRemove({
+                          userId: member.userId,
+                          name: member.user?.name,
+                        })
+                      }
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Remove member</span>
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -277,6 +359,33 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
             Only admins can assign or remove project members.
           </p>
         )}
+
+        <AlertDialog
+          open={!!memberToRemove}
+          onOpenChange={(open) => {
+            if (!open) setMemberToRemove(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove project member?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will remove {memberToRemove?.name ?? "this user"} from
+                this project.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={isRemoving}
+                onClick={handleRemoveMember}
+                className="bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20"
+              >
+                Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Building2,
@@ -33,6 +34,17 @@ import {
 import { UserRoleBadge } from "./UserRoleBadge";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserViewSkeleton } from "./UserViewSkeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface UserViewPageClientProps {
   userId: string;
@@ -75,23 +87,19 @@ export default function UserViewPageClient({
   const isAdmin = currentUser?.role === Role.ADMIN;
   const isCurrentUser = currentUser?.id === selectedUser.id;
   const isStatusSubmitting = isActivating || isDeactivating;
+  const statusAction = selectedUser.isActive ? "deactivate" : "activate";
 
   async function handleStatusChange() {
-    const action = selectedUser.isActive ? "deactivate" : "activate";
-    const confirmed = window.confirm(
-      `Are you sure you want to ${action} "${selectedUser.name}"?`,
-    );
-
-    if (!confirmed) return;
-
     try {
       if (selectedUser.isActive) {
         await deactivateUser(selectedUser.id).unwrap();
+        toast.success("User deactivated successfully");
       } else {
         await activateUser(selectedUser.id).unwrap();
+        toast.success("User activated successfully");
       }
     } catch (error) {
-      alert(formatApiError(error));
+      toast.error(formatApiError(error));
     }
   }
 
@@ -126,22 +134,50 @@ export default function UserViewPageClient({
               </Link>
             </Button>
 
-            <Button
-              variant={selectedUser.isActive ? "destructive" : "default"}
-              disabled={isStatusSubmitting || isCurrentUser}
-              onClick={handleStatusChange}
-            >
-              {selectedUser.isActive ? (
-                <UserX className="mr-2 h-4 w-4" />
-              ) : (
-                <UserCheck className="mr-2 h-4 w-4" />
-              )}
-              {isStatusSubmitting
-                ? "Saving..."
-                : selectedUser.isActive
-                  ? "Deactivate"
-                  : "Activate"}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant={selectedUser.isActive ? "destructive" : "default"}
+                  disabled={isStatusSubmitting || isCurrentUser}
+                >
+                  {selectedUser.isActive ? (
+                    <UserX className="mr-2 h-4 w-4" />
+                  ) : (
+                    <UserCheck className="mr-2 h-4 w-4" />
+                  )}
+                  {isStatusSubmitting
+                    ? "Saving..."
+                    : selectedUser.isActive
+                      ? "Deactivate"
+                      : "Activate"}
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {selectedUser.isActive ? "Deactivate" : "Activate"} user?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {`This will ${statusAction} "${selectedUser.name}".`}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={isStatusSubmitting}
+                    onClick={handleStatusChange}
+                    className={
+                      selectedUser.isActive
+                        ? "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20"
+                        : undefined
+                    }
+                  >
+                    {selectedUser.isActive ? "Deactivate" : "Activate"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </div>

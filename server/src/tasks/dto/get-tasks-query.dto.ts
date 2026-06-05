@@ -34,8 +34,8 @@ export class GetTasksQueryDto {
   toDate?: string;
 
   @IsOptional()
-  @IsIn(['createdAt', 'updatedAt', 'dueDate'])
-  sortBy?: 'createdAt' | 'updatedAt' | 'dueDate' = 'createdAt';
+  @IsEnum(['createdAt', 'updatedAt', 'deadline', 'title'])
+  sortBy?: 'createdAt' | 'updatedAt' | 'deadline' | 'title';
 
   @IsOptional()
   @IsIn(['ASC', 'DESC'])

@@ -11,6 +11,7 @@ import type {
   ProjectMember,
   ProjectOption,
   ProjectQuery,
+  RemoveProjectMemberPayload,
   UpdateProjectPayload,
 } from "./projectTypes";
 
@@ -111,13 +112,13 @@ export const projectsApi = baseApi.injectEndpoints({
       ],
     }),
     assignProjectMember: builder.mutation<
-      ApiResponse<Project>,
+      ApiResponse<ProjectMember>,
       AssignProjectMemberPayload
     >({
-      query: ({ projectId, userId }) => ({
+      query: ({ projectId, userId, roleInProject }) => ({
         url: `/projects/${projectId}/members`,
         method: "POST",
-        body: { userId },
+        body: { userId, roleInProject },
       }),
       invalidatesTags: (_result, _error, { projectId }) => [
         { type: "Projects", id: projectId },
@@ -136,7 +137,7 @@ export const projectsApi = baseApi.injectEndpoints({
     }),
     removeProjectMember: builder.mutation<
       ApiResponse<Project>,
-      AssignProjectMemberPayload
+      RemoveProjectMemberPayload
     >({
       query: ({ projectId, userId }) => ({
         url: `/projects/${projectId}/members/${userId}`,

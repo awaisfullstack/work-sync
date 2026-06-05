@@ -116,6 +116,7 @@ export function TasksTableToolbar({
             <SelectItem value="createdAt">Latest Created</SelectItem>
             <SelectItem value="updatedAt">Recently Updated</SelectItem>
             <SelectItem value="dueDate">Due Date</SelectItem>
+            <SelectItem value="title">Title</SelectItem>
           </SelectContent>
         </Select>
 

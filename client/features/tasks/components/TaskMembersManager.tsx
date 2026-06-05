@@ -2,7 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Trash2, UserPlus } from "lucide-react";
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +28,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -33,7 +45,6 @@ import { cn } from "@/lib/utils";
 import { isSuccessResponse } from "@/types/api-response";
 import { Task } from "../taskTypes";
 import { useAssignTaskMutation, useUnassignTaskMutation } from "../tasksApi";
-import { toast } from "sonner";
 
 interface TaskMembersManagerProps {
   task: Task;
@@ -56,6 +67,10 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
 
   const [open, setOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [memberToRemove, setMemberToRemove] = useState<{
+    userId: string;
+    name?: string;
+  } | null>(null);
   const [error, setError] = useState("");
 
   const { data: usersResponse, isLoading: isUsersLoading } =
@@ -98,27 +113,30 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
 
       setSelectedUserId("");
       setOpen(false);
+      toast.success("Task member assigned successfully");
     } catch (error) {
-      setError(formatApiError(error));
+      const message = formatApiError(error);
+      setError(message);
+      toast.error(message);
     }
   }
 
-  async function handleRemoveMember(userId: string, name?: string) {
-    const confirmed = window.confirm(
-      `Remove ${name ?? "this user"} from this task?`
-    );
-
-    if (!confirmed) return;
+  async function handleRemoveMember() {
+    if (!memberToRemove) return;
 
     setError("");
 
     try {
       await unassignTaskMember({
         id: task.id,
-        userId,
+        userId: memberToRemove.userId,
       }).unwrap();
+      setMemberToRemove(null);
+      toast.success("Task member removed successfully");
     } catch (error) {
-      setError(formatApiError(error));
+      const message = formatApiError(error);
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -158,36 +176,43 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
                   <Command className="">
                     <CommandInput placeholder="Search employee..." />
 
-                    <CommandEmpty>No employee found.</CommandEmpty>
+                    <CommandList
+                      style={{
+                        maxHeight:
+                          "max(8rem, min(16rem, calc(var(--radix-popover-content-available-height, 20rem) - 3.5rem)))",
+                      }}
+                    >
+                      <CommandEmpty>No employee found.</CommandEmpty>
 
-                    <CommandGroup className="max-h-64 overflow-y-auto">
-                      {assignableUsers.map((user) => (
-                        <CommandItem
-                          key={user.id}
-                          value={`${user.name} ${user.email}`}
-                          onSelect={() => {
-                            setSelectedUserId(user.id);
-                            setOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              selectedUserId === user.id
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
+                      <CommandGroup>
+                        {assignableUsers.map((user) => (
+                          <CommandItem
+                            key={user.id}
+                            value={`${user.name} ${user.email}`}
+                            onSelect={() => {
+                              setSelectedUserId(user.id);
+                              setOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedUserId === user.id
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
 
-                          <div>
-                            <p className="font-medium">{user.name}</p>
-                            <p className="text-xs text-slate-500">
-                              {user.email}
-                            </p>
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
+                            <div>
+                              <p className="font-medium">{user.name}</p>
+                              <p className="text-xs text-slate-500">
+                                {user.email}
+                              </p>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
@@ -251,7 +276,10 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
                     size="icon"
                     disabled={isRemoving}
                     onClick={() =>
-                      handleRemoveMember(member.userId, member.user?.name)
+                      setMemberToRemove({
+                        userId: member.userId,
+                        name: member.user?.name,
+                      })
                     }
                     className="text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
@@ -269,6 +297,33 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
             Only admins can assign or unassign task members.
           </p>
         )}
+
+        <AlertDialog
+          open={!!memberToRemove}
+          onOpenChange={(open) => {
+            if (!open) setMemberToRemove(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove task member?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will remove {memberToRemove?.name ?? "this user"} from
+                this task.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={isRemoving}
+                onClick={handleRemoveMember}
+                className="bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20"
+              >
+                Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

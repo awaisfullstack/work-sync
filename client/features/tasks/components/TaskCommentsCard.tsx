@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, MoreVertical, Send, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { formatDateTime } from "@/lib/utils/formatDate";
 import { formatApiError } from "@/lib/utils/formatError";
+import { Role } from "@/constants";
+import { useAppSelector } from "@/store/hooks";
 
 import {
   useAddTaskCommentMutation,
@@ -40,6 +43,7 @@ function getInitials(name?: string) {
 }
 
 export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
+  const currentUser = useAppSelector((state) => state.auth.user);
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
 
@@ -63,8 +67,11 @@ export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
       }).unwrap();
 
       setComment("");
+      toast.success("Comment added successfully");
     } catch (error) {
-      setError(formatApiError(error));
+      const message = formatApiError(error);
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -76,8 +83,11 @@ export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
         taskId,
         commentId,
       }).unwrap();
+      toast.success("Comment deleted successfully");
     } catch (error) {
-      setError(formatApiError(error));
+      const message = formatApiError(error);
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -128,52 +138,63 @@ export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
               </p>
             </div>
           ) : (
-            comments.map((item) => (
-              <div key={item.id} className="flex gap-3 rounded-lg border p-4">
-                <Avatar>
-                  <AvatarFallback>
-                    {getInitials(item.user?.name)}
-                  </AvatarFallback>
-                </Avatar>
+            comments.map((item) => {
+              const canDeleteComment =
+                currentUser?.role === Role.ADMIN ||
+                item.userId === currentUser?.id;
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium">
-                        {item.user?.name ?? "Unknown User"}
-                      </p>
+              return (
+                <div
+                  key={item.id}
+                  className="flex gap-3 rounded-lg border p-4"
+                >
+                  <Avatar>
+                    <AvatarFallback>
+                      {getInitials(item.user?.name)}
+                    </AvatarFallback>
+                  </Avatar>
 
-                      <p className="text-xs text-muted-foreground">
-                        {formatDateTime(item.createdAt)}
-                      </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium">
+                          {item.user?.name ?? "Unknown User"}
+                        </p>
+
+                        <p className="text-xs text-muted-foreground">
+                          {formatDateTime(item.createdAt)}
+                        </p>
+                      </div>
+
+                      {canDeleteComment && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              disabled={isDeleting}
+                              className="text-red-600"
+                              onClick={() => handleDeleteComment(item.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          disabled={isDeleting}
-                          className="text-red-600"
-                          onClick={() => handleDeleteComment(item.id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <p className="mt-3 whitespace-pre-line text-sm text-slate-700">
+                      {item.comment}
+                    </p>
                   </div>
-
-                  <p className="mt-3 whitespace-pre-line text-sm text-slate-700">
-                    {item.comment}
-                  </p>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </CardContent>

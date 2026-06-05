@@ -1,6 +1,7 @@
 import type { UserRole } from "@/features/auth/authTypes";
 
 export type ProjectStatus = "ACTIVE" | "COMPLETED" | "ARCHIVED";
+export type ProjectMemberRole = "MEMBER" | "LEAD";
 export type ProjectSortBy = "createdAt" | "updatedAt" | "deadline" | "title";
 
 export type SortOrder = "ASC" | "DESC";
@@ -31,6 +32,8 @@ export interface ProjectMember {
   id: string;
   userId: string;
   projectId: string;
+  roleInProject: ProjectMemberRole;
+  joinedAt: string;
   user?: ProjectMemberUser;
   createdAt?: string;
   updatedAt?: string;
@@ -87,6 +90,12 @@ export interface UpdateProjectPayload {
 }
 
 export interface AssignProjectMemberPayload {
+  projectId: string;
+  userId: string;
+  roleInProject: ProjectMemberRole;
+}
+
+export interface RemoveProjectMemberPayload {
   projectId: string;
   userId: string;
 }

@@ -181,6 +181,7 @@ export class ProjectsService {
         {
           model: ProjectMember,
           as: 'members',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
           include: [
             {
               model: User,

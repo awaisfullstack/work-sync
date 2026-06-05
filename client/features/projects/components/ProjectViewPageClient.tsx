@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 import { ArrowLeft, Archive, Pencil } from "lucide-react";
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useAppSelector } from "@/store/hooks";
 import { canEditProject } from "@/lib/auth/permissions";
@@ -41,16 +53,11 @@ export default function ProjectViewPageClient({
   async function handleArchive() {
     if (!project) return;
 
-    const confirmed = window.confirm(
-      `Are you sure you want to archive "${project.title}"?`,
-    );
-
-    if (!confirmed) return;
-
     try {
       await archiveProject(project.id).unwrap();
+      toast.success("Project archived successfully");
     } catch (error) {
-      alert(formatApiError(error));
+      toast.error(formatApiError(error));
     }
   }
 
@@ -104,14 +111,33 @@ export default function ProjectViewPageClient({
             </Button>
 
             {project.status !== "ARCHIVED" && (
-              <Button
-                variant="destructive"
-                disabled={isArchiving}
-                onClick={handleArchive}
-              >
-                <Archive className="mr-2 h-4 w-4" />
-                {isArchiving ? "Archiving..." : "Archive"}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" disabled={isArchiving}>
+                    <Archive className="mr-2 h-4 w-4" />
+                    {isArchiving ? "Archiving..." : "Archive"}
+                  </Button>
+                </AlertDialogTrigger>
+
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Archive project?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {`This will archive "${project.title}" and move it out of active project work.`}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      disabled={isArchiving}
+                      onClick={handleArchive}
+                      className="bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20"
+                    >
+                      Archive
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         )}
@@ -119,11 +145,7 @@ export default function ProjectViewPageClient({
 
       <ProjectDetailsCard project={project} />
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
-        {/* <ProjectTasksSummary project={project} /> */}
-
-        <ProjectMembersManager project={project} />
-      </div>
+      <ProjectMembersManager project={project} />
     </section>
   );
 }

@@ -1,4 +1,4 @@
-import { CalendarDays, Clock, UserRound } from "lucide-react";
+import { Archive, CalendarDays, Clock, UserRound } from "lucide-react";
 
 import {
   Card,
@@ -9,8 +9,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
-import { formatProjectDate, getDeadlineStatus } from "../utils";
 import { Project } from "../projectTypes";
+import { formatDate, getDeadlineStatus } from "@/lib/utils/formatDate";
 
 interface ProjectDetailsCardProps {
   project: Project;
@@ -38,7 +38,7 @@ export function ProjectDetailsCard({ project }: ProjectDetailsCardProps) {
       <CardContent className="space-y-6">
         <Separator />
 
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
               <CalendarDays className="h-4 w-4" />
@@ -46,7 +46,7 @@ export function ProjectDetailsCard({ project }: ProjectDetailsCardProps) {
             </div>
 
             <p className="mt-2 text-lg font-semibold text-slate-900">
-              {formatProjectDate(project.deadline)}
+              {formatDate(project.deadline)}
             </p>
 
             <p
@@ -84,11 +84,28 @@ export function ProjectDetailsCard({ project }: ProjectDetailsCardProps) {
             </div>
 
             <p className="mt-2 text-lg font-semibold text-slate-900">
-              {formatProjectDate(project.updatedAt)}
+              {formatDate(project.updatedAt)}
             </p>
 
             <p className="mt-1 text-sm text-slate-500">
-              Created {formatProjectDate(project.createdAt)}
+              Created {formatDate(project.createdAt)}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-slate-50 p-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+              <Archive className="h-4 w-4" />
+              Archived At
+            </div>
+
+            <p className="mt-2 text-lg font-semibold text-slate-900">
+              {project.archivedAt
+                ? formatDate(project.archivedAt)
+                : "Not archived"}
+            </p>
+
+            <p className="mt-1 text-sm text-slate-500">
+              {project.archivedAt ? "Archive date" : "No archive date"}
             </p>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { NavMain } from "@/components/nav-main";
+import { NavMain, type NavMainItem } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -24,6 +24,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { WorkIcon } from "@hugeicons/core-free-icons";
 import { useAppSelector } from "@/store/hooks";
 import { usePathname } from "next/navigation";
+import { Role } from "@/constants";
 
 const data = {
   navMain: [
@@ -56,13 +57,15 @@ const data = {
       title: "Users",
       url: "/users",
       icon: <UsersThreeIcon />,
+      allowedRoles: [Role.ADMIN],
     },
     {
       title: "Departments",
       url: "/departments",
       icon: <BuildingsIcon />,
+      allowedRoles: [Role.ADMIN],
     },
-  ],
+  ] satisfies NavMainItem[],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -84,7 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} currentPath={pathname} />
+        <NavMain items={data.navMain} currentPath={pathname} user={user} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />

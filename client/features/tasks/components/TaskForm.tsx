@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -143,6 +144,8 @@ export function TaskForm({ mode, task }: TaskFormProps) {
             status: values.status,
           }).unwrap();
         }
+
+        toast.success("Task created successfully");
       }
 
       if (mode === "update" && task) {
@@ -163,13 +166,16 @@ export function TaskForm({ mode, task }: TaskFormProps) {
         }
 
         await syncAssignment(task.id, values.assignedUserId || undefined);
+        toast.success("Task updated successfully");
       }
 
       router.push("/tasks");
     } catch (error) {
+      const message = formatApiError(error);
       setError("root", {
-        message: formatApiError(error),
+        message,
       });
+      toast.error(message);
     }
   }
 

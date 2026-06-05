@@ -1,14 +1,11 @@
 "use client";
 
-import {
-  formatProjectDate,
-  getDeadlineStatus,
-} from "@/features/projects/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { TaskStatusBadge } from "./components/TaskStatusBadge";
 import { Task } from "./taskTypes";
 import { TaskRowActions } from "./components/TaskRowActions";
+import { formatDate, getDeadlineStatus } from "@/lib/utils/formatDate";
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -74,7 +71,7 @@ export const columns: ColumnDef<Task>[] = [
       return (
         <div>
           <p className="text-sm font-medium text-slate-900">
-            {formatProjectDate(deadline)}
+            {formatDate(deadline)}
           </p>
 
           <p

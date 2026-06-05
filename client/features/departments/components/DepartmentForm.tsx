@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ export function DepartmentForm({
     try {
       if (mode === "create") {
         await createDepartment(values).unwrap();
+        toast.success("Department created successfully");
       }
 
       if (mode === "update" && department) {
@@ -57,13 +59,16 @@ export function DepartmentForm({
           id: department.id,
           body: values,
         }).unwrap();
+        toast.success("Department updated successfully");
       }
 
       router.push("/departments");
     } catch (error) {
+      const message = formatApiError(error);
       setError("root", {
-        message: formatApiError(error),
+        message,
       });
+      toast.error(message);
     }
   }
 

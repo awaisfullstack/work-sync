@@ -12,7 +12,7 @@ const protectedRoutes = [
   "/activity-logs",
 ];
 
-const authRoutes = ["/login", "/register"];
+const authRoutes = ["/login"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -47,6 +47,5 @@ export const config = {
     "/departments/:path*",
     "/activity-logs/:path*",
     "/login",
-    "/register",
   ],
 };
