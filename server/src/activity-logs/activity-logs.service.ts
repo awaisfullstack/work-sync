@@ -50,9 +50,12 @@ export class ActivityLogsService {
     }
 
     if (query.fromDate || query.toDate) {
+      const endDate = query.toDate ? new Date(query.toDate) : undefined;
+      endDate?.setHours(23, 59, 59, 999);
+
       where.createdAt = {
         ...(query.fromDate ? { [Op.gte]: new Date(query.fromDate) } : {}),
-        ...(query.toDate ? { [Op.lte]: new Date(query.toDate) } : {}),
+        ...(endDate ? { [Op.lte]: endDate } : {}),
       };
     }
 
@@ -88,6 +91,43 @@ export class ActivityLogsService {
 
   async findRecent(limit = 10): Promise<ActivityLog[]> {
     return this.activityLogModel.findAll({
+      include: [
+        {
+          model: User,
+          as: 'actor',
+          attributes: ['id', 'name', 'email', 'role'],
+        },
+        {
+          model: Project,
+          attributes: ['id', 'title', 'status'],
+        },
+      ],
+      limit,
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
+  async findRecentForUser(
+    userId: string,
+    projectIds: string[],
+    limit = 10,
+  ): Promise<ActivityLog[]> {
+    const activityScope =
+      projectIds.length > 0
+        ? {
+            [Op.or]: [
+              { actorId: userId },
+              {
+                projectId: {
+                  [Op.in]: projectIds,
+                },
+              },
+            ],
+          }
+        : { actorId: userId };
+
+    return this.activityLogModel.findAll({
+      where: activityScope,
       include: [
         {
           model: User,

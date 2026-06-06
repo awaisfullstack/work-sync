@@ -22,6 +22,7 @@ export const shiftsApi = baseApi.injectEndpoints({
         { type: "Shifts", id: "LIST" },
         { type: "Shifts", id: "ACTIVE" },
         { type: "Shifts", id: "WEEKLY_HOURS" },
+        { type: "Shifts", id: "WORKED_HOURS" },
         "Dashboard",
         "ActivityLogs",
       ],
@@ -35,6 +36,7 @@ export const shiftsApi = baseApi.injectEndpoints({
         { type: "Shifts", id: "LIST" },
         { type: "Shifts", id: "ACTIVE" },
         { type: "Shifts", id: "WEEKLY_HOURS" },
+        { type: "Shifts", id: "WORKED_HOURS" },
         "Dashboard",
         "ActivityLogs",
       ],
@@ -52,6 +54,17 @@ export const shiftsApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: [{ type: "Shifts", id: "WEEKLY_HOURS" }],
+    }),
+    getMyWorkedHours: builder.query<
+      ApiResponse<ShiftWorkedHours>,
+      { fromDate?: string; toDate?: string }
+    >({
+      query: (params) => ({
+        url: "/shifts/me/worked-hours",
+        method: "GET",
+        params,
+      }),
+      providesTags: [{ type: "Shifts", id: "WORKED_HOURS" }],
     }),
     getShifts: builder.query<ApiResponse<PaginatedResponse<Shift>>, ShiftQuery>(
       {
@@ -86,8 +99,9 @@ export const shiftsApi = baseApi.injectEndpoints({
           method: "POST",
           body,
         }),
-        invalidatesTags: [
+        invalidatesTags: (_result, _error, body) => [
           { type: "Shifts", id: "LIST" },
+          { type: "Shifts", id: `${body.userId}-WORKED_HOURS` },
           "Dashboard",
           "ActivityLogs",
         ],
@@ -115,6 +129,7 @@ export const {
   useCreateManualShiftMutation,
   useGetActiveShiftQuery,
   useGetEmployeeWorkedHoursQuery,
+  useGetMyWorkedHoursQuery,
   useGetShiftByIdQuery,
   useGetShiftsQuery,
   useGetWeeklyWorkedHoursQuery,

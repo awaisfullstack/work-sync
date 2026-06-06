@@ -6,6 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,8 +25,28 @@ import {
 import { isSuccessResponse } from "@/types/api-response";
 import { useCreateManualShiftMutation } from "../shiftsApi";
 
-function toIsoDateTime(value: string) {
-  return new Date(value).toISOString();
+function parseDateInputValue(value?: string) {
+  if (!value) return undefined;
+
+  const [year, month, day] = value.split("-").map(Number);
+
+  if (!year || !month || !day) return undefined;
+
+  return new Date(year, month - 1, day);
+}
+
+function formatDateInputValue(date?: Date) {
+  if (!date) return "";
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function toIsoDateTime(date: string, time: string) {
+  return new Date(`${date}T${time}`).toISOString();
 }
 
 export function ManualShiftForm() {
@@ -49,8 +70,10 @@ export function ManualShiftForm() {
     resolver: zodResolver(manualShiftSchema),
     defaultValues: {
       userId: "",
-      clockInAt: "",
-      clockOutAt: "",
+      clockInDate: "",
+      clockInTime: "",
+      clockOutDate: "",
+      clockOutTime: "",
     },
   });
 
@@ -58,8 +81,8 @@ export function ManualShiftForm() {
     try {
       await createManualShift({
         userId: values.userId,
-        clockInAt: toIsoDateTime(values.clockInAt),
-        clockOutAt: toIsoDateTime(values.clockOutAt),
+        clockInAt: toIsoDateTime(values.clockInDate, values.clockInTime),
+        clockOutAt: toIsoDateTime(values.clockOutDate, values.clockOutTime),
       }).unwrap();
 
       toast.success("Manual shift created successfully");
@@ -118,31 +141,77 @@ export function ManualShiftForm() {
 
       <div className="grid gap-5 md:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="clockInAt">Clock In</Label>
-          <Input
-            id="clockInAt"
-            type="datetime-local"
-            disabled={isCreating}
-            {...register("clockInAt")}
+          <Label>Clock In Date</Label>
+          <Controller
+            name="clockInDate"
+            control={control}
+            render={({ field }) => (
+              <DatePicker
+                value={parseDateInputValue(field.value)}
+                onChange={(date) => field.onChange(formatDateInputValue(date))}
+                onBlur={field.onBlur}
+                disabled={isCreating}
+                placeholder="Select clock in date"
+                triggerClassName="w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
+              />
+            )}
           />
-          {errors.clockInAt?.message && (
+          {errors.clockInDate?.message && (
             <p className="text-sm text-red-600">
-              {errors.clockInAt.message}
+              {errors.clockInDate.message}
             </p>
           )}
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="clockOutAt">Clock Out</Label>
+          <Label htmlFor="clockInTime">Clock In Time</Label>
           <Input
-            id="clockOutAt"
-            type="datetime-local"
+            id="clockInTime"
+            type="time"
             disabled={isCreating}
-            {...register("clockOutAt")}
+            {...register("clockInTime")}
           />
-          {errors.clockOutAt?.message && (
+          {errors.clockInTime?.message && (
             <p className="text-sm text-red-600">
-              {errors.clockOutAt.message}
+              {errors.clockInTime.message}
+            </p>
+          )}
+        </div>
+
+        <div className="grid gap-2">
+          <Label>Clock Out Date</Label>
+          <Controller
+            name="clockOutDate"
+            control={control}
+            render={({ field }) => (
+              <DatePicker
+                value={parseDateInputValue(field.value)}
+                onChange={(date) => field.onChange(formatDateInputValue(date))}
+                onBlur={field.onBlur}
+                disabled={isCreating}
+                placeholder="Select clock out date"
+                triggerClassName="w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
+              />
+            )}
+          />
+          {errors.clockOutDate?.message && (
+            <p className="text-sm text-red-600">
+              {errors.clockOutDate.message}
+            </p>
+          )}
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="clockOutTime">Clock Out Time</Label>
+          <Input
+            id="clockOutTime"
+            type="time"
+            disabled={isCreating}
+            {...register("clockOutTime")}
+          />
+          {errors.clockOutTime?.message && (
+            <p className="text-sm text-red-600">
+              {errors.clockOutTime.message}
             </p>
           )}
         </div>

@@ -116,19 +116,25 @@ export class ShiftsService {
     if (query.status) {
       where.status = query.status;
     }
-
     if (query.fromDate || query.toDate) {
+      where.clockInAt = {
+        ...(query.fromDate ? { [Op.gte]: query.fromDate } : {}),
+        ...(query.toDate ? { [Op.lte]: query.toDate } : {}),
+      };
+    }
+
+    /* if (query.fromDate || query.toDate) {
       if (query.fromDate) {
-        where.createdAt = {
+        where.clockInAt = {
           [Op.gte]: query.fromDate,
         };
       }
       if (query.toDate) {
-        where.createdAt = {
+        where.clockInAt = {
           [Op.lte]: query.toDate,
         };
       }
-    }
+    } */
 
     if (user.role !== UserRole.ADMIN) {
       where.userId = user.id;

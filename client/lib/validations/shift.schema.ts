@@ -3,14 +3,30 @@ import { z } from "zod";
 export const manualShiftSchema = z
   .object({
     userId: z.string().min(1, "Employee is required"),
-    clockInAt: z.string().min(1, "Clock in time is required"),
-    clockOutAt: z.string().min(1, "Clock out time is required"),
+    clockInDate: z.string().min(1, "Clock in date is required"),
+    clockInTime: z.string().min(1, "Clock in time is required"),
+    clockOutDate: z.string().min(1, "Clock out date is required"),
+    clockOutTime: z.string().min(1, "Clock out time is required"),
   })
   .refine(
-    (values) => new Date(values.clockOutAt) > new Date(values.clockInAt),
+    (values) => {
+      if (
+        !values.clockInDate ||
+        !values.clockInTime ||
+        !values.clockOutDate ||
+        !values.clockOutTime
+      ) {
+        return true;
+      }
+
+      return (
+        new Date(`${values.clockOutDate}T${values.clockOutTime}`) >
+        new Date(`${values.clockInDate}T${values.clockInTime}`)
+      );
+    },
     {
       message: "Clock out time must be after clock in time",
-      path: ["clockOutAt"],
+      path: ["clockOutTime"],
     },
   );
 

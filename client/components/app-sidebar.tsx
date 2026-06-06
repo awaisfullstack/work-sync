@@ -47,6 +47,7 @@ const data = {
       title: "Activity Log",
       url: "/activity-logs",
       icon: <ListMagnifyingGlassIcon />,
+      allowedRoles: [Role.ADMIN],
     },
     {
       title: "Shifts",

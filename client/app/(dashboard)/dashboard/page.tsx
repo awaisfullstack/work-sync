@@ -1,7 +1,15 @@
-import React from "react";
+import PageHeader from "@/components/shared/PageHeader";
+import DashboardPageClient from "@/features/dashboard/components/DashboardPageClient";
 
-const DashboardPage = () => {
-  return <div>DashboardPage</div>;
-};
+export default function DashboardPage() {
+  return (
+    <>
+      <PageHeader
+        title="Dashboard"
+        description="Track work, projects, shifts, and recent activity."
+      />
 
-export default DashboardPage;
+      <DashboardPageClient />
+    </>
+  );
+}

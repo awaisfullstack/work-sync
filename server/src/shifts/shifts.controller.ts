@@ -58,6 +58,16 @@ export class ShiftsController {
     return this.shiftsService.getWeeklyWorkedHours(user.id);
   }
 
+  @Get('me/worked-hours')
+  @Roles(UserRole.EMPLOYEE)
+  getMyWorkedHours(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ) {
+    return this.shiftsService.getEmployeeWorkedHours(user.id, fromDate, toDate);
+  }
+
   @Post('manual')
   @Roles(UserRole.ADMIN)
   createManualShift(@Body() dto: ManualShiftDto) {
