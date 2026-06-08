@@ -23,7 +23,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useLogoutMutation } from "@/features/auth/authApi";
-import { logout as logoutState } from "@/features/auth/authSlice";
+import {
+  logout as logoutState,
+} from "@/features/auth/authSlice";
 import { baseApi } from "@/lib/api/baseApi";
 import { useAppDispatch } from "@/store/hooks";
 
@@ -42,6 +44,7 @@ export function NavUser({
   const [logout, { isLoading }] = useLogoutMutation();
 
   async function handleLogout() {
+
     try {
       await logout().unwrap();
     } catch {

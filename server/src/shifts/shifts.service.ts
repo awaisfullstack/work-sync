@@ -69,7 +69,7 @@ export class ShiftsService {
     return await this.shiftModel.create({
       userId: user.id,
       clockInAt: new Date(),
-      clockOutAt: new Date(),
+      clockOutAt: null,
       status: ShiftStatus.ACTIVE,
     } as Shift);
   }
@@ -236,9 +236,10 @@ export class ShiftsService {
     const now = new Date();
 
     const startOfWeek = new Date(now);
-    const day = startOfWeek.getDay();
+    const day = startOfWeek.getDay(); // 5
     const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
 
+    // start of week here
     startOfWeek.setDate(diff);
     startOfWeek.setHours(0, 0, 0, 0);
 
@@ -277,10 +278,17 @@ export class ShiftsService {
     fromDate?: string,
     toDate?: string,
   ) {
+    return this.getWorkedHours(userId, fromDate, toDate);
+  }
+
+  async getWorkedHours(userId?: string, fromDate?: string, toDate?: string) {
     const where: WhereOptions<Shift> = {
-      userId,
       status: ShiftStatus.COMPLETED,
     };
+
+    if (userId) {
+      where.userId = userId;
+    }
 
     if (fromDate || toDate) {
       where.clockInAt = {};
@@ -305,7 +313,7 @@ export class ShiftsService {
     }, 0);
 
     return {
-      userId,
+      userId: userId ?? null,
       fromDate: fromDate ?? null,
       toDate: toDate ?? null,
       totalMinutes,

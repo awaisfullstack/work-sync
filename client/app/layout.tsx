@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { StoreProvider } from "@/store/provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { FrontendErrorLogger } from "@/components/FrontendErrorLogger";
 
 const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -39,8 +40,10 @@ export default function RootLayout({
         "font-sans",
         publicSans.variable,
       )}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <FrontendErrorLogger />
         <StoreProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </StoreProvider>

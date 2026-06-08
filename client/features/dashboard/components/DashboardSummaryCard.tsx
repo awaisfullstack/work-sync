@@ -14,7 +14,7 @@ export function DashboardSummaryCard<TStatus extends string>({
   const total = items.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="rounded-lg border bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm font-medium text-slate-900">{title}</p>
         <p className="text-sm text-slate-500">{total} total</p>
@@ -35,9 +35,9 @@ export function DashboardSummaryCard<TStatus extends string>({
                 </span>
               </div>
 
-              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-2 overflow-hidden rounded-sm bg-slate-100">
                 <div
-                  className="h-full rounded-full bg-blue-600"
+                  className="h-full rounded-sm bg-teal-600"
                   style={{ width: `${percentage}%` }}
                 />
               </div>

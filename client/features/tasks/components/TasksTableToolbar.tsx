@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { SortOrder, TaskSortBy, TaskStatus } from "../taskTypes";
+import type { DateRange } from "react-day-picker";
 import { useGetProjectOptionsQuery } from "@/features/projects/projectsApi";
 import { isSuccessResponse } from "@/types/api-response";
-import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/shared/DateRangePicker";
+import type { SortOrder, TaskSortBy, TaskStatus } from "../taskTypes";
 
 interface TasksTableToolbarProps {
   projectId: string;
@@ -61,20 +61,20 @@ export function TasksTableToolbar({
   const allProjects = isSuccessResponse(data) ? (data?.data ?? []) : [];
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
-      <div className="relative w-full lg:max-w-sm">
+    <div className="flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm xl:flex-row xl:flex-wrap xl:items-center xl:justify-between">
+      <div className="relative w-full xl:max-w-sm xl:shrink-0">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
         <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search tasks..."
-          className="pl-9"
+          className="w-full pl-9"
         />
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:flex xl:w-auto xl:flex-wrap xl:items-center xl:justify-end">
         <Select value={status} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full xl:w-[160px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
 
@@ -85,14 +85,13 @@ export function TasksTableToolbar({
             <SelectItem value="TODO">To Do</SelectItem>
           </SelectContent>
         </Select>
-        
 
         <Select
           disabled={isLoading}
           value={projectId}
           onValueChange={onProjectIdChange}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full xl:w-[220px]">
             <SelectValue placeholder="Projects" />
           </SelectTrigger>
 
@@ -105,10 +104,9 @@ export function TasksTableToolbar({
             ))}
           </SelectContent>
         </Select>
-       
 
         <Select value={sortBy} onValueChange={onSortByChange}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full xl:w-[190px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
 
@@ -121,7 +119,7 @@ export function TasksTableToolbar({
         </Select>
 
         <Select value={sortOrder} onValueChange={onSortOrderChange}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full xl:w-[150px]">
             <SelectValue placeholder="Order" />
           </SelectTrigger>
 
@@ -130,15 +128,20 @@ export function TasksTableToolbar({
             <SelectItem value="ASC">Ascending</SelectItem>
           </SelectContent>
         </Select>
-         <DateRangePicker
+
+        <DateRangePicker
           value={dateRange}
           onChange={onDateRangeChange}
-          className="w-full"
+          className="w-full sm:col-span-2 lg:col-span-1 xl:w-[260px]"
           placeholder="Filter by due date"
         />
 
         {hasFilters && (
-          <Button variant="outline" onClick={onReset}>
+          <Button
+            variant="outline"
+            onClick={onReset}
+            className="w-full sm:col-span-2 lg:col-span-1 xl:w-auto"
+          >
             <X className="mr-2 h-4 w-4" />
             Reset
           </Button>

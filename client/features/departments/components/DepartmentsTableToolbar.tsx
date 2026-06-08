@@ -19,19 +19,19 @@ export function DepartmentsTableToolbar({
   const hasFilters = search.length > 0;
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
-      <div className="relative w-full lg:max-w-sm">
+    <div className="flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+      <div className="relative w-full sm:max-w-sm sm:flex-1">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
         <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search departments..."
-          className="pl-9"
+          className="w-full pl-9"
         />
       </div>
 
       {hasFilters && (
-        <Button variant="outline" onClick={onReset}>
+        <Button variant="outline" onClick={onReset} className="w-full sm:w-auto">
           <X className="mr-2 h-4 w-4" />
           Reset
         </Button>

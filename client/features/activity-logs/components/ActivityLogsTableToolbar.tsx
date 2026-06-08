@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Role } from "@/constants";
+import type { AuthUser } from "@/features/auth/authTypes";
 import { useGetProjectOptionsQuery } from "@/features/projects/projectsApi";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { isSuccessResponse } from "@/types/api-response";
@@ -28,6 +30,7 @@ import {
 } from "../utils";
 
 interface ActivityLogsTableToolbarProps {
+  user: AuthUser | null;
   action: ActivityAction | "ALL";
   entityType: ActivityEntityType | "ALL";
   actorId: string;
@@ -46,6 +49,7 @@ interface ActivityLogsTableToolbarProps {
 }
 
 export function ActivityLogsTableToolbar({
+  user,
   action,
   entityType,
   actorId,
@@ -62,8 +66,11 @@ export function ActivityLogsTableToolbar({
   onDateRangeChange,
   onReset,
 }: ActivityLogsTableToolbarProps) {
+  const isAdmin = user?.role === Role.ADMIN;
   const { data: usersResponse, isLoading: isUsersLoading } =
-    useGetUserOptionsQuery();
+    useGetUserOptionsQuery(undefined, {
+      skip: !isAdmin,
+    });
   const { data: projectsResponse, isLoading: isProjectsLoading } =
     useGetProjectOptionsQuery();
 
@@ -74,44 +81,48 @@ export function ActivityLogsTableToolbar({
   const hasFilters =
     action !== "ALL" ||
     entityType !== "ALL" ||
-    actorId !== "all" ||
+    (isAdmin && actorId !== "all") ||
     projectId !== "all" ||
     dateRange !== undefined ||
     sortBy !== "createdAt" ||
     sortOrder !== "DESC";
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
-      <div>
+    <div className="flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm">
+      <div className="w-full">
         <p className="text-sm font-medium text-slate-900">Audit Trail</p>
         <p className="mt-1 text-sm text-slate-500">
-          Filter activity by actor, project, action, entity, date, and order.
+          {isAdmin
+            ? "Filter activity by actor, project, action, entity, date, and order."
+            : "Review your activity by project, action, entity, date, and order."}
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <Select value={actorId} onValueChange={onActorIdChange}>
-          <SelectTrigger
-            disabled={isUsersLoading}
-            className="w-full sm:w-[190px]"
-          >
-            <SelectValue placeholder="Actor" />
-          </SelectTrigger>
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:flex xl:w-auto xl:flex-wrap xl:items-center">
+        {isAdmin && (
+          <Select value={actorId} onValueChange={onActorIdChange}>
+            <SelectTrigger
+              disabled={isUsersLoading}
+              className="w-full xl:w-[190px]"
+            >
+              <SelectValue placeholder="Actor" />
+            </SelectTrigger>
 
-          <SelectContent>
-            <SelectItem value="all">All Actors</SelectItem>
-            {users.map((user) => (
-              <SelectItem key={user.id} value={user.id}>
-                {user.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <SelectContent>
+              <SelectItem value="all">All Actors</SelectItem>
+              {users.map((userOption) => (
+                <SelectItem key={userOption.id} value={userOption.id}>
+                  {userOption.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <Select value={projectId} onValueChange={onProjectIdChange}>
           <SelectTrigger
             disabled={isProjectsLoading}
-            className="w-full sm:w-[190px]"
+            className="w-full xl:w-[190px]"
           >
             <SelectValue placeholder="Project" />
           </SelectTrigger>
@@ -127,7 +138,7 @@ export function ActivityLogsTableToolbar({
         </Select>
 
         <Select value={action} onValueChange={onActionChange}>
-          <SelectTrigger className="w-full sm:w-[210px]">
+          <SelectTrigger className="w-full xl:w-[210px]">
             <SelectValue placeholder="Action" />
           </SelectTrigger>
 
@@ -142,7 +153,7 @@ export function ActivityLogsTableToolbar({
         </Select>
 
         <Select value={entityType} onValueChange={onEntityTypeChange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full xl:w-[180px]">
             <SelectValue placeholder="Entity" />
           </SelectTrigger>
 
@@ -157,7 +168,7 @@ export function ActivityLogsTableToolbar({
         </Select>
 
         <Select value={sortBy} onValueChange={onSortByChange}>
-          <SelectTrigger className="w-full sm:w-[160px]">
+          <SelectTrigger className="w-full xl:w-[160px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
 
@@ -168,7 +179,7 @@ export function ActivityLogsTableToolbar({
         </Select>
 
         <Select value={sortOrder} onValueChange={onSortOrderChange}>
-          <SelectTrigger className="w-full sm:w-[140px]">
+          <SelectTrigger className="w-full xl:w-[150px]">
             <SelectValue placeholder="Order" />
           </SelectTrigger>
 
@@ -181,12 +192,16 @@ export function ActivityLogsTableToolbar({
         <DateRangePicker
           value={dateRange}
           onChange={onDateRangeChange}
-          className="w-full sm:w-[240px]"
+          className="w-full sm:col-span-2 lg:col-span-1 xl:w-[260px]"
           placeholder="Filter by log date"
         />
 
         {hasFilters && (
-          <Button variant="outline" onClick={onReset}>
+          <Button
+            variant="outline"
+            onClick={onReset}
+            className="w-full sm:col-span-2 lg:col-span-1 xl:w-auto"
+          >
             <X className="mr-2 h-4 w-4" />
             Reset
           </Button>

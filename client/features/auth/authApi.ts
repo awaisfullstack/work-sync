@@ -3,7 +3,9 @@ import type { AuthResponseData, AuthUser, LoginRequest } from "./authTypes";
 import { ApiResponse } from "@/types/api-response";
 
 export const authApi = baseApi.injectEndpoints({
+
   endpoints: (builder) => ({
+   
     login: builder.mutation<ApiResponse<AuthResponseData>, LoginRequest>({
       query: (body) => ({
         url: "/auth/login",
@@ -26,7 +28,6 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/logout",
         method: "POST",
       }),
-      invalidatesTags: ["Auth"],
     }),
   }),
 });

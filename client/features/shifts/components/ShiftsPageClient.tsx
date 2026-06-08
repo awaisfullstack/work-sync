@@ -11,6 +11,7 @@ import { useAppSelector } from "@/store/hooks";
 import { isSuccessResponse } from "@/types/api-response";
 import { columns } from "../columns";
 import {
+  useGetAllEmployeesWorkedHoursQuery,
   useGetEmployeeWorkedHoursQuery,
   useGetMyWorkedHoursQuery,
   useGetShiftsQuery,
@@ -86,6 +87,16 @@ const ShiftsPageClient = () => {
       skip: !isAdmin || employeeId === "all",
     },
   );
+  const { data: allEmployeesWorkedHoursResponse } =
+    useGetAllEmployeesWorkedHoursQuery(
+      {
+        fromDate,
+        toDate,
+      },
+      {
+        skip: !isAdmin || employeeId !== "all",
+      },
+    );
   const { data: myWorkedHoursResponse } = useGetMyWorkedHoursQuery(
     {
       fromDate,
@@ -103,6 +114,11 @@ const ShiftsPageClient = () => {
   const employeeWorkedHours = isSuccessResponse(employeeWorkedHoursResponse)
     ? employeeWorkedHoursResponse.data
     : undefined;
+  const allEmployeesWorkedHours = isSuccessResponse(
+    allEmployeesWorkedHoursResponse,
+  )
+    ? allEmployeesWorkedHoursResponse.data
+    : undefined;
   const myWorkedHours = isSuccessResponse(myWorkedHoursResponse)
     ? myWorkedHoursResponse.data
     : undefined;
@@ -110,7 +126,11 @@ const ShiftsPageClient = () => {
   const totalItems = shiftsData?.pagination.total ?? 0;
   const totalPages = shiftsData?.pagination.totalPages ?? 1;
   const activeShiftsCount = activeShiftsData?.pagination.total ?? 0;
-  const shouldShowWorkedHoursStat = !isAdmin || employeeId !== "all";
+  const workedHoursMinutes = isAdmin
+    ? employeeId === "all"
+      ? (allEmployeesWorkedHours?.totalMinutes ?? 0)
+      : (employeeWorkedHours?.totalMinutes ?? 0)
+    : (myWorkedHours?.totalMinutes ?? 0);
 
   function handleEmployeeIdChange(value: string) {
     setEmployeeId(value);
@@ -172,18 +192,18 @@ const ShiftsPageClient = () => {
           </h3>
         </div>
 
-        {shouldShowWorkedHoursStat && (
-          <div className="rounded-2xl border bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">
-              {isAdmin ? "Selected Employee Hours" : "Total Worked Hours"}
-            </p>
-            <h3 className="mt-2 text-2xl font-bold text-slate-700">
-              {isAdmin
-                ? formatShiftDuration(employeeWorkedHours?.totalMinutes ?? 0)
-                : formatShiftDuration(myWorkedHours?.totalMinutes ?? 0)}
-            </h3>
-          </div>
-        )}
+        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+          <p className="text-sm text-slate-500">
+            {isAdmin
+              ? employeeId === "all"
+                ? "All Employees Hours"
+                : "Selected Employee Hours"
+              : "Total Worked Hours"}
+          </p>
+          <h3 className="mt-2 text-2xl font-bold text-slate-700">
+            {formatShiftDuration(workedHoursMinutes)}
+          </h3>
+        </div>
       </div>
 
       <ShiftsTableToolbar

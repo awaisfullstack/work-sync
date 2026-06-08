@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import {
   departmentSchema,
   type DepartmentFormValues,
 } from "@/lib/validations/department.schema";
+import { logFrontendError } from "@/lib/logger/frontendLogger";
+import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
 import {
   useCreateDepartmentMutation,
@@ -65,6 +67,14 @@ export function DepartmentForm({
       router.push("/departments");
     } catch (error) {
       const message = formatApiError(error);
+      void logFrontendError("Department form submit error", error, {
+        source: "departments.form.submit",
+        metadata: {
+          mode,
+          departmentId: department?.id ?? null,
+          message,
+        },
+      });
       setError("root", {
         message,
       });
@@ -72,9 +82,17 @@ export function DepartmentForm({
     }
   }
 
+  function onInvalid(errors: FieldErrors<DepartmentFormValues>) {
+    void logFormValidationIssue(
+      "Department",
+      errors,
+      "departments.form.validation",
+    );
+  }
+
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, onInvalid)}
       className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
     >
       {errors.root?.message && (

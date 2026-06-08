@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { ActivityLog } from './entities/activity-log.entity';
 import { CreateActivityLogDto } from './dto/create-activity-log.dto';
-import { User } from 'src/users/entities/user.entity';
+import { User, UserRole } from 'src/users/entities/user.entity';
 import { Project } from 'src/projects/entities/project.entity';
 import { GetActivityLogsQueryDto } from './dto/get-activity-logs-query.dto';
 import { Op, WhereOptions } from 'sequelize';
+import type { AuthenticatedUser } from 'src/types';
 
 @Injectable()
 export class ActivityLogsService {
@@ -26,7 +27,7 @@ export class ActivityLogsService {
     } as ActivityLog);
   }
 
-  async findAll(query: GetActivityLogsQueryDto) {
+  async findAll(query: GetActivityLogsQueryDto, user: AuthenticatedUser) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const offset = (page - 1) * limit;
@@ -41,7 +42,9 @@ export class ActivityLogsService {
       where.entityType = query.entityType;
     }
 
-    if (query.actorId) {
+    if (user.role === UserRole.EMPLOYEE) {
+      where.actorId = user.id;
+    } else if (query.actorId) {
       where.actorId = query.actorId;
     }
 

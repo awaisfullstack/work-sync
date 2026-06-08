@@ -19,12 +19,14 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { useLoginMutation } from "./authApi";
 
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { LoginFormValues, loginSchema } from "@/lib/validations/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { setUser } from "./authSlice";
 import { toast } from "sonner";
 import { formatApiError } from "@/lib/utils/formatError";
+import { logFrontendError } from "@/lib/logger/frontendLogger";
+import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 
 export function LoginForm({
   className,
@@ -61,9 +63,21 @@ export function LoginForm({
       }
     } catch (error: unknown) {
       const message = formatApiError(error);
+      void logFrontendError("Login error", error, {
+        source: "auth.login",
+        metadata: {
+          email: values.email,
+          message,
+        },
+      });
       toast.error(message);
     }
   }
+
+  function onInvalid(errors: FieldErrors<LoginFormValues>) {
+    void logFormValidationIssue("Login", errors, "auth.login.form");
+  }
+
   return (
     <Card className={cn("w-full max-w-md", className)} {...props}>
       <CardHeader className="text-center">
@@ -71,7 +85,7 @@ export function LoginForm({
         <CardDescription>Login to continue to WorkSync</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>

@@ -5,7 +5,7 @@ interface DashboardMetricCardProps {
   value: string | number;
   detail?: string;
   icon: ReactNode;
-  tone?: "blue" | "green" | "slate" | "amber" | "rose";
+  tone?: "blue" | "green" | "slate" | "amber" | "rose" | "teal";
 }
 
 const toneClasses = {
@@ -14,6 +14,7 @@ const toneClasses = {
   slate: "bg-slate-50 text-slate-700",
   amber: "bg-amber-50 text-amber-700",
   rose: "bg-rose-50 text-rose-700",
+  teal: "bg-teal-50 text-teal-700",
 };
 
 export function DashboardMetricCard({
@@ -24,14 +25,14 @@ export function DashboardMetricCard({
   tone = "slate",
 }: DashboardMetricCardProps) {
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="rounded-lg border bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-slate-500">{label}</p>
           <h3 className="mt-2 text-2xl font-bold text-slate-900">{value}</h3>
         </div>
 
-        <div className={`rounded-2xl p-2.5 ${toneClasses[tone]}`}>{icon}</div>
+        <div className={`rounded-md p-2.5 ${toneClasses[tone]}`}>{icon}</div>
       </div>
 
       {detail && <p className="mt-3 text-sm text-slate-500">{detail}</p>}

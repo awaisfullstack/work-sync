@@ -6,6 +6,8 @@ import type { DateRange } from "react-day-picker";
 import { DataTable } from "@/components/shared/data-table";
 import LoadTableError from "@/components/shared/LoadTableError";
 import { TablePagination } from "@/components/shared/TablePagination";
+import { Role } from "@/constants";
+import { useAppSelector } from "@/store/hooks";
 import { isSuccessResponse } from "@/types/api-response";
 import { columns } from "../columns";
 import { useGetActivityLogsQuery } from "../activityLogsApi";
@@ -28,6 +30,9 @@ function formatDateParam(date?: Date) {
 }
 
 export default function ActivityLogsPageClient() {
+  const currentUser = useAppSelector((state) => state.auth.user);
+  const isAdmin = currentUser?.role === Role.ADMIN;
+
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [action, setAction] = useState<ActivityAction | "ALL">("ALL");
@@ -49,7 +54,7 @@ export default function ActivityLogsPageClient() {
       limit,
       action: action === "ALL" ? undefined : action,
       entityType: entityType === "ALL" ? undefined : entityType,
-      actorId: actorId === "all" ? undefined : actorId,
+      actorId: isAdmin && actorId !== "all" ? actorId : undefined,
       projectId: projectId === "all" ? undefined : projectId,
       fromDate,
       toDate,
@@ -61,6 +66,7 @@ export default function ActivityLogsPageClient() {
       limit,
       action,
       entityType,
+      isAdmin,
       actorId,
       projectId,
       fromDate,
@@ -80,7 +86,9 @@ export default function ActivityLogsPageClient() {
   const projectLogsOnPage = logs.filter(
     (log) => log.entityType === "PROJECT",
   ).length;
-  const shiftLogsOnPage = logs.filter((log) => log.entityType === "SHIFT").length;
+  const shiftLogsOnPage = logs.filter(
+    (log) => log.entityType === "SHIFT",
+  ).length;
   const actorCountOnPage = new Set(
     logs.map((log) => log.actorId).filter(Boolean),
   ).size;
@@ -135,7 +143,9 @@ export default function ActivityLogsPageClient() {
     <section className="flex flex-col gap-6 py-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Total Logs</p>
+          <p className="text-sm text-slate-500">
+            {isAdmin ? "Total Logs" : "My Logs"}
+          </p>
           <h3 className="mt-2 text-2xl font-bold text-slate-900">
             {totalItems}
           </h3>
@@ -149,9 +159,11 @@ export default function ActivityLogsPageClient() {
         </div>
 
         <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Actors On Page</p>
+          <p className="text-sm text-slate-500">
+            {isAdmin ? "Actors On Page" : "Projects On Page"}
+          </p>
           <h3 className="mt-2 text-2xl font-bold text-green-700">
-            {actorCountOnPage}
+            {isAdmin ? actorCountOnPage : projectLogsOnPage}
           </h3>
         </div>
 
@@ -164,6 +176,7 @@ export default function ActivityLogsPageClient() {
       </div>
 
       <ActivityLogsTableToolbar
+        user={currentUser}
         action={action}
         entityType={entityType}
         actorId={actorId}

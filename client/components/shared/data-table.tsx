@@ -29,7 +29,6 @@ export function DataTable<TData, TValue>({
   isLoading,
   noFoundMessage,
 }: DataTableProps<TData, TValue>) {
-
   const table = useReactTable({
     data,
     columns,
@@ -43,7 +42,7 @@ export function DataTable<TData, TValue>({
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+      <div className="w-full min-w-0 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
         <div className="space-y-3">
           {Array.from({ length: 7 }).map((_, index) => (
             <div
@@ -57,8 +56,8 @@ export function DataTable<TData, TValue>({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-      <div className="overflow-x-auto">
+    <div className="w-full min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm">
+      <div className="w-full min-w-0 overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

@@ -242,14 +242,14 @@ export class TasksService {
     ];
 
     if (!this.isAdmin(user)) {
-      const memberships = await this.projectMemberModel.findAll({
+      const memberships = await this.taskAssignmentModel.findAll({
         where: { userId: user.id },
-        attributes: ['projectId'],
+        attributes: ['taskId'],
       });
 
-      const projectIds = memberships.map((member) => member.projectId);
+      const taskIds = memberships.map((member) => member.taskId);
 
-      if (projectIds.length === 0) {
+      if (taskIds.length === 0) {
         return {
           items: [],
           pagination: {
@@ -261,8 +261,8 @@ export class TasksService {
         };
       }
 
-      taskWhere.projectId = {
-        [Op.in]: projectIds,
+      taskWhere.id = {
+        [Op.in]: taskIds,
       };
     }
 
@@ -272,7 +272,6 @@ export class TasksService {
         exclude: ['statusId', 'projectId', 'createdBy'],
       },
       include,
-      distinct: true,
       limit,
       offset,
       order: [[query.sortBy ?? 'createdAt', query.sortOrder ?? 'DESC']],

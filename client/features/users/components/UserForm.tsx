@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, FieldErrors, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ import {
   type CreateUserFormValues,
   type UpdateUserFormValues,
 } from "@/lib/validations/user.schema";
+import { logFrontendError } from "@/lib/logger/frontendLogger";
+import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
 import { isSuccessResponse } from "@/types/api-response";
 import { useCreateUserMutation, useUpdateUserMutation } from "../usersApi";
@@ -89,6 +91,15 @@ export function UserForm({ mode, user }: UserFormProps) {
       router.push("/users");
     } catch (error) {
       const message = formatApiError(error);
+      void logFrontendError("User form submit error", error, {
+        source: "users.form.submit",
+        metadata: {
+          mode,
+          userId: user?.id ?? null,
+          email: values.email,
+          message,
+        },
+      });
       setError("root", {
         message,
       });
@@ -96,9 +107,13 @@ export function UserForm({ mode, user }: UserFormProps) {
     }
   }
 
+  function onInvalid(errors: FieldErrors<UserFormFields>) {
+    void logFormValidationIssue("User", errors, "users.form.validation");
+  }
+
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, onInvalid)}
       className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
     >
       {errors.root?.message && (

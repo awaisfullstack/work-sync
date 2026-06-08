@@ -9,7 +9,7 @@ interface DashboardRecentActivityProps {
 
 export function DashboardRecentActivity({ logs }: DashboardRecentActivityProps) {
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="rounded-lg border bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm font-medium text-slate-900">Recent Activity</p>
         <p className="text-sm text-slate-500">{logs.length} events</p>

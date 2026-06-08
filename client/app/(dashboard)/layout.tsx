@@ -1,11 +1,15 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetMeQuery } from "@/features/auth/authApi";
-import { setUser } from "@/features/auth/authSlice";
-import { useAppDispatch } from "@/store/hooks";
+import { logout, setUser } from "@/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { isSuccessResponse } from "@/types/api-response";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
@@ -13,16 +17,16 @@ import React, { useEffect } from "react";
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { data: userData, isLoading } = useGetMeQuery();
+  const { data: userData, isLoading, error: userError } = useGetMeQuery();
 
   useEffect(() => {
     if (isLoading) return;
-
     if (!isSuccessResponse(userData)) {
+      dispatch(logout());
       router.replace("/login");
       return;
     }
-    dispatch(setUser(userData.data));
+    dispatch(setUser(userData?.data));
   }, [userData, isLoading, router, dispatch]);
 
   if (isLoading) {
@@ -41,7 +45,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <SidebarTrigger className="-ml-1" />
           </div>
         </header>
-        <main className="main-container">{children}</main>
+        <main className="main-container min-w-0">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

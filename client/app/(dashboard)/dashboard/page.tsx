@@ -1,7 +1,17 @@
 import PageHeader from "@/components/shared/PageHeader";
 import DashboardPageClient from "@/features/dashboard/components/DashboardPageClient";
+import type { DashboardData } from "@/features/dashboard/dashboardTypes";
+import { serverFetch } from "@/lib/api/serverFetch";
+import type { ApiResponse } from "@/types/api-response";
 
-export default function DashboardPage() {
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const dashboardResponse =
+    await serverFetch<ApiResponse<DashboardData>>("/dashboard");
+  const initialDashboard =
+    dashboardResponse?.success === true ? dashboardResponse.data : undefined;
+
   return (
     <>
       <PageHeader
@@ -9,7 +19,7 @@ export default function DashboardPage() {
         description="Track work, projects, shifts, and recent activity."
       />
 
-      <DashboardPageClient />
+      <DashboardPageClient initialDashboard={initialDashboard} />
     </>
   );
 }

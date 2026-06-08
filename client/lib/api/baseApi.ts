@@ -7,6 +7,7 @@ export const baseApi = createApi({
     baseUrl: process.env.NEXT_PUBLIC_API_URL,
     credentials: "include",
     timeout: 10000,
+    
 
     /* prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
@@ -19,6 +20,9 @@ export const baseApi = createApi({
       return headers;
     }, */
   }),
+
+
+  
 
   tagTypes: [
     "Auth",

@@ -108,8 +108,6 @@ export class ProjectsService {
         })
       : [];
 
-    console.log('projectMembers', projectMembers);
-
     const membersByProjectId = projectMembers.reduce<
       Record<string, { id: string; projectId: string; userId: string }[]>
     >((acc, member) => {
@@ -118,6 +116,7 @@ export class ProjectsService {
 
       return acc;
     }, {});
+    console.log('membersByProjectId', membersByProjectId);
 
     const items = rows.map((project) => {
       const members = membersByProjectId[project.id] ?? [];
