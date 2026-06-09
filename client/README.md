@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WorkSync Frontend
 
-## Getting Started
+Next.js frontend for WorkSync. It connects to the NestJS backend and provides dashboards for admins and employees to manage projects, tasks, shifts, users, departments, and activity logs.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js
+- React
+- Redux Toolkit Query
+- React Hook Form
+- Zod
+- Tailwind CSS
+- shadcn-style UI components
+
+## Setup Instructions
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Copy the environment example:
+
+```bash
+cp .env.example .env
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+3. Start the backend first. The frontend expects the backend API to be available at the URL in `NEXT_PUBLIC_API_URL`.
+
+4. Start the frontend:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Default local frontend URL:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```txt
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+Create `.env` in the `client` folder:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Required | Description |
+| --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | Yes | Backend API base URL used by RTK Query and server-side fetch helpers |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Build Instructions
 
-## Deploy on Vercel
+Create a production build:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Run the production build:
+
+```bash
+npm run start
+```
+
+Run lint:
+
+```bash
+npm run lint
+```
+
+## Authentication Notes
+
+The backend stores the JWT in an HTTP-only cookie named `access_token`.
+
+Frontend API requests use:
+
+```ts
+credentials: "include"
+```
+
+That allows the browser to send the auth cookie with requests to the backend.
+
+## Project Structure
+
+```txt
+app/                 Next.js app routes
+components/          Shared UI and layout components
+features/            Feature modules such as auth, users, tasks, projects
+lib/api/             API base query and server fetch helpers
+lib/logger/          Frontend logging helpers
+store/               Redux store setup
+```
+
+## Local Frontend Logs
+
+The app can send frontend errors to:
+
+```txt
+/api/logs
+```
+
+Those logs are stored by the Next.js API route in:
+
+```txt
+storage/logs/frontend-logs.jsonl
+```
+
+This is useful for local debugging. For production, use a database or external logging provider.

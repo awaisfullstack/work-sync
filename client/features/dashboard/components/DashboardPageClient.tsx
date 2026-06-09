@@ -37,6 +37,7 @@ import type {
 import { DashboardMetricCard } from "./DashboardMetricCard";
 import { DashboardRecentActivity } from "./DashboardRecentActivity";
 import { DashboardSummaryCard } from "./DashboardSummaryCard";
+import DashboardLoading from "./DashboardLoading";
 
 function formatStatusLabel(status: string) {
   return status
@@ -56,22 +57,7 @@ function formatHours(hours: number) {
   return `${wholeHours}h ${minutes}m`;
 }
 
-function DashboardLoading() {
-  return (
-    <section className="flex flex-col gap-6 py-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} className="h-32 rounded-lg" />
-        ))}
-      </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Skeleton className="h-72 rounded-lg" />
-        <Skeleton className="h-72 rounded-lg" />
-      </div>
-    </section>
-  );
-}
 
 function DashboardRequiredMetrics({ dashboard }: { dashboard: BaseDashboard }) {
   const isAdmin = dashboard.role === Role.ADMIN;
@@ -138,9 +124,7 @@ function DashboardSnapshot({
                 <p className="mt-1 text-xs text-slate-500">{item.detail}</p>
               )}
             </div>
-            <p className="text-lg font-semibold text-slate-900">
-              {item.value}
-            </p>
+            <p className="text-lg font-semibold text-slate-900">{item.value}</p>
           </div>
         ))}
       </div>
@@ -350,8 +334,10 @@ export default function DashboardPageClient({
   initialDashboard,
 }: DashboardPageClientProps) {
   const currentUser = useAppSelector((state) => state.auth.user);
-  console.log({initialDashboard})
-  const { data, isLoading, isError, error, refetch } = useGetDashboardQuery(undefined,{skip:!!initialDashboard});
+  const { data, isLoading, isError, error, refetch } = useGetDashboardQuery(
+    undefined,
+    { skip: !initialDashboard },
+  );
   const loggedDashboardError = useRef(false);
   const dashboard = isSuccessResponse(data) ? data.data : initialDashboard;
 

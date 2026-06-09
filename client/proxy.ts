@@ -12,8 +12,6 @@ const protectedRoutes = [
   "/activity-logs",
 ];
 
-const authRoutes = ["/login"];
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -22,16 +20,9 @@ export function proxy(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route)
   );
 
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
-
   if (isProtectedRoute && !token) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
-  }
-
-  if (isAuthRoute && token) {
-    const dashboardUrl = new URL("/dashboard", request.url);
-    return NextResponse.redirect(dashboardUrl);
   }
 
   return NextResponse.next();
@@ -46,6 +37,5 @@ export const config = {
     "/users/:path*",
     "/departments/:path*",
     "/activity-logs/:path*",
-    "/login",
   ],
 };

@@ -1,12 +1,12 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import AppLoader from "@/components/shared/AppLoader";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Spinner } from "@/components/ui/spinner";
 import { useGetMeQuery } from "@/features/auth/authApi";
 import { logout, setUser } from "@/features/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -15,9 +15,10 @@ import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  const isAuth = useAppSelector((state) => state.auth.isAuthenticated);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { data: userData, isLoading, error: userError } = useGetMeQuery();
+  const { data: userData, isLoading } = useGetMeQuery();
 
   useEffect(() => {
     if (isLoading) return;
@@ -26,15 +27,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       router.replace("/login");
       return;
     }
-    dispatch(setUser(userData?.data));
-  }, [userData, isLoading, router, dispatch]);
+    dispatch(setUser(userData.data));
+  }, [userData, isLoading, router, dispatch]);  
 
-  if (isLoading) {
-    return (
-      <div className="main-container min-h-screen flex items-center justify-center">
-        <Spinner className="w-6 h-6" />
-      </div>
-    );
+  if (isLoading || !isAuth) {
+    return <AppLoader />;
   }
   return (
     <SidebarProvider>

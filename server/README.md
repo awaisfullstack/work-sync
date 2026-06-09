@@ -1,98 +1,268 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# WorkSync Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS API for WorkSync, a team task, project, shift, department, user, dashboard, and activity-log management system.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tech Stack
 
-## Description
+- NestJS
+- PostgreSQL
+- Sequelize / sequelize-typescript
+- Sequelize CLI migrations and seeders
+- JWT authentication with an `access_token` HTTP-only cookie
+- Swagger API documentation
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Environment Setup
 
-## Project setup
+1. Install dependencies:
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+2. Create a PostgreSQL database.
+
+3. Copy the environment example:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+4. Update `.env`:
+
+```env
+PORT=4000
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
+DB_NAME=worksync
+
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=1d
+```
+
+## Run the App
+
+Development:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Production build:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Default local API URL:
 
-## Resources
+```txt
+http://localhost:4000/api/v1
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Migration Commands
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Run all pending migrations:
 
-## Support
+```bash
+npm run migration:run
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Create a new migration:
 
-## Stay in touch
+```bash
+npm run migration:create -- migration-name
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Undo the last migration:
 
-## License
+```bash
+npm run migration:undo
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Undo all migrations:
+
+```bash
+npm run migration:undo:all
+```
+
+Current migrations create:
+
+- PostgreSQL `pgcrypto` extension
+- departments
+- users
+- projects
+- project members
+- task statuses
+- tasks
+- task assignments
+- task comments
+- shifts
+- activity logs
+
+## Seeder Commands
+
+Run all seeders:
+
+```bash
+npm run seed:run
+```
+
+Create a new seeder:
+
+```bash
+npm run seed:create -- seeder-name
+```
+
+Undo all seeders:
+
+```bash
+npm run seed:undo
+```
+
+Seeder order:
+
+1. departments
+2. users
+3. projects
+4. project members
+5. task statuses
+6. tasks
+7. task assignments
+8. task comments
+9. shifts
+10. activity logs
+
+Recommended fresh database setup:
+
+```bash
+npm run migration:run
+npm run seed:run
+```
+
+## API Documentation
+
+Swagger is available after starting the server:
+
+```txt
+http://localhost:4000/api/docs
+```
+
+All application endpoints use the global prefix:
+
+```txt
+/api/v1
+```
+
+Authentication uses an HTTP-only cookie named:
+
+```txt
+access_token
+```
+
+Login sets the cookie automatically.
+
+## Main API Routes
+
+### Auth
+
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| POST | `/api/v1/auth/login` | Public | Login user and set auth cookie |
+| POST | `/api/v1/auth/logout` | Authenticated | Clear auth cookie |
+| GET | `/api/v1/auth/me` | Authenticated | Get current user profile |
+| POST | `/api/v1/auth/register` | Admin | Create user through auth flow |
+
+### Users
+
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/api/v1/users` | Admin | List users |
+| POST | `/api/v1/users` | Admin | Create user |
+| GET | `/api/v1/users/stats` | Admin | Get user statistics |
+| GET | `/api/v1/users/options` | Admin | Get users for selects/options |
+| GET | `/api/v1/users/:id` | Admin | Get one user |
+| PATCH | `/api/v1/users/:id` | Admin | Update user |
+| PATCH | `/api/v1/users/:id/activate` | Admin | Activate user |
+| PATCH | `/api/v1/users/:id/deactivate` | Admin | Deactivate user |
+| DELETE | `/api/v1/users/:id` | Admin | Delete user |
+
+### Departments
+
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/api/v1/departments` | Admin | List departments |
+| POST | `/api/v1/departments` | Admin | Create department |
+| GET | `/api/v1/departments/:id` | Admin | Get one department |
+| PATCH | `/api/v1/departments/:id` | Admin | Update department |
+| DELETE | `/api/v1/departments/:id` | Admin | Delete department |
+
+### Projects
+
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/api/v1/projects` | Admin, Employee | List accessible projects |
+| POST | `/api/v1/projects` | Admin | Create project |
+| GET | `/api/v1/projects/options` | Authenticated | Get projects for selects/options |
+| GET | `/api/v1/projects/:id` | Authenticated | Get project details |
+| PATCH | `/api/v1/projects/:id` | Admin | Update project |
+| PATCH | `/api/v1/projects/:id/archive` | Admin | Archive project |
+| GET | `/api/v1/projects/:id/members` | Admin | List project members |
+| POST | `/api/v1/projects/:id/members` | Admin | Add project member |
+| DELETE | `/api/v1/projects/:id/members/:userId` | Admin | Remove project member |
+
+### Tasks
+
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/api/v1/tasks` | Authenticated | List accessible tasks |
+| POST | `/api/v1/tasks` | Admin | Create task |
+| GET | `/api/v1/tasks/:id` | Authenticated | Get task details |
+| PATCH | `/api/v1/tasks/:id` | Admin | Update task |
+| PATCH | `/api/v1/tasks/:id/status` | Authenticated | Update task status |
+| POST | `/api/v1/tasks/:id/assign` | Admin | Assign task |
+| PATCH | `/api/v1/tasks/:id/unassign/:userId` | Admin | Unassign user |
+| GET | `/api/v1/tasks/:id/comments` | Authenticated | List task comments |
+| POST | `/api/v1/tasks/:id/comments` | Authenticated | Add task comment |
+| DELETE | `/api/v1/tasks/:id/comments/:commentId` | Authenticated | Delete task comment |
+| DELETE | `/api/v1/tasks/:id` | Admin | Delete task |
+
+### Shifts
+
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| POST | `/api/v1/shifts/clock-in` | Employee | Clock in |
+| POST | `/api/v1/shifts/clock-out` | Employee | Clock out |
+| GET | `/api/v1/shifts/me` | Admin, Employee | Get current user's shifts |
+| GET | `/api/v1/shifts/me/active` | Employee | Get active shift |
+| GET | `/api/v1/shifts/me/weekly-hours` | Employee | Get weekly hours |
+| GET | `/api/v1/shifts/me/worked-hours` | Employee | Get own worked hours |
+| POST | `/api/v1/shifts/manual` | Admin | Create manual shift |
+| GET | `/api/v1/shifts/worked-hours` | Admin | Get worked hours for all employees |
+| GET | `/api/v1/shifts/user/:userId/worked-hours` | Admin | Get one employee's worked hours |
+| GET | `/api/v1/shifts/:id` | Admin | Get shift details |
+
+### Dashboard and Activity Logs
+
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/api/v1/dashboard` | Authenticated | Get dashboard data for current user |
+| GET | `/api/v1/activity-logs` | Admin, Employee | List activity logs visible to current user |
+
+## Useful Commands
+
+```bash
+npm run lint
+npm run test
+npm run test:e2e
+npm run test:cov
+```
