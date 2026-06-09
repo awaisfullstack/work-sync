@@ -21,7 +21,7 @@ export function DashboardRecentActivity({ logs }: DashboardRecentActivityProps) 
         ) : (
           logs.slice(0, 6).map((log) => (
             <div key={log.id} className="py-4 first:pt-0 last:pb-0">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-900">
                     {log.message}
