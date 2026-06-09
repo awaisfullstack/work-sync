@@ -26,9 +26,7 @@ import { taskSchema, type TaskFormValues } from "@/lib/validations/task.schema";
 import { isSuccessResponse } from "@/types/api-response";
 import type { Task } from "../taskTypes";
 import {
-  useAssignTaskMutation,
   useCreateTaskMutation,
-  useUnassignTaskMutation,
   useUpdateTaskMutation,
   useUpdateTaskStatusMutation,
 } from "../tasksApi";
@@ -64,11 +62,6 @@ function formatDateInputValue(date?: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function getAssignedUserId(task?: Task) {
-  return task?.assignments?.find((assignment) => !assignment.unassignedAt)
-    ?.userId;
-}
-
 export function TaskForm({ mode, task }: TaskFormProps) {
   const router = useRouter();
 
@@ -81,9 +74,6 @@ export function TaskForm({ mode, task }: TaskFormProps) {
   const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
   const [updateTaskStatus, { isLoading: isUpdatingStatus }] =
     useUpdateTaskStatusMutation();
-  const [assignTask, { isLoading: isAssigning }] = useAssignTaskMutation();
-  const [unassignTask, { isLoading: isUnassigning }] =
-    useUnassignTaskMutation();
 
   const projects = isSuccessResponse(projectsResponse)
     ? (projectsResponse.data ?? [])
@@ -91,13 +81,8 @@ export function TaskForm({ mode, task }: TaskFormProps) {
   const users = isSuccessResponse(usersResponse)
     ? (usersResponse.data ?? [])
     : [];
-  const assignedUserId = getAssignedUserId(task);
-  const isSubmitting =
-    isCreating ||
-    isUpdating ||
-    isUpdatingStatus ||
-    isAssigning ||
-    isUnassigning;
+
+  const isSubmitting = isCreating || isUpdating || isUpdatingStatus;
 
   const {
     register,
@@ -113,21 +98,9 @@ export function TaskForm({ mode, task }: TaskFormProps) {
       status: task?.status.name ?? "TODO",
       dueDate: getDateInputValue(task?.dueDate),
       projectId: task?.projectId ?? task?.project?.id ?? "",
-      assignedUserId: assignedUserId ?? "",
+      assignedUserId: "",
     },
   });
-
-  async function syncAssignment(taskId: string, nextUserId?: string) {
-    if (assignedUserId === nextUserId) return;
-
-    if (assignedUserId) {
-      await unassignTask({ id: taskId, userId: assignedUserId }).unwrap();
-    }
-
-    if (nextUserId) {
-      await assignTask({ id: taskId, userId: nextUserId }).unwrap();
-    }
-  }
 
   async function onSubmit(values: TaskFormValues) {
     try {
@@ -167,7 +140,6 @@ export function TaskForm({ mode, task }: TaskFormProps) {
           }).unwrap();
         }
 
-        await syncAssignment(task.id, values.assignedUserId || undefined);
         toast.success("Task updated successfully");
       }
 
@@ -232,7 +204,6 @@ export function TaskForm({ mode, task }: TaskFormProps) {
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">
-        
         <div className="grid w-full gap-2">
           <Label>Status</Label>
           <Controller
@@ -260,7 +231,7 @@ export function TaskForm({ mode, task }: TaskFormProps) {
             <p className="text-sm text-red-600">{errors.status.message}</p>
           )}
         </div>
-         <div className="grid gap-2">
+        <div className="grid gap-2">
           <Label htmlFor="dueDate">Due Date</Label>
           <Controller
             name="dueDate"
@@ -292,9 +263,7 @@ export function TaskForm({ mode, task }: TaskFormProps) {
                 <Select
                   value={field.value}
                   onValueChange={field.onChange}
-                  disabled={
-                    isSubmitting || isProjectsLoading || mode === "update"
-                  }
+                  disabled={isSubmitting || isProjectsLoading}
                 >
                   <SelectTrigger className="w-auto" onBlur={field.onBlur}>
                     <SelectValue

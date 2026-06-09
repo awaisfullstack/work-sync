@@ -21,8 +21,6 @@ const baseQueryWithAuth: BaseQueryFn<
   const result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
-    console.log({error: result.error});
-    
     api.dispatch(logout());
 
     if (typeof window !== "undefined" && window.location.pathname !== "/login") {

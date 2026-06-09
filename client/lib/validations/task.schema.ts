@@ -21,7 +21,7 @@ export const taskSchema = z.object({
 
   projectId: z.string().min(1, "Project is required"),
 
-  assignedUserId: z.string().min(1, "Assigned user is required"),
+  assignedUserId: z.string().optional(),
 });
 
 export type TaskFormValues = z.infer<typeof taskSchema>;
