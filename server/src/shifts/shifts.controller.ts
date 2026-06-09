@@ -17,15 +17,25 @@ import type { AuthenticatedUser } from 'src/types';
 import { ShiftQueryDto } from './dto/shift-query.dto';
 import { ManualShiftDto } from './dto/manual-shift.dto';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @Controller('shifts')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('Shifts')
+@ApiCookieAuth('access_token')
+@ApiBearerAuth('access-token')
 export class ShiftsController {
   constructor(private readonly shiftsService: ShiftsService) {}
 
   @Post('clock-in')
   @ResponseMessage('Clock in successful')
   @Roles(UserRole.EMPLOYEE)
+  @ApiOperation({ summary: 'Clock in current employee' })
   clockIn(@CurrentUser() user: AuthenticatedUser) {
     return this.shiftsService.clockIn(user.id);
   }
@@ -33,18 +43,21 @@ export class ShiftsController {
   @Post('clock-out')
   @ResponseMessage('Clock out successful')
   @Roles(UserRole.EMPLOYEE)
+  @ApiOperation({ summary: 'Clock out current employee' })
   clockOut(@CurrentUser() user: AuthenticatedUser) {
     return this.shiftsService.clockOut(user.id);
   }
 
   @Get('me/active')
   @Roles(UserRole.EMPLOYEE)
+  @ApiOperation({ summary: 'Get current employee active shift' })
   getMyActiveShift(@CurrentUser() user: AuthenticatedUser) {
     return this.shiftsService.getMyActiveShift(user.id);
   }
 
   @Get('me')
   @Roles(UserRole.EMPLOYEE, UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get current user shifts' })
   getMyShifts(
     @Query() query: ShiftQueryDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -54,12 +67,14 @@ export class ShiftsController {
 
   @Get('me/weekly-hours')
   @Roles(UserRole.EMPLOYEE)
+  @ApiOperation({ summary: 'Get current employee weekly worked hours' })
   getMyWeeklyWorkedHours(@CurrentUser() user: AuthenticatedUser) {
     return this.shiftsService.getWeeklyWorkedHours(user.id);
   }
 
   @Get('me/worked-hours')
   @Roles(UserRole.EMPLOYEE)
+  @ApiOperation({ summary: 'Get current employee worked hours' })
   getMyWorkedHours(
     @CurrentUser() user: AuthenticatedUser,
     @Query('fromDate') fromDate?: string,
@@ -70,12 +85,14 @@ export class ShiftsController {
 
   @Post('manual')
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Create a manual shift record' })
   createManualShift(@Body() dto: ManualShiftDto) {
     return this.shiftsService.createManualShift(dto);
   }
 
   @Get('worked-hours')
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get worked hours for all employees' })
   getAllEmployeesWorkedHours(
     @Query('fromDate') fromDate?: string,
     @Query('toDate') toDate?: string,
@@ -85,6 +102,7 @@ export class ShiftsController {
 
   @Get('user/:userId/worked-hours')
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get worked hours for one employee' })
   getEmployeeWorkedHours(
     @Param('userId') userId: string,
     @Query('fromDate') fromDate?: string,
@@ -95,6 +113,7 @@ export class ShiftsController {
 
   @Get(':id')
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get one shift by id' })
   findOne(@Param('id') id: string) {
     return this.shiftsService.findOne(id);
   }

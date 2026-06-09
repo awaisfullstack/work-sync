@@ -20,15 +20,25 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from 'src/users/entities/user.entity';
 import { ProjectQueryDto } from './dto/project-query.dto';
 import { AddProjectMemberDto } from './dto/add-project-member.dto';
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard)
 @Controller('projects')
+@ApiTags('Projects')
+@ApiCookieAuth('access_token')
+@ApiBearerAuth('access-token')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Create a project' })
   create(
     @Body() createProjectDto: CreateProjectDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -39,6 +49,7 @@ export class ProjectsController {
   @Get()
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
+  @ApiOperation({ summary: 'List projects visible to current user' })
   findAll(
     @Query() query: ProjectQueryDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -48,11 +59,13 @@ export class ProjectsController {
 
   @Get('options')
   @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Get project options for select inputs' })
   findProjectOptions(@CurrentUser() user: AuthenticatedUser) {
     return this.projectsService.findProjectOptions(user);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get one project by id' })
   async findOne(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
@@ -67,6 +80,7 @@ export class ProjectsController {
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Update a project' })
   update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
     return this.projectsService.update(id, dto);
   }
@@ -74,6 +88,7 @@ export class ProjectsController {
   @Patch(':id/archive')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Archive a project' })
   archive(@Param('id') id: string) {
     return this.projectsService.archive(id);
   }
@@ -81,6 +96,7 @@ export class ProjectsController {
   @Post(':id/members')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Add a project member' })
   addMember(@Param('id') projectId: string, @Body() dto: AddProjectMemberDto) {
     return this.projectsService.addMember(projectId, dto);
   }
@@ -88,6 +104,7 @@ export class ProjectsController {
   @Get(':id/members')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'List project members' })
   getMembers(@Param('id') projectId: string) {
     return this.projectsService.getProjectMembers(projectId);
   }
@@ -95,6 +112,7 @@ export class ProjectsController {
   @Delete(':id/members/:userId')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Remove a project member' })
   removeMember(
     @Param('id') projectId: string,
     @Param('userId') userId: string,

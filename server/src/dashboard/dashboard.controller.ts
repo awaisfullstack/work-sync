@@ -3,15 +3,23 @@ import { DashboardService } from './dashboard.service';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from 'src/types';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard)
+@ApiTags('Dashboard')
+@ApiCookieAuth('access_token')
 @ApiBearerAuth('access-token')
 @Controller('dashboard')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get dashboard data for current user' })
   getDashboard(@CurrentUser() user: AuthenticatedUser) {
     return this.dashboardService.getDashboard(user);
   }

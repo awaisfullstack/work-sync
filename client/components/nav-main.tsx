@@ -8,6 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import type { AuthUser, UserRole } from "@/features/auth/authTypes";
 
@@ -27,6 +28,7 @@ export function NavMain({
   currentPath: string;
   user: AuthUser | null;
 }) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const visibleItems = items.filter((item) => {
     if (!item.allowedRoles) return true;
 
@@ -34,7 +36,9 @@ export function NavMain({
   });
 
   function isItemActive(url: string) {
-    return currentPath === url || (url !== "/" && currentPath.startsWith(`${url}/`));
+    return (
+      currentPath === url || (url !== "/" && currentPath.startsWith(`${url}/`))
+    );
   }
 
   return (
@@ -47,7 +51,10 @@ export function NavMain({
               isActive={isItemActive(item.url)}
               tooltip={item.title}
             >
-              <Link href={item.url}>
+              <Link
+                onClick={() => isMobile && setOpenMobile(false)}
+                href={item.url}
+              >
                 {item.icon}
                 <span>{item.title}</span>
               </Link>

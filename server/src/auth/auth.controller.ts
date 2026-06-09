@@ -18,17 +18,25 @@ import type { AuthenticatedUser } from 'src/types';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from 'src/users/entities/user.entity';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 
 @Controller('auth')
-@ApiBearerAuth('access-token')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
+  @ApiCookieAuth('access_token')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Register a new user (admin only)' })
   @ResponseMessage('User created successfully')
   register(@Body() dto: CreateUserDto) {
     return this.authService.register(dto);
@@ -36,6 +44,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
+  @ApiOperation({ summary: 'Login and set access token cookie' })
   @ResponseMessage('User login successfully')
   async login(
     @Body() loginDto: LoginDto,
@@ -57,6 +66,9 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
+  @ApiCookieAuth('access_token')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get current logged-in user profile' })
   me(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.getProfile(user.id);
   }
@@ -64,6 +76,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('logout')
+  @ApiCookieAuth('access_token')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Logout and clear access token cookie' })
   logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('access_token');
     return this.authService.logout();

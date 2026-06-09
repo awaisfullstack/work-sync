@@ -15,7 +15,7 @@ export const columns: ColumnDef<ActivityLog>[] = [
       const log = row.original;
 
       return (
-        <div className="max-w-[520px]">
+        <div className="max-w-[720px]">
           <p className="font-medium text-slate-900">{log.message}</p>
           <p className="mt-1 truncate text-xs text-slate-500">
             {log.entityId ? `Entity ID: ${log.entityId}` : "System event"}

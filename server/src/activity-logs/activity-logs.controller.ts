@@ -7,14 +7,24 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from 'src/users/entities/user.entity';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from 'src/types';
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('activity-logs')
+@ApiTags('Activity Logs')
+@ApiCookieAuth('access_token')
+@ApiBearerAuth('access-token')
 export class ActivityLogsController {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
   @Get()
   @Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
+  @ApiOperation({ summary: 'List activity logs visible to current user' })
   findAll(
     @Query() query: GetActivityLogsQueryDto,
     @CurrentUser() user: AuthenticatedUser,

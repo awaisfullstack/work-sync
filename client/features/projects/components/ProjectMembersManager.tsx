@@ -164,7 +164,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
   return (
     <Card className="rounded-2xl">
       <CardHeader>
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
           <div>
             <CardTitle>Project Members</CardTitle>
             <p className="mt-1 text-sm text-slate-500">
@@ -174,7 +174,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
           </div>
 
           {canManage && (
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <Button

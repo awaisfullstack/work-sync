@@ -231,13 +231,13 @@ const TaskViewPageClient = ({ taskId }: TaskViewPageClientProps) => {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+    
         <div className="space-y-6">
           <TaskCommentsCard taskId={task.id} />
         </div>
 
         <TaskMembersManager task={task} />
-      </div>
+        
     </section>
   );
 };
