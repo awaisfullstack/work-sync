@@ -53,14 +53,6 @@ export const departmentsApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-
-    deleteDepartment: builder.mutation<ApiResponse<null>, string>({
-      query: (id) => ({
-        url: `/departments/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Departments", "Users", "Dashboard", "ActivityLogs"],
-    }),
   }),
 });
 
@@ -69,5 +61,4 @@ export const {
   useGetDepartmentByIdQuery,
   useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
-  useDeleteDepartmentMutation,
 } = departmentsApi;

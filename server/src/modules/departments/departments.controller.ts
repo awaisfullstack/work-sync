@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
@@ -63,13 +62,5 @@ export class DepartmentsController {
     @Body() updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<null> {
     return await this.departmentsService.update(id, updateDepartmentDto);
-  }
-
-  @Roles(UserRole.ADMIN)
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a department' })
-  @ResponseMessage('Department deleted successfully')
-  async remove(@Param('id') id: string): Promise<null> {
-    return await this.departmentsService.remove(id);
   }
 }
