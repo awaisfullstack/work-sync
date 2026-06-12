@@ -1,5 +1,5 @@
 "use client";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";

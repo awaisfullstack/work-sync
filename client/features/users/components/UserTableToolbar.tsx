@@ -11,16 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserRole } from "@/features/auth/authTypes";
+import type { Role } from "@/enums";
 import { useGetDepartmentQuery } from "@/features/departments/departmentsApi";
-import { isSuccessResponse } from "@/types/api-response";
 
 interface UserTableToolbarProps {
   search: string;
-  role: UserRole | "all";
+  role: Role | "all";
   departmentId: string;
   onSearchChange: (value: string) => void;
-  onRoleChange: (value: UserRole | "all") => void;
+  onRoleChange: (value: Role | "all") => void;
   onDepartmentChange: (value: string) => void;
   onReset: () => void;
 }
@@ -38,7 +37,7 @@ export function UsersTableToolbar({
     search.length > 0 || role !== 'all' || departmentId !== 'all';
   const { data, isLoading } = useGetDepartmentQuery();
 
-  const departments = isSuccessResponse(data) ? (data?.data ?? []) : [];
+  const departments = data?.data ?? [];
   return (
     <div className="flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm xl:flex-row xl:flex-wrap xl:items-center xl:justify-between">
       <div className="relative w-full xl:max-w-sm xl:flex-1">

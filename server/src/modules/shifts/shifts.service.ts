@@ -6,7 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { User, UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 import { Shift, ShiftStatus } from './entities/shift.entity';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { ShiftQueryDto } from './dto/shift-query.dto';
@@ -52,7 +53,7 @@ export class ShiftsService {
   async clockIn(id: string): Promise<Shift> {
     const user = await this.isUserExist(id);
 
-    if ((user.role as UserRole) !== UserRole.EMPLOYEE) {
+    if ((user.role as Role) !== Role.EMPLOYEE) {
       throw new ForbiddenException('Only employees can clock in');
     }
 
@@ -136,11 +137,11 @@ export class ShiftsService {
       }
     } */
 
-    if (user.role !== UserRole.ADMIN) {
+    if (user.role !== Role.ADMIN) {
       where.userId = user.id;
     }
 
-    if (query.userId && user.role === UserRole.ADMIN) {
+    if (query.userId && user.role === Role.ADMIN) {
       where.userId = query.userId;
     }
 
@@ -173,7 +174,7 @@ export class ShiftsService {
       throw new NotFoundException('Employee not found');
     }
 
-    if ((employee.role as UserRole) !== UserRole.EMPLOYEE) {
+    if ((employee.role as Role) !== Role.EMPLOYEE) {
       throw new BadRequestException(
         'Manual shift can only be created for employees',
       );

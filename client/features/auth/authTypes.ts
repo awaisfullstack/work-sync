@@ -1,25 +1,13 @@
-export type UserRole = "ADMIN" | "EMPLOYEE";
-
-export interface Department {
-  id: string;
-  name: string;
-}
-
-export interface UserOption {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  departmentId?: string | null;
-}
+import { Role } from "@/enums";
+import type { UserDepartment } from "../users/userTypes";
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: Role;
   isActive: boolean;
-  department: Department | null;
+  department: UserDepartment | null;
 }
 
 export interface LoginRequest {

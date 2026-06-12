@@ -28,7 +28,7 @@ import {
 import { Project } from "../projectTypes";
 import { useArchiveProjectMutation } from "../projectsApi";
 import { useAppSelector } from "@/store/hooks";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { formatApiError } from "@/lib/utils/formatError";
 
 interface ProjectRowActionsProps {

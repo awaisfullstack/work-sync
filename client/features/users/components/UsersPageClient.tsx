@@ -5,19 +5,18 @@ import { DataTable } from "@/components/shared/data-table";
 import { useMemo, useState } from "react";
 import { TablePagination } from "../../../components/shared/TablePagination";
 import { useDebounce } from "@/hooks/useDebounce";
-import { isSuccessResponse } from "@/types/api-response";
 import LoadTableError from "@/components/shared/LoadTableError";
-import { UserRole } from "@/features/auth/authTypes";
 import { useGetDepartmentQuery } from "@/features/departments/departmentsApi";
 import { useGetUsersQuery, useGetUserStatsQuery } from "../usersApi";
 import { UsersTableToolbar } from "./UserTableToolbar";
+import { Role } from "@/enums";
 
 const UsersPageClient = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
 
   const [search, setSearch] = useState("");
-  const [role, setRole] = useState<UserRole | "all">("all");
+  const [role, setRole] = useState<Role | "all">("all");
   const [departmentId, setDepartmentId] = useState("all");
 
   const debouncedSearch = useDebounce(search, 500);
@@ -39,22 +38,20 @@ const UsersPageClient = () => {
 
   const { data: statsData } = useGetUserStatsQuery();
 
-  const stats = isSuccessResponse(statsData) && statsData?.data;
+  const stats = statsData?.data;
 
-  const usersData = isSuccessResponse(data) ? data.data : undefined;
+  const usersData = data?.data ?? undefined;
   const users = usersData?.items ?? [];
   const totalItems = usersData?.pagination.total ?? 0;
   const totalPages = usersData?.pagination.totalPages ?? 1;
-  const departments = isSuccessResponse(departmentsData)
-    ? (departmentsData.data ?? [])
-    : [];
+  const departments = departmentsData?.data ?? [];
 
   function handleSearchChange(value: string) {
     setSearch(value);
     setPage(1);
   }
 
-  function handleRoleChange(value: UserRole | "all") {
+  function handleRoleChange(value: Role | "all") {
     setRole(value);
     setPage(1);
   }

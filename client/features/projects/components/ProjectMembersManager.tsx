@@ -55,7 +55,6 @@ import type { Project, ProjectMemberRole } from "../projectTypes";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
-import { isSuccessResponse } from "@/types/api-response";
 import { formatDate } from "@/lib/utils/formatDate";
 
 interface ProjectMembersManagerProps {
@@ -110,7 +109,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
   }, [members]);
 
   const assignableUsers = useMemo(() => {
-    const users = isSuccessResponse(usersResponse) ? usersResponse.data : [];
+    const users = usersResponse?.data ?? [];
 
     return users.filter((user) => !assignedUserIds.has(user.id));
   }, [usersResponse, assignedUserIds]);

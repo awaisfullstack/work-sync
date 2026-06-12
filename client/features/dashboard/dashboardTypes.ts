@@ -1,6 +1,6 @@
 import type { ActivityLog } from "@/features/activity-logs/activityLogTypes";
 import type { Shift } from "@/features/shifts/shiftTypes";
-import type { UserRole } from "@/features/auth/authTypes";
+import { Role } from "@/enums";
 
 export type DashboardTaskStatus = "TODO" | "IN_PROGRESS" | "COMPLETED";
 export type DashboardProjectStatus = "ACTIVE" | "COMPLETED" | "ARCHIVED";
@@ -34,7 +34,7 @@ export interface EmployeeDashboardStats {
 }
 
 export interface BaseDashboard {
-  role: UserRole;
+  role: Role;
   totalCompletedTasks: number;
   totalActiveProjects: number;
   weeklyWorkedHours: number;
@@ -44,12 +44,12 @@ export interface BaseDashboard {
 }
 
 export interface AdminDashboard extends BaseDashboard {
-  role: "ADMIN";
+  role: Role.ADMIN;
   stats: AdminDashboardStats;
 }
 
 export interface EmployeeDashboard extends BaseDashboard {
-  role: "EMPLOYEE";
+  role: Role.EMPLOYEE;
   stats: EmployeeDashboardStats;
   activeShift: Shift | null;
 }

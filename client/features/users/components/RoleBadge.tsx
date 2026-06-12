@@ -1,12 +1,11 @@
-
 import { Badge } from "@/components/ui/badge";
-import { UserRole } from "@/features/auth/authTypes";
+import type { Role } from "@/enums";
 
-interface UserRoleBadgeProps {
-  role: UserRole;
+interface RoleBadgeProps {
+  role: Role;
 }
 
-export function UserRoleBadge({ role }: UserRoleBadgeProps) {
+export function RoleBadge({ role }: RoleBadgeProps) {
   const className =
     role === "ADMIN"
       ? "border-purple-200 bg-purple-50 text-purple-700"

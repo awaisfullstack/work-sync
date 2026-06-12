@@ -10,7 +10,6 @@ import {
 import { useGetMeQuery } from "@/features/auth/authApi";
 import { logout, setUser } from "@/features/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { isSuccessResponse } from "@/types/api-response";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
@@ -22,7 +21,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (isLoading) return;
-    if (!isSuccessResponse(userData)) {
+    if (!userData) {
       dispatch(logout());
       router.replace("/login");
       return;

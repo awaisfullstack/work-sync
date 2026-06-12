@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { useAppSelector } from "@/store/hooks";
 import { formatDateTime } from "@/lib/utils/formatDate";
 import { formatApiError } from "@/lib/utils/formatError";
@@ -16,7 +16,6 @@ import {
   useGetWeeklyWorkedHoursQuery,
 } from "../shiftsApi";
 import { formatShiftDuration, getShiftDurationMinutes } from "../utils";
-import { isSuccessResponse } from "@/types/api-response";
 
 export function ShiftClockCard() {
   const currentUser = useAppSelector((state) => state.auth.user);
@@ -37,12 +36,8 @@ export function ShiftClockCard() {
 
   if (!isEmployee) return null;
 
-  const activeShift = isSuccessResponse(activeShiftResponse)
-    ? activeShiftResponse.data
-    : null;
-  const weeklyHours = isSuccessResponse(weeklyHoursResponse)
-    ? weeklyHoursResponse.data
-    : undefined;
+  const activeShift = activeShiftResponse?.data ?? null;
+  const weeklyHours = weeklyHoursResponse?.data;
   const activeDuration = activeShift
     ? getShiftDurationMinutes(
         activeShift.clockInAt,

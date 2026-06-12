@@ -24,7 +24,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { WorkIcon } from "@hugeicons/core-free-icons";
 import { useAppSelector } from "@/store/hooks";
 import { usePathname } from "next/navigation";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 
 const data = {
   navMain: [

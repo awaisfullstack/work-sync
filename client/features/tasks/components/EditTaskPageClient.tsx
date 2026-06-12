@@ -1,7 +1,6 @@
 "use client";
 
 import FetchByIdError from "@/components/shared/FetchByIdError";
-import { isSuccessResponse } from "@/types/api-response";
 import { useGetTaskByIdQuery } from "../tasksApi";
 import { TaskForm } from "./TaskForm";
 
@@ -11,7 +10,7 @@ interface EditTaskPageClientProps {
 
 export function EditTaskPageClient({ taskId }: EditTaskPageClientProps) {
   const { data, isLoading, isError } = useGetTaskByIdQuery(taskId);
-  const task = isSuccessResponse(data) ? data.data : undefined;
+  const task = data?.data;
 
   if (isLoading) {
     return (

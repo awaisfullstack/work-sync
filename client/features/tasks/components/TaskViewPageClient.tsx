@@ -30,7 +30,6 @@ import {
   isOverdue,
 } from "@/lib/utils/formatDate";
 import { formatApiError } from "@/lib/utils/formatError";
-import { isSuccessResponse } from "@/types/api-response";
 
 import { useGetTaskByIdQuery, useUpdateTaskStatusMutation } from "../tasksApi";
 import type { TaskStatus } from "../taskTypes";
@@ -39,7 +38,7 @@ import { TaskMembersManager } from "./TaskMembersManager";
 import { TaskStatusBadge } from "./TaskStatusBadge";
 import { TaskViewSkeleton } from "./TaskViewSkeleton";
 import { useAppSelector } from "@/store/hooks";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 
 interface TaskViewPageClientProps {
   taskId: string;
@@ -56,7 +55,7 @@ const TaskViewPageClient = ({ taskId }: TaskViewPageClientProps) => {
   const [updateTaskStatus, { isLoading: isUpdatingStatus }] =
     useUpdateTaskStatusMutation();
 
-  const task = isSuccessResponse(data) && data?.data;
+  const task = data?.data;
 
   async function handleStatusChange(status: TaskStatus) {
     if (!task || status === task.status.name) return;

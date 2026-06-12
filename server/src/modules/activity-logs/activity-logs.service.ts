@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { ActivityLog } from './entities/activity-log.entity';
 import { CreateActivityLogDto } from './dto/create-activity-log.dto';
-import { User, UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 import { Project } from '../projects/entities/project.entity';
 import { GetActivityLogsQueryDto } from './dto/get-activity-logs-query.dto';
 import { Op, WhereOptions } from 'sequelize';
@@ -42,7 +43,7 @@ export class ActivityLogsService {
       where.entityType = query.entityType;
     }
 
-    if (user.role === UserRole.EMPLOYEE) {
+    if (user.role === Role.EMPLOYEE) {
       where.actorId = user.id;
     } else if (query.actorId) {
       where.actorId = query.actorId;

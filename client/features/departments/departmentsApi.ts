@@ -1,5 +1,5 @@
 import { baseApi } from "@/lib/api/baseApi";
-import { ApiResponse } from "@/types/api-response";
+import type { SuccessResponse } from "@/types/api-response";
 import type {
   CreateDepartmentRequest,
   Department,
@@ -8,7 +8,7 @@ import type {
 
 export const departmentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getDepartment: builder.query<ApiResponse<Department[]>, void>({
+    getDepartment: builder.query<SuccessResponse<Department[]>, void>({
       query: () => ({
         url: "/departments",
         method: "GET",
@@ -16,7 +16,7 @@ export const departmentsApi = baseApi.injectEndpoints({
       providesTags: ["Departments"],
     }),
 
-    getDepartmentById: builder.query<ApiResponse<Department>, string>({
+    getDepartmentById: builder.query<SuccessResponse<Department>, string>({
       query: (id) => ({
         url: `/departments/${id}`,
         method: "GET",
@@ -25,7 +25,7 @@ export const departmentsApi = baseApi.injectEndpoints({
     }),
 
     createDepartment: builder.mutation<
-      ApiResponse<Department>,
+      SuccessResponse<Department>,
       CreateDepartmentRequest
     >({
       query: (body) => ({
@@ -37,7 +37,7 @@ export const departmentsApi = baseApi.injectEndpoints({
     }),
 
     updateDepartment: builder.mutation<
-      ApiResponse<null>,
+      SuccessResponse<null>,
       UpdateDepartmentRequest
     >({
       query: ({ id, body }) => ({
@@ -62,3 +62,4 @@ export const {
   useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
 } = departmentsApi;
+

@@ -25,7 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { formatApiError } from "@/lib/utils/formatError";
 import { useAppSelector } from "@/store/hooks";
 import { useDeleteUserMutation } from "../usersApi";

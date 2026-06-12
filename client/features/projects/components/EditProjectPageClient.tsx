@@ -1,6 +1,5 @@
 "use client";
 
-import { isSuccessResponse } from "@/types/api-response";
 import { useGetProjectByIdQuery } from "../projectsApi";
 import { ProjectForm } from "./ProjectForm";
 import FetchByIdError from "@/components/shared/FetchByIdError";
@@ -13,7 +12,7 @@ export function EditProjectPageClient({
   projectId,
 }: EditProjectPageClientProps) {
   const { data, isLoading, isError } = useGetProjectByIdQuery(projectId);
-  const project = isSuccessResponse(data) ? data.data : undefined;
+  const project = data?.data;
 
   if (isLoading) {
     return (

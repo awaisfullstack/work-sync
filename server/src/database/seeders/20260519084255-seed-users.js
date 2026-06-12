@@ -207,7 +207,6 @@ module.exports = {
         department_id: user.department
           ? departmentByName.get(user.department)
           : user.department_id,
-        is_active: true,
         created_at: now,
         updated_at: now,
       })),

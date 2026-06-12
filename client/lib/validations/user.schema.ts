@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Role } from "@/enums";
 
 export const createUserSchema = z.object({
   name: z
@@ -17,7 +18,7 @@ export const createUserSchema = z.object({
     .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters"),
 
-  role: z.enum(["ADMIN", "EMPLOYEE"], {
+  role: z.enum(Role, {
     message: "Please select a valid role",
   }),
 

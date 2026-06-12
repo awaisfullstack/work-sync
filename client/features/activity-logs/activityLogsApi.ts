@@ -1,15 +1,11 @@
 import { baseApi } from "@/lib/api/baseApi";
-import {
-  isSuccessResponse,
-  type ApiResponse,
-  type PaginatedResponse,
-} from "@/types/api-response";
+import type { SuccessResponse, PaginatedResponse } from "@/types/api-response";
 import type { ActivityLog, ActivityLogsQuery } from "./activityLogTypes";
 
 export const activityLogsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getActivityLogs: builder.query<
-      ApiResponse<PaginatedResponse<ActivityLog>>,
+      SuccessResponse<PaginatedResponse<ActivityLog>>,
       ActivityLogsQuery
     >({
       query: (params) => ({
@@ -18,7 +14,7 @@ export const activityLogsApi = baseApi.injectEndpoints({
         params,
       }),
       providesTags: (result) =>
-        isSuccessResponse(result)
+        result
           ? [
               ...result.data.items.map((log) => ({
                 type: "ActivityLogs" as const,
@@ -32,3 +28,4 @@ export const activityLogsApi = baseApi.injectEndpoints({
 });
 
 export const { useGetActivityLogsQuery } = activityLogsApi;
+

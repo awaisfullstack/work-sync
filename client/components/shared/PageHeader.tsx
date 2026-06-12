@@ -4,7 +4,7 @@ import { PlusIcon } from "@phosphor-icons/react";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
 import { useAppSelector } from "@/store/hooks";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 
 type Props = {
   title: string;
@@ -24,7 +24,7 @@ const PageHeader = ({ title, description, href, buttonText }: Props) => {
       {user?.role === Role.ADMIN && href && (
         <Link href={href} className={buttonVariants()}>
           <PlusIcon />
-          {buttonText}
+          {buttonText ?? "Create"}
         </Link>
       )}
     </div>

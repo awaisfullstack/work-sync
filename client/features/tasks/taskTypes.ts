@@ -1,4 +1,4 @@
-import type { UserRole } from "@/features/auth/authTypes";
+import type { Role } from "@/enums";
 
 export type TaskStatus = "TODO" | "IN_PROGRESS" | "COMPLETED";
 
@@ -15,7 +15,7 @@ export interface TaskUser {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: Role;
 }
 
 export interface TaskComment {

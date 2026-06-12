@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { formatDateTime } from "@/lib/utils/formatDate";
 import { formatApiError } from "@/lib/utils/formatError";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { useAppSelector } from "@/store/hooks";
 
 import {
@@ -25,7 +25,6 @@ import {
   useDeleteTaskCommentMutation,
   useGetTaskCommentsQuery,
 } from "../tasksApi";
-import { isSuccessResponse } from "@/types/api-response";
 
 interface TaskCommentsCardProps {
   taskId: string;
@@ -53,7 +52,7 @@ export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
   const [deleteComment, { isLoading: isDeleting }] =
     useDeleteTaskCommentMutation();
 
-  const comments = isSuccessResponse(data) ? (data?.data ?? []) : [];
+  const comments = data?.data ?? [];
 
   async function handleAddComment() {
     if (!comment.trim()) return;

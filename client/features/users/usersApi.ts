@@ -1,17 +1,17 @@
 import { baseApi } from "@/lib/api/baseApi";
-import type { ApiResponse, PaginatedResponse } from "@/types/api-response";
+import type { PaginatedResponse, SuccessResponse } from "@/types/api-response";
 import type {
   CreateUserRequest,
   UpdateUserRequest,
   User,
+  UserOption,
   UsersQuery,
   UsersStats,
 } from "./userTypes";
-import { UserOption } from "../auth/authTypes";
 
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getUsers: builder.query<ApiResponse<PaginatedResponse<User>>, UsersQuery>({
+    getUsers: builder.query<SuccessResponse<PaginatedResponse<User>>, UsersQuery>({
       query: (params) => ({
         url: "/users",
         method: "GET",
@@ -19,7 +19,7 @@ export const usersApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Users"],
     }),
-    getUserStats: builder.query<ApiResponse<UsersStats>, void>({
+    getUserStats: builder.query<SuccessResponse<UsersStats>, void>({
       query: () => ({
         url: "/users/stats",
         method: "GET",
@@ -27,7 +27,7 @@ export const usersApi = baseApi.injectEndpoints({
       providesTags: ["Users"],
     }),
 
-    getUserById: builder.query<ApiResponse<User>, string>({
+    getUserById: builder.query<SuccessResponse<User>, string>({
       query: (id) => ({
         url: `/users/${id}`,
         method: "GET",
@@ -35,7 +35,7 @@ export const usersApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: "Users", id }],
     }),
 
-    getUserOptions: builder.query<ApiResponse<UserOption[]>, void>({
+    getUserOptions: builder.query<SuccessResponse<UserOption[]>, void>({
       query: () => ({
         url: "/users/options",
         method: "GET",
@@ -43,7 +43,7 @@ export const usersApi = baseApi.injectEndpoints({
       providesTags: ["Users"],
     }),
 
-    createUser: builder.mutation<ApiResponse<User>, CreateUserRequest>({
+    createUser: builder.mutation<SuccessResponse<User>, CreateUserRequest>({
       query: (body) => ({
         url: "/users",
         method: "POST",
@@ -52,7 +52,7 @@ export const usersApi = baseApi.injectEndpoints({
       invalidatesTags: ["Users", "Dashboard", "ActivityLogs"],
     }),
 
-    updateUser: builder.mutation<ApiResponse<User>, UpdateUserRequest>({
+    updateUser: builder.mutation<SuccessResponse<null>, UpdateUserRequest>({
       query: ({ id, body }) => ({
         url: `/users/${id}`,
         method: "PATCH",
@@ -66,7 +66,7 @@ export const usersApi = baseApi.injectEndpoints({
       ],
     }),
 
-    deleteUser: builder.mutation<ApiResponse<null>, string>({
+    deleteUser: builder.mutation<SuccessResponse<null>, string>({
       query: (id) => ({
         url: `/users/${id}`,
         method: "DELETE",
@@ -75,7 +75,7 @@ export const usersApi = baseApi.injectEndpoints({
     }),
 
     activateUser: builder.mutation<
-      ApiResponse<{ id: string; isActive: boolean }>,
+      SuccessResponse<null>,
       string
     >({
       query: (id) => ({
@@ -91,7 +91,7 @@ export const usersApi = baseApi.injectEndpoints({
     }),
 
     deactivateUser: builder.mutation<
-      ApiResponse<{ id: string; isActive: boolean }>,
+      SuccessResponse<null>,
       string
     >({
       query: (id) => ({

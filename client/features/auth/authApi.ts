@@ -1,12 +1,12 @@
 import { baseApi } from "@/lib/api/baseApi";
 import type { AuthResponseData, AuthUser, LoginRequest } from "./authTypes";
-import { ApiResponse } from "@/types/api-response";
+import type { SuccessResponse } from "@/types/api-response";
 
 export const authApi = baseApi.injectEndpoints({
 
   endpoints: (builder) => ({
    
-    login: builder.mutation<ApiResponse<AuthResponseData>, LoginRequest>({
+    login: builder.mutation<SuccessResponse<AuthResponseData>, LoginRequest>({
       query: (body) => ({
         url: "/auth/login",
         method: "POST",
@@ -15,7 +15,7 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["Auth"],
     }),
 
-    getMe: builder.query<ApiResponse<AuthUser>, void>({
+    getMe: builder.query<SuccessResponse<AuthUser>, void>({
       query: () => ({
         url: "/auth/me",
         method: "GET",
@@ -23,7 +23,7 @@ export const authApi = baseApi.injectEndpoints({
       providesTags: ["Auth"],
     }),
 
-    logout: builder.mutation<ApiResponse<null>, void>({
+    logout: builder.mutation<SuccessResponse<null>, void>({
       query: () => ({
         url: "/auth/logout",
         method: "POST",
@@ -33,3 +33,4 @@ export const authApi = baseApi.injectEndpoints({
 });
 
 export const { useLoginMutation, useGetMeQuery, useLogoutMutation } = authApi;
+

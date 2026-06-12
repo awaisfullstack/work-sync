@@ -6,9 +6,8 @@ import type { DateRange } from "react-day-picker";
 import { DataTable } from "@/components/shared/data-table";
 import LoadTableError from "@/components/shared/LoadTableError";
 import { TablePagination } from "@/components/shared/TablePagination";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { useAppSelector } from "@/store/hooks";
-import { isSuccessResponse } from "@/types/api-response";
 import { columns } from "../columns";
 import { useGetActivityLogsQuery } from "../activityLogsApi";
 import type {
@@ -79,7 +78,7 @@ export default function ActivityLogsPageClient() {
   const { data, isLoading, isFetching, isError, refetch } =
     useGetActivityLogsQuery(queryArgs);
 
-  const logsData = isSuccessResponse(data) ? data.data : undefined;
+  const logsData = data?.data;
   const logs = logsData?.items ?? [];
   const totalItems = logsData?.pagination.total ?? 0;
   const totalPages = logsData?.pagination.totalPages ?? 1;

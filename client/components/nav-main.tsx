@@ -10,13 +10,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { AuthUser, UserRole } from "@/features/auth/authTypes";
+import type { AuthUser } from "@/features/auth/authTypes";
+import type { Role } from "@/enums";
 
 export interface NavMainItem {
   title: string;
   url: string;
   icon?: ReactNode;
-  allowedRoles?: UserRole[];
+  allowedRoles?: Role[];
 }
 
 export function NavMain({

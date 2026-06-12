@@ -28,7 +28,7 @@ import { Task } from "../taskTypes";
 import { useDeleteTaskMutation } from "../tasksApi";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { formatApiError } from "@/lib/utils/formatError";
 
 interface TaskRowActionsProps {

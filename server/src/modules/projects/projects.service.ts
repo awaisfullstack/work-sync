@@ -9,7 +9,8 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Project } from './entities/project.entity';
 import { ProjectMember } from './entities/project-member.entity';
-import { User, UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 import { ProjectStatus } from './enums/project-status.enum';
 import { ProjectQueryDto } from './dto/project-query.dto';
 import { Includeable, Op, WhereOptions } from 'sequelize';
@@ -74,7 +75,7 @@ export class ProjectsService {
       },
     ];
 
-    if (user.role === UserRole.EMPLOYEE) {
+    if (user.role === Role.EMPLOYEE) {
       include.push({
         model: ProjectMember,
         as: 'members',
@@ -143,7 +144,7 @@ export class ProjectsService {
   ): Promise<Pick<Project, 'id' | 'title'>[]> {
     const where: WhereOptions<Project> = {};
 
-    if (user.role === UserRole.EMPLOYEE) {
+    if (user.role === Role.EMPLOYEE) {
       return this.projectModel.findAll({
         attributes: ['id', 'title'],
         include: [
@@ -239,7 +240,7 @@ export class ProjectsService {
       throw new NotFoundException('User not found');
     }
 
-    if (user.role !== (UserRole.EMPLOYEE as unknown as typeof user.role)) {
+    if (user.role !== (Role.EMPLOYEE as unknown as typeof user.role)) {
       throw new ForbiddenException(
         'Only employees can be assigned to projects',
       );

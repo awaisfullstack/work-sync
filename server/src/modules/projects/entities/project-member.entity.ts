@@ -14,12 +14,6 @@ import { User } from '../../users/entities/user.entity';
   tableName: 'project_members',
   timestamps: true,
   underscored: true,
-  indexes: [
-    {
-      unique: true,
-      fields: ['project_id', 'user_id'],
-    },
-  ],
 })
 export class ProjectMember extends Model<ProjectMember> {
   @Column({
@@ -35,6 +29,13 @@ export class ProjectMember extends Model<ProjectMember> {
     allowNull: false,
   })
   declare projectId: string;
+
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
+  declare userId: string;
 
   @ForeignKey(() => User)
   @Column({

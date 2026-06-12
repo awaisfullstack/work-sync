@@ -16,6 +16,7 @@ import {
 import { ProjectStatus } from '../enums/project-status.enum';
 import { User } from '../../users/entities/user.entity';
 import { ProjectMember } from './project-member.entity';
+import { Task } from 'src/modules/tasks/entities/task.entity';
 
 @Table({
   tableName: 'projects',
@@ -65,10 +66,7 @@ export class Project extends Model<
   })
   declare createdById: string;
 
-  @BelongsTo(() => User, {
-    foreignKey: 'createdById',
-    as: 'createdBy',
-  })
+  @BelongsTo(() => User)
   declare createdBy: NonAttribute<User>;
 
   @Column({
@@ -82,4 +80,10 @@ export class Project extends Model<
     as: 'members',
   })
   declare members: NonAttribute<ProjectMember[]>;
+
+  @HasMany(() => Task, {
+    foreignKey: 'projectId',
+    as: 'tasks',
+  })
+  declare tasks: NonAttribute<Task[]>;
 }

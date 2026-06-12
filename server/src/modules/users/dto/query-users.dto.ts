@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
-import { UserRole } from '../entities/user.entity';
+import { Role } from '../enums/users.enum';
 
 export class QueryUsersDto {
   @IsOptional()
@@ -8,8 +8,8 @@ export class QueryUsersDto {
   search?: string;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsEnum(Role)
+  role?: Role;
 
   @IsOptional()
   @IsUUID()

@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDateTime } from "@/lib/utils/formatDate";
-import { isSuccessResponse } from "@/types/api-response";
 import { useGetShiftByIdQuery } from "../shiftsApi";
 import { formatShiftDuration, getShiftDurationMinutes } from "../utils";
 import { ShiftStatusBadge } from "./ShiftStatusBadge";
@@ -28,7 +27,7 @@ export default function ShiftViewPageClient({
   shiftId,
 }: ShiftViewPageClientProps) {
   const { data, isLoading, isError, refetch } = useGetShiftByIdQuery(shiftId);
-  const shift = isSuccessResponse(data) ? data.data : undefined;
+  const shift = data?.data;
 
   if (isLoading) {
     return (

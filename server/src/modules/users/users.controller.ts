@@ -17,13 +17,14 @@ import { QueryUsersDto } from './dto/query-users.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from './entities/user.entity';
+import { Role } from './enums/users.enum';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
@@ -33,14 +34,15 @@ import {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Create a user' })
+  @ResponseMessage('User created successfully')
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Get()
   @ApiOperation({ summary: 'List users with filters and pagination' })
   findAll(@Query() query: QueryUsersDto) {
@@ -49,29 +51,30 @@ export class UsersController {
 
   @Get('stats')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get user statistics' })
   getUserStats() {
     return this.usersService.getUserStats();
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Get('options')
   @ApiOperation({ summary: 'Get user options for select inputs' })
   findUserOptions() {
     return this.usersService.findUserOptions();
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Get(':id')
   @ApiOperation({ summary: 'Get one user by id' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user' })
+  @ResponseMessage('User updated successfully')
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -79,23 +82,26 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id/deactivate')
   @ApiOperation({ summary: 'Deactivate a user' })
+  @ResponseMessage('User deactivated successfully')
   deactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.deactivate(id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id/activate')
   @ApiOperation({ summary: 'Activate a user' })
+  @ResponseMessage('User activated successfully')
   activate(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.activate(id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a user' })
+  @ResponseMessage('User deleted successfully')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
   }

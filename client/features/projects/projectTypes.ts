@@ -1,4 +1,4 @@
-import type { UserRole } from "@/features/auth/authTypes";
+import type { Role } from "@/enums";
 
 export type ProjectStatus = "ACTIVE" | "COMPLETED" | "ARCHIVED";
 export type ProjectMemberRole = "MEMBER" | "LEAD";
@@ -9,7 +9,7 @@ export interface ProjectUser {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: Role;
 }
 
 export interface ProjectOption {
@@ -21,7 +21,7 @@ export interface ProjectMemberUser {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: Role;
   department?: {
     id: string;
     name: string;

@@ -15,7 +15,7 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
@@ -31,7 +31,7 @@ import {
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Create a department' })
   @ResponseMessage('Department created successfully')
@@ -39,21 +39,21 @@ export class DepartmentsController {
     return this.departmentsService.create(createDepartmentDto);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Get()
   @ApiOperation({ summary: 'List departments' })
   findAll(): Promise<Department[]> {
     return this.departmentsService.findAll();
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Get(':id')
   @ApiOperation({ summary: 'Get one department by id' })
   findOne(@Param('id') id: string): Promise<Department> {
     return this.departmentsService.findOne(id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a department' })
   @ResponseMessage('Department updated successfully')

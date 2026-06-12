@@ -12,9 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
-import { isSuccessResponse } from "@/types/api-response";
 import type { ShiftSortBy, ShiftStatus, SortOrder } from "../shiftTypes";
 import type { AuthUser } from "@/features/auth/authTypes";
 
@@ -53,7 +52,7 @@ export function ShiftsTableToolbar({
       skip: !isAdmin,
     });
 
-  const users = isSuccessResponse(usersResponse) ? usersResponse.data : [];
+  const users = usersResponse?.data ?? [];
   const hasFilters =
     dateRange !== undefined ||
     status !== "ALL" ||

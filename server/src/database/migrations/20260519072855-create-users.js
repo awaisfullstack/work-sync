@@ -44,12 +44,6 @@ module.exports = {
         onDelete: 'RESTRICT',
       },
 
-      is_active: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
-
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -66,7 +60,6 @@ module.exports = {
     await queryInterface.addIndex('users', ['email']);
     await queryInterface.addIndex('users', ['role']);
     await queryInterface.addIndex('users', ['department_id']);
-    await queryInterface.addIndex('users', ['is_active']);
   },
 
   async down(queryInterface, Sequelize) {

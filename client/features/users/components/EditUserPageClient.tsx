@@ -1,7 +1,6 @@
 "use client";
 
 import FetchByIdError from "@/components/shared/FetchByIdError";
-import { isSuccessResponse } from "@/types/api-response";
 import { useGetUserByIdQuery } from "../usersApi";
 import { UserForm } from "./UserForm";
 
@@ -11,7 +10,7 @@ interface EditUserPageClientProps {
 
 export function EditUserPageClient({ userId }: EditUserPageClientProps) {
   const { data, isLoading, isError } = useGetUserByIdQuery(userId);
-  const user = isSuccessResponse(data) ? data.data : undefined;
+  const user = data?.data;
 
   if (isLoading) {
     return (

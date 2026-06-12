@@ -15,11 +15,7 @@ import {
 } from 'sequelize-typescript';
 import { Department } from '../../departments/entities/department.entity';
 import { ProjectMember } from '../../projects/entities/project-member.entity';
-
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  EMPLOYEE = 'EMPLOYEE',
-}
+import { Role } from '../enums/users.enum';
 
 @Table({
   tableName: 'users',
@@ -57,11 +53,11 @@ export class User extends Model<
   declare password: string;
 
   @Column({
-    type: DataType.ENUM(...Object.values(UserRole)),
+    type: DataType.ENUM(...Object.values(Role)),
     allowNull: false,
-    defaultValue: UserRole.EMPLOYEE,
+    defaultValue: Role.EMPLOYEE,
   })
-  declare role: CreationOptional<UserRole>;
+  declare role: CreationOptional<Role>;
 
   @ForeignKey(() => Department)
   @Column({

@@ -1,9 +1,5 @@
 import { baseApi } from "@/lib/api/baseApi";
-import {
-  isSuccessResponse,
-  type ApiResponse,
-  type PaginatedResponse,
-} from "@/types/api-response";
+import type { SuccessResponse, PaginatedResponse } from "@/types/api-response";
 import type {
   ManualShiftPayload,
   Shift,
@@ -13,7 +9,7 @@ import type {
 
 export const shiftsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    clockIn: builder.mutation<ApiResponse<Shift>, void>({
+    clockIn: builder.mutation<SuccessResponse<Shift>, void>({
       query: () => ({
         url: "/shifts/clock-in",
         method: "POST",
@@ -28,7 +24,7 @@ export const shiftsApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-    clockOut: builder.mutation<ApiResponse<null>, void>({
+    clockOut: builder.mutation<SuccessResponse<null>, void>({
       query: () => ({
         url: "/shifts/clock-out",
         method: "POST",
@@ -43,14 +39,14 @@ export const shiftsApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-    getActiveShift: builder.query<ApiResponse<Shift | null>, void>({
+    getActiveShift: builder.query<SuccessResponse<Shift | null>, void>({
       query: () => ({
         url: "/shifts/me/active",
         method: "GET",
       }),
       providesTags: [{ type: "Shifts", id: "ACTIVE" }],
     }),
-    getWeeklyWorkedHours: builder.query<ApiResponse<ShiftWorkedHours>, void>({
+    getWeeklyWorkedHours: builder.query<SuccessResponse<ShiftWorkedHours>, void>({
       query: () => ({
         url: "/shifts/me/weekly-hours",
         method: "GET",
@@ -58,7 +54,7 @@ export const shiftsApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Shifts", id: "WEEKLY_HOURS" }],
     }),
     getMyWorkedHours: builder.query<
-      ApiResponse<ShiftWorkedHours>,
+      SuccessResponse<ShiftWorkedHours>,
       { fromDate?: string; toDate?: string }
     >({
       query: (params) => ({
@@ -68,7 +64,7 @@ export const shiftsApi = baseApi.injectEndpoints({
       }),
       providesTags: [{ type: "Shifts", id: "WORKED_HOURS" }],
     }),
-    getShifts: builder.query<ApiResponse<PaginatedResponse<Shift>>, ShiftQuery>(
+    getShifts: builder.query<SuccessResponse<PaginatedResponse<Shift>>, ShiftQuery>(
       {
         query: (params) => ({
           url: "/shifts/me",
@@ -76,7 +72,7 @@ export const shiftsApi = baseApi.injectEndpoints({
           params,
         }),
         providesTags: (result) =>
-          isSuccessResponse(result)
+          result
             ? [
                 ...result.data.items.map((shift) => ({
                   type: "Shifts" as const,
@@ -87,14 +83,14 @@ export const shiftsApi = baseApi.injectEndpoints({
             : [{ type: "Shifts" as const, id: "LIST" }],
       },
     ),
-    getShiftById: builder.query<ApiResponse<Shift>, string>({
+    getShiftById: builder.query<SuccessResponse<Shift>, string>({
       query: (id) => ({
         url: `/shifts/${id}`,
         method: "GET",
       }),
       providesTags: (_result, _error, id) => [{ type: "Shifts", id }],
     }),
-    createManualShift: builder.mutation<ApiResponse<Shift>, ManualShiftPayload>(
+    createManualShift: builder.mutation<SuccessResponse<Shift>, ManualShiftPayload>(
       {
         query: (body) => ({
           url: "/shifts/manual",
@@ -111,7 +107,7 @@ export const shiftsApi = baseApi.injectEndpoints({
       },
     ),
     getEmployeeWorkedHours: builder.query<
-      ApiResponse<ShiftWorkedHours>,
+      SuccessResponse<ShiftWorkedHours>,
       { userId: string; fromDate?: string; toDate?: string }
     >({
       query: ({ userId, fromDate, toDate }) => ({
@@ -124,7 +120,7 @@ export const shiftsApi = baseApi.injectEndpoints({
       ],
     }),
     getAllEmployeesWorkedHours: builder.query<
-      ApiResponse<ShiftWorkedHours>,
+      SuccessResponse<ShiftWorkedHours>,
       { fromDate?: string; toDate?: string }
     >({
       query: (params) => ({
@@ -149,3 +145,4 @@ export const {
   useGetShiftsQuery,
   useGetWeeklyWorkedHoursQuery,
 } = shiftsApi;
+

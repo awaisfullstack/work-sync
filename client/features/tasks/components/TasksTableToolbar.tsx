@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/select";
 import type { DateRange } from "react-day-picker";
 import { useGetProjectOptionsQuery } from "@/features/projects/projectsApi";
-import { isSuccessResponse } from "@/types/api-response";
 import { DateRangePicker } from "@/components/shared/DateRangePicker";
 import type { SortOrder, TaskSortBy, TaskStatus } from "../taskTypes";
 
@@ -58,7 +57,7 @@ export function TasksTableToolbar({
 
   const { data, isLoading } = useGetProjectOptionsQuery();
 
-  const allProjects = isSuccessResponse(data) ? (data?.data ?? []) : [];
+  const allProjects = data?.data ?? [];
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm xl:flex-row xl:flex-wrap xl:items-center xl:justify-between">

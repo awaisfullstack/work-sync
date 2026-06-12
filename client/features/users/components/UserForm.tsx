@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserRole } from "@/features/auth/authTypes";
+import { Role } from "@/enums";
 import { useGetDepartmentQuery } from "@/features/departments/departmentsApi";
 import {
   createUserSchema,
@@ -26,7 +26,6 @@ import {
 import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
-import { isSuccessResponse } from "@/types/api-response";
 import { useCreateUserMutation, useUpdateUserMutation } from "../usersApi";
 import type { User } from "../userTypes";
 
@@ -44,9 +43,7 @@ export function UserForm({ mode, user }: UserFormProps) {
   const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
 
-  const departments = isSuccessResponse(departmentsData)
-    ? (departmentsData.data ?? [])
-    : [];
+  const departments = departmentsData?.data ?? [];
   const isSubmitting = isCreating || isUpdating;
 
   const {
@@ -63,7 +60,7 @@ export function UserForm({ mode, user }: UserFormProps) {
       name: user?.name ?? "",
       email: user?.email ?? "",
       password: "",
-      role: user?.role ?? "EMPLOYEE",
+      role: user?.role ?? Role.EMPLOYEE,
       departmentId: user?.department?.id ?? null,
     },
   });
@@ -71,12 +68,12 @@ export function UserForm({ mode, user }: UserFormProps) {
   async function onSubmit(values: UserFormFields) {
     try {
       if (mode === "create") {
-        await createUser(values as CreateUserFormValues).unwrap();
-        toast.success("User created successfully");
+        const res = await createUser(values as CreateUserFormValues).unwrap();
+        toast.success(res.message);
       }
 
       if (mode === "update" && user) {
-        await updateUser({
+        const res = await updateUser({
           id: user.id,
           body: {
             name: values.name,
@@ -85,7 +82,7 @@ export function UserForm({ mode, user }: UserFormProps) {
             departmentId: values.departmentId,
           },
         }).unwrap();
-        toast.success("User updated successfully");
+        toast.success(res.message);
       }
 
       router.push("/users");
@@ -103,7 +100,6 @@ export function UserForm({ mode, user }: UserFormProps) {
       setError("root", {
         message,
       });
-      toast.error(message);
     }
   }
 
@@ -167,7 +163,7 @@ export function UserForm({ mode, user }: UserFormProps) {
             render={({ field }) => (
               <Select
                 value={field.value}
-                onValueChange={(value) => field.onChange(value as UserRole)}
+                onValueChange={(value) => field.onChange(value as Role)}
               >
                 <SelectTrigger className="w-auto" onBlur={field.onBlur}>
                   <SelectValue placeholder="Select role" />

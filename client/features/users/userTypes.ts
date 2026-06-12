@@ -1,16 +1,26 @@
-import { Department, UserRole } from "../auth/authTypes";
+import { Role } from "@/enums";
+export interface UserDepartment {
+  id: string;
+  name: string;
+}
+
+export interface UserOption {
+  id: string;
+  name: string;
+  email: string;
+}
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: Role;
   isActive: boolean;
-  departmentId: string | null;
   createdAt: string;
   updatedAt: string;
+  departmentId?: string | null;
 
-  department?: Department | null;
+  department?: UserDepartment | null;
 }
 
 export interface UsersStats {
@@ -23,7 +33,7 @@ export interface CreateUserRequest {
   name: string;
   email: string;
   password: string;
-  role: UserRole;
+  role: Role;
   departmentId: string | null;
 }
 
@@ -38,7 +48,7 @@ export interface UsersQuery {
   page?: number;
   limit?: number;
   search?: string;
-  role?: UserRole | "";
+  role?: Role | "";
   departmentId?: string;
   sortBy?: string;
   sortOrder?: "ASC" | "DESC";

@@ -1,9 +1,5 @@
 import { baseApi } from "@/lib/api/baseApi";
-import {
-  isSuccessResponse,
-  type ApiResponse,
-  type PaginatedResponse,
-} from "@/types/api-response";
+import type { SuccessResponse, PaginatedResponse } from "@/types/api-response";
 import {
   CreateTaskPayload,
   AssignTaskPayload,
@@ -18,7 +14,7 @@ import {
 export const tasksApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getTasks: builder.query<
-      ApiResponse<PaginatedResponse<Task>>,
+      SuccessResponse<PaginatedResponse<Task>>,
       TaskQuery | void
     >({
       query: (params) => ({
@@ -37,7 +33,7 @@ export const tasksApi = baseApi.injectEndpoints({
         },
       }),
       providesTags: (result) =>
-        isSuccessResponse(result)
+        result
           ? [
               ...result.data.items.map((task) => ({
                 type: "Tasks" as const,
@@ -47,14 +43,14 @@ export const tasksApi = baseApi.injectEndpoints({
             ]
           : [{ type: "Tasks" as const, id: "LIST" }],
     }),
-    getTaskById: builder.query<ApiResponse<Task>, string>({
+    getTaskById: builder.query<SuccessResponse<Task>, string>({
       query: (id) => ({
         url: `/tasks/${id}`,
         method: "GET",
       }),
       providesTags: (_result, _error, id) => [{ type: "Tasks" as const, id }],
     }),
-    createTask: builder.mutation<ApiResponse<Task>, CreateTaskPayload>({
+    createTask: builder.mutation<SuccessResponse<Task>, CreateTaskPayload>({
       query: (body) => ({
         url: "/tasks",
         method: "POST",
@@ -67,7 +63,7 @@ export const tasksApi = baseApi.injectEndpoints({
       ],
     }),
     updateTask: builder.mutation<
-      ApiResponse<Task>,
+      SuccessResponse<Task>,
       { id: string; body: UpdateTaskPayload }
     >({
       query: ({ id, body }) => ({
@@ -83,7 +79,7 @@ export const tasksApi = baseApi.injectEndpoints({
       ],
     }),
     updateTaskStatus: builder.mutation<
-      ApiResponse<Task>,
+      SuccessResponse<Task>,
       UpdateTaskStatusPayload
     >({
       query: ({ id, status }) => ({
@@ -98,7 +94,7 @@ export const tasksApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-    assignTask: builder.mutation<ApiResponse<Task>, AssignTaskPayload>({
+    assignTask: builder.mutation<SuccessResponse<Task>, AssignTaskPayload>({
       query: ({ id, userId }) => ({
         url: `/tasks/${id}/assign`,
         method: "POST",
@@ -111,7 +107,7 @@ export const tasksApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-    unassignTask: builder.mutation<ApiResponse<Task>, AssignTaskPayload>({
+    unassignTask: builder.mutation<SuccessResponse<Task>, AssignTaskPayload>({
       query: ({ id, userId }) => ({
         url: `/tasks/${id}/unassign/${userId}`,
         method: "PATCH",
@@ -123,7 +119,7 @@ export const tasksApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-    deleteTask: builder.mutation<ApiResponse, string>({
+    deleteTask: builder.mutation<SuccessResponse, string>({
       query: (id) => ({
         url: `/tasks/${id}`,
         method: "DELETE",
@@ -133,7 +129,7 @@ export const tasksApi = baseApi.injectEndpoints({
         { type: "Tasks" as const, id: "LIST" },
       ],
     }),
-    getTaskComments: builder.query<ApiResponse<TaskComment[]>, string>({
+    getTaskComments: builder.query<SuccessResponse<TaskComment[]>, string>({
       query: (taskId) => ({
         url: `/tasks/${taskId}/comments`,
         method: "GET",
@@ -143,7 +139,7 @@ export const tasksApi = baseApi.injectEndpoints({
       ],
     }),
     addTaskComment: builder.mutation<
-      ApiResponse<TaskComment>,
+      SuccessResponse<TaskComment>,
       CreateTaskCommentRequest
     >({
       query: ({ taskId, comment }) => ({
@@ -158,7 +154,7 @@ export const tasksApi = baseApi.injectEndpoints({
       ],
     }),
     deleteTaskComment: builder.mutation<
-      ApiResponse<null>,
+      SuccessResponse<null>,
       { taskId: string; commentId: string }
     >({
       query: ({ taskId, commentId }) => ({
@@ -187,3 +183,4 @@ export const {
   useAddTaskCommentMutation,
   useDeleteTaskCommentMutation,
 } = tasksApi;
+

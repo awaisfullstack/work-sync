@@ -6,9 +6,8 @@ import type { DateRange } from "react-day-picker";
 import { DataTable } from "@/components/shared/data-table";
 import LoadTableError from "@/components/shared/LoadTableError";
 import { TablePagination } from "@/components/shared/TablePagination";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { useAppSelector } from "@/store/hooks";
-import { isSuccessResponse } from "@/types/api-response";
 import { columns } from "../columns";
 import {
   useGetAllEmployeesWorkedHoursQuery,
@@ -107,21 +106,11 @@ const ShiftsPageClient = () => {
     },
   );
 
-  const shiftsData = isSuccessResponse(data) ? data.data : undefined;
-  const activeShiftsData = isSuccessResponse(activeShiftsResponse)
-    ? activeShiftsResponse.data
-    : undefined;
-  const employeeWorkedHours = isSuccessResponse(employeeWorkedHoursResponse)
-    ? employeeWorkedHoursResponse.data
-    : undefined;
-  const allEmployeesWorkedHours = isSuccessResponse(
-    allEmployeesWorkedHoursResponse,
-  )
-    ? allEmployeesWorkedHoursResponse.data
-    : undefined;
-  const myWorkedHours = isSuccessResponse(myWorkedHoursResponse)
-    ? myWorkedHoursResponse.data
-    : undefined;
+  const shiftsData = data?.data;
+  const activeShiftsData = activeShiftsResponse?.data;
+  const employeeWorkedHours = employeeWorkedHoursResponse?.data;
+  const allEmployeesWorkedHours = allEmployeesWorkedHoursResponse?.data;
+  const myWorkedHours = myWorkedHoursResponse?.data;
   const shifts = shiftsData?.items ?? [];
   const totalItems = shiftsData?.pagination.total ?? 0;
   const totalPages = shiftsData?.pagination.totalPages ?? 1;

@@ -13,7 +13,8 @@ import { TaskAssignment } from './entities/task-assignment.entity';
 import { TaskComment } from './entities/task-comment';
 import { Project } from '../projects/entities/project.entity';
 import { ProjectMember } from '../projects/entities/project-member.entity';
-import { User, UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { AssignTaskDto } from './dto/assign-task.dto';
 import { AddTaskCommentDto } from './dto/add-task-comment.dto';
@@ -53,7 +54,7 @@ export class TasksService {
   ) {}
 
   private isAdmin(user: AuthenticatedUser): boolean {
-    return user.role === UserRole.ADMIN;
+    return user.role === Role.ADMIN;
   }
 
   private async getStatusByName(status: TaskStatusName): Promise<TaskStatus> {

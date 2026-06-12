@@ -7,7 +7,6 @@ import type { ProjectSortBy, ProjectStatus, SortOrder } from "../projectTypes";
 import { useMemo, useState } from "react";
 import { TablePagination } from "../../../components/shared/TablePagination";
 import { useDebounce } from "@/hooks/useDebounce";
-import { isSuccessResponse } from "@/types/api-response";
 import LoadTableError from "@/components/shared/LoadTableError";
 import { ProjectsTableToolbar } from "./ProjectsTableToolbar";
 
@@ -37,7 +36,7 @@ const ProjectsPageClient = () => {
   const { data, isLoading, isFetching, isError, refetch } =
     useGetProjectsQuery(queryArgs);
 
-  const projectsData = isSuccessResponse(data) ? data.data : undefined;
+  const projectsData = data?.data;
   const projects = projectsData?.items ?? [];
   const totalItems = projectsData?.pagination.total ?? 0;
   const totalPages = projectsData?.pagination.totalPages ?? 1;

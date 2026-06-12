@@ -22,8 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import FetchByIdError from "@/components/shared/FetchByIdError";
 import { formatDate, formatDateTime } from "@/lib/utils/formatDate";
 import { formatApiError } from "@/lib/utils/formatError";
-import { isSuccessResponse } from "@/types/api-response";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { useAppSelector } from "@/store/hooks";
 
 import {
@@ -31,7 +30,7 @@ import {
   useDeactivateUserMutation,
   useGetUserByIdQuery,
 } from "@/features/users/usersApi";
-import { UserRoleBadge } from "./UserRoleBadge";
+import { RoleBadge } from "./RoleBadge";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserViewSkeleton } from "./UserViewSkeleton";
 import {
@@ -65,7 +64,7 @@ export default function UserViewPageClient({
   const [deactivateUser, { isLoading: isDeactivating }] =
     useDeactivateUserMutation();
 
-  const user = isSuccessResponse(data) ? data.data : undefined;
+  const user = data?.data;
 
   if (isLoading || isFetching) {
     return <UserViewSkeleton />;
@@ -191,7 +190,7 @@ export default function UserViewPageClient({
                   <CardTitle className="text-2xl">
                     {selectedUser.name}
                   </CardTitle>
-                  <UserRoleBadge role={selectedUser.role} />
+                  <RoleBadge role={selectedUser.role} />
                   <UserStatusBadge isActive={selectedUser.isActive} />
                 </div>
 

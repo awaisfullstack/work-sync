@@ -17,7 +17,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import type { AuthenticatedUser } from '../../common/types/auth.types';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 import { ProjectQueryDto } from './dto/project-query.dto';
 import { AddProjectMemberDto } from './dto/add-project-member.dto';
 import {
@@ -37,7 +37,7 @@ export class ProjectsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a project' })
   create(
     @Body() createProjectDto: CreateProjectDto,
@@ -48,7 +48,7 @@ export class ProjectsController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
+  @Roles(Role.ADMIN, Role.EMPLOYEE)
   @ApiOperation({ summary: 'List projects visible to current user' })
   findAll(
     @Query() query: ProjectQueryDto,
@@ -70,7 +70,7 @@ export class ProjectsController {
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    if (user.role === UserRole.EMPLOYEE) {
+    if (user.role === Role.EMPLOYEE) {
       await this.projectsService.ensureEmployeeCanAccessProject(id, user.id);
     }
 
@@ -79,7 +79,7 @@ export class ProjectsController {
 
   @Patch(':id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update a project' })
   update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
     return this.projectsService.update(id, dto);
@@ -87,7 +87,7 @@ export class ProjectsController {
 
   @Patch(':id/archive')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Archive a project' })
   archive(@Param('id') id: string) {
     return this.projectsService.archive(id);
@@ -95,7 +95,7 @@ export class ProjectsController {
 
   @Post(':id/members')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Add a project member' })
   addMember(@Param('id') projectId: string, @Body() dto: AddProjectMemberDto) {
     return this.projectsService.addMember(projectId, dto);
@@ -103,7 +103,7 @@ export class ProjectsController {
 
   @Get(':id/members')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'List project members' })
   getMembers(@Param('id') projectId: string) {
     return this.projectsService.getProjectMembers(projectId);
@@ -111,7 +111,7 @@ export class ProjectsController {
 
   @Delete(':id/members/:userId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Remove a project member' })
   removeMember(
     @Param('id') projectId: string,

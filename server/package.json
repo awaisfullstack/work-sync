@@ -21,11 +21,12 @@
     "migration:create": "sequelize-cli migration:generate --name",
     "migration:run": "sequelize-cli db:migrate",
     "migrate:status": "sequelize-cli db:migrate:status",
-    "migration:undo": "sequelize-cli db:migrate:undo",
+    "migration:undo": "sequelize-cli db:migrate:undo --name",
     "migration:undo:all": "sequelize-cli db:migrate:undo:all",
     "seed:create": "sequelize-cli seed:generate --name",
     "seed:run": "sequelize-cli db:seed:all",
-    "seed:undo": "sequelize-cli db:seed:undo:all",
+    "seed:undo": "sequelize-cli db:seed:undo --seed",
+    "seed:undo:all": "sequelize-cli db:seed:undo",
     "reset": "sequelize-cli db:seed:undo:all && sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all"
   },
   "dependencies": {

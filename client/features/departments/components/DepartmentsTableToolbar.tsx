@@ -24,7 +24,7 @@ export function DepartmentsTableToolbar({
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
         <Input
           value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
+          onChange={(event) => onSearchChange(event.target.value.trim())}
           placeholder="Search departments..."
           className="w-full pl-9"
         />

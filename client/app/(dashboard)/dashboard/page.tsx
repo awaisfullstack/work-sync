@@ -2,13 +2,13 @@ import PageHeader from "@/components/shared/PageHeader";
 import DashboardPageClient from "@/features/dashboard/components/DashboardPageClient";
 import type { DashboardData } from "@/features/dashboard/dashboardTypes";
 import { serverFetch } from "@/lib/api/serverFetch";
-import type { ApiResponse } from "@/types/api-response";
+import type { SuccessResponse } from "@/types/api-response";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const dashboardResponse =
-    await serverFetch<ApiResponse<DashboardData>>("/dashboard");
+    await serverFetch<SuccessResponse<DashboardData>>("/dashboard");
   const initialDashboard =
     dashboardResponse?.success === true ? dashboardResponse.data : undefined;
 
@@ -23,3 +23,4 @@ export default async function DashboardPage() {
     </>
   );
 }
+

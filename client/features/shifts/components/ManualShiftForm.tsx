@@ -24,7 +24,6 @@ import {
   manualShiftSchema,
   type ManualShiftFormValues,
 } from "@/lib/validations/shift.schema";
-import { isSuccessResponse } from "@/types/api-response";
 import { useCreateManualShiftMutation } from "../shiftsApi";
 
 function parseDateInputValue(value?: string) {
@@ -58,9 +57,7 @@ export function ManualShiftForm() {
   const [createManualShift, { isLoading: isCreating }] =
     useCreateManualShiftMutation();
 
-  const employees = isSuccessResponse(usersResponse)
-    ? (usersResponse.data ?? [])
-    : [];
+  const employees = usersResponse?.data ?? [];
 
   const {
     control,

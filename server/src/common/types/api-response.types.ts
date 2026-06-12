@@ -1,21 +1,18 @@
 export type MessageType = string | string[];
-
-export interface BaseResponse {
-  success: boolean;
-  message: MessageType;
-  statusCode: number;
-}
-
-export interface SuccessResponse<T = unknown> extends BaseResponse {
+export interface SuccessResponse<T> {
   success: true;
+  statusCode: number;
+  message: MessageType;
   data: T;
 }
 
-export interface ErrorResponse extends BaseResponse {
+export interface ErrorResponse {
   success: false;
+  statusCode: number;
+  message: MessageType;
   path?: string;
   method?: string;
   timestamp: string;
 }
 
-export type ApiResponse<T = unknown> = SuccessResponse<T> | ErrorResponse;
+export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;

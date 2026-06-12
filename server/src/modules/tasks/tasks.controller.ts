@@ -17,7 +17,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/types/auth.types';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 import { GetTasksQueryDto } from './dto/get-tasks-query.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { AssignTaskDto } from './dto/assign-task.dto';
@@ -38,7 +38,7 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a task' })
   create(@Body() dto: CreateTaskDto, @CurrentUser() user: AuthenticatedUser) {
     return this.tasksService.create(dto, user);
@@ -60,7 +60,7 @@ export class TasksController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update a task' })
   update(
     @Param('id') id: string,
@@ -81,7 +81,7 @@ export class TasksController {
   }
 
   @Post(':id/assign')
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Assign a user to a task' })
   assign(
     @Param('id') id: string,
@@ -92,7 +92,7 @@ export class TasksController {
   }
 
   @Patch(':id/unassign/:userId')
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Unassign a user from a task' })
   unassign(
     @Param('id') id: string,
@@ -113,7 +113,7 @@ export class TasksController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Delete a task' })
   remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.tasksService.remove(id, user);

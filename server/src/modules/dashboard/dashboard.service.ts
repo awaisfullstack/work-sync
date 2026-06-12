@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op, WhereOptions } from 'sequelize';
 
-import { User, UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 import { Project } from '../projects/entities/project.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { Shift, ShiftStatus } from '../shifts/entities/shift.entity';
@@ -49,7 +50,7 @@ export class DashboardService {
   ) {}
 
   private isAdmin(user: AuthenticatedUser): boolean {
-    return user.role === UserRole.ADMIN;
+    return user.role === Role.ADMIN;
   }
 
   private getCurrentWeekRange(): DateRange {
@@ -94,12 +95,12 @@ export class DashboardService {
     const totalUsers = await this.userModel.count();
     const totalEmployees = await this.userModel.count({
       where: {
-        role: UserRole.EMPLOYEE,
+        role: Role.EMPLOYEE,
       },
     });
     const activeEmployees = await this.userModel.count({
       where: {
-        role: UserRole.EMPLOYEE,
+        role: Role.EMPLOYEE,
         isActive: true,
       },
     });

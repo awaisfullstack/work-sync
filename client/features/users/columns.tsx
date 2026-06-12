@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 
 import { formatDate } from "@/lib/utils/formatDate";
-import { UserRoleBadge } from "./components/UserRoleBadge";
+import { RoleBadge } from "./components/RoleBadge";
 import { UserRowActions } from "./components/UserRowActions";
 import { UserStatusBadge } from "./components/UserStatusBadge";
 import type { User } from "./userTypes";
@@ -35,7 +35,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "role",
     header: "Role",
-    cell: ({ row }) => <UserRoleBadge role={row.original.role} />,
+    cell: ({ row }) => <RoleBadge role={row.original.role} />,
   },
   {
     accessorKey: "isActive",

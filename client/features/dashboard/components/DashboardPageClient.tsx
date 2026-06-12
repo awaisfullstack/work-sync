@@ -20,11 +20,10 @@ import {
 import LoadTableError from "@/components/shared/LoadTableError";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import { formatDateTime } from "@/lib/utils/formatDate";
 import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { useAppSelector } from "@/store/hooks";
-import { isSuccessResponse } from "@/types/api-response";
 import { useGetDashboardQuery } from "../dashboardApi";
 import type {
   AdminDashboard,
@@ -339,7 +338,7 @@ export default function DashboardPageClient({
     { skip: !initialDashboard },
   );
   const loggedDashboardError = useRef(false);
-  const dashboard = isSuccessResponse(data) ? data.data : initialDashboard;
+  const dashboard = data?.data ?? initialDashboard;
 
   useEffect(() => {
     if (!isError || loggedDashboardError.current) {

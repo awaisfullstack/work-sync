@@ -5,7 +5,6 @@ import { DataTable } from "@/components/shared/data-table";
 import { useMemo, useState } from "react";
 import { TablePagination } from "../../../components/shared/TablePagination";
 import { useDebounce } from "@/hooks/useDebounce";
-import { isSuccessResponse } from "@/types/api-response";
 import LoadTableError from "@/components/shared/LoadTableError";
 import { SortOrder, TaskSortBy, TaskStatus } from "../taskTypes";
 import { useGetTasksQuery } from "../tasksApi";
@@ -66,7 +65,7 @@ const TasksPageClient = () => {
   const { data, isLoading, isFetching, isError, refetch } =
     useGetTasksQuery(queryArgs);
 
-  const tasksData = isSuccessResponse(data) ? data.data : undefined;
+  const tasksData = data?.data;
   const tasks = tasksData?.items ?? [];
   const totalItems = tasksData?.pagination.total ?? 0;
   const totalPages = tasksData?.pagination.totalPages ?? 1;

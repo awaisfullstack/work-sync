@@ -23,7 +23,6 @@ import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
 import { taskSchema, type TaskFormValues } from "@/lib/validations/task.schema";
-import { isSuccessResponse } from "@/types/api-response";
 import type { Task } from "../taskTypes";
 import {
   useCreateTaskMutation,
@@ -75,12 +74,8 @@ export function TaskForm({ mode, task }: TaskFormProps) {
   const [updateTaskStatus, { isLoading: isUpdatingStatus }] =
     useUpdateTaskStatusMutation();
 
-  const projects = isSuccessResponse(projectsResponse)
-    ? (projectsResponse.data ?? [])
-    : [];
-  const users = isSuccessResponse(usersResponse)
-    ? (usersResponse.data ?? [])
-    : [];
+  const projects = projectsResponse?.data ?? [];
+  const users = usersResponse?.data ?? [];
 
   const isSubmitting = isCreating || isUpdating || isUpdatingStatus;
 
@@ -113,7 +108,7 @@ export function TaskForm({ mode, task }: TaskFormProps) {
           assignedUserId: values.assignedUserId || undefined,
         }).unwrap();
 
-        if (values.status !== "TODO" && isSuccessResponse(response)) {
+        if (values.status !== "TODO") {
           await updateTaskStatus({
             id: response.data.id,
             status: values.status,

@@ -7,7 +7,8 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
-import { User, UserRole } from './entities/user.entity';
+import { User } from './entities/user.entity';
+import { Role } from './enums/users.enum';
 import { Department } from '../departments/entities/department.entity';
 import * as bcrypt from 'bcrypt';
 import { QueryUsersDto } from './dto/query-users.dto';
@@ -23,7 +24,7 @@ export class UsersService {
     private readonly departmentModel: typeof Department,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto): Promise<null> {
     const { email, password, departmentId, role } = dto;
     const existingUser = await this.userModel.findOne({
       where: { email },
@@ -33,9 +34,9 @@ export class UsersService {
       throw new ConflictException('User with this email already exists');
     }
 
-    const userRole = role ?? UserRole.EMPLOYEE;
+    const userRole = role ?? Role.EMPLOYEE;
 
-    if (!departmentId && userRole === UserRole.EMPLOYEE) {
+    if (!departmentId && userRole === Role.EMPLOYEE) {
       throw new BadRequestException('Department is required for employee user');
     }
 
@@ -49,14 +50,15 @@ export class UsersService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.userModel.create({
+    await this.userModel.create({
       ...dto,
       role: userRole,
       password: hashedPassword,
       departmentId: departmentId ?? null,
+      isActive: true,
     });
 
-    return this.findOne(user.id);
+    return null;
   }
 
   async findAll(query: QueryUsersDto) {
@@ -94,7 +96,7 @@ export class UsersService {
     const { rows, count } = await this.userModel.findAndCountAll({
       where,
       attributes: {
-        exclude: ['password'],
+        exclude: ['password', 'departmentId'],
       },
       include: [
         {
@@ -118,21 +120,19 @@ export class UsersService {
     };
   }
 
-  // users.service.ts
-
   async getUserStats() {
     const [totalUsers, totalAdmins, totalEmployees] = await Promise.all([
       this.userModel.count(),
 
       this.userModel.count({
         where: {
-          role: UserRole.ADMIN,
+          role: Role.ADMIN,
         },
       }),
 
       this.userModel.count({
         where: {
-          role: UserRole.EMPLOYEE,
+          role: Role.EMPLOYEE,
         },
       }),
     ]);
@@ -147,10 +147,10 @@ export class UsersService {
   async findUserOptions() {
     return this.userModel.findAll({
       where: {
-        role: UserRole.EMPLOYEE,
+        role: Role.EMPLOYEE,
         isActive: true,
       },
-      attributes: ['id', 'name', 'email', 'role', 'departmentId'],
+      attributes: ['id', 'name'],
       order: [['name', 'ASC']],
     });
   }
@@ -158,7 +158,7 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.userModel.findByPk(id, {
       attributes: {
-        exclude: ['password'],
+        exclude: ['password', 'departmentId'],
       },
       include: [
         {
@@ -187,7 +187,7 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<null> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
@@ -213,8 +213,8 @@ export class UsersService {
       }
     }
 
-    if (updateUserDto.role === UserRole.EMPLOYEE) {
-      const finalDepartmentId = updateUserDto.departmentId ?? user.departmentId;
+    if (updateUserDto.role === Role.EMPLOYEE) {
+      const finalDepartmentId = updateUserDto.departmentId;
 
       if (!finalDepartmentId) {
         throw new BadRequestException(
@@ -225,10 +225,10 @@ export class UsersService {
 
     await user.update(updateUserDto);
 
-    return this.findOne(id);
+    return null;
   }
 
-  async deactivate(id: string): Promise<{ id: string; isActive: boolean }> {
+  async deactivate(id: string): Promise<null> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
@@ -239,13 +239,10 @@ export class UsersService {
       isActive: false,
     });
 
-    return {
-      id: user.id,
-      isActive: user.isActive,
-    };
+    return null;
   }
 
-  async activate(id: string): Promise<{ id: string; isActive: boolean }> {
+  async activate(id: string): Promise<null> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
@@ -256,13 +253,10 @@ export class UsersService {
       isActive: true,
     });
 
-    return {
-      id: user.id,
-      isActive: user.isActive,
-    };
+    return null;
   }
 
-  async remove(id: string): Promise<{ id: string }> {
+  async remove(id: string): Promise<null> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
@@ -271,8 +265,6 @@ export class UsersService {
 
     await user.destroy();
 
-    return {
-      id,
-    };
+    return null;
   }
 }

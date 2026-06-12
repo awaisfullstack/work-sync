@@ -1,5 +1,5 @@
 import type { ProjectStatus } from "@/features/projects/projectTypes";
-import type { UserRole } from "@/features/auth/authTypes";
+import type { Role } from "@/enums";
 
 export enum ActivityAction {
   PROJECT_CREATED = 'PROJECT_CREATED',
@@ -37,7 +37,7 @@ export interface ActivityActor {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: Role;
 }
 
 export interface ActivityProject {

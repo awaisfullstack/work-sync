@@ -42,7 +42,6 @@ import { canManageProjectMembers } from "@/lib/auth/permissions";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
-import { isSuccessResponse } from "@/types/api-response";
 import { Task } from "../taskTypes";
 import { useAssignTaskMutation, useUnassignTaskMutation } from "../tasksApi";
 
@@ -91,7 +90,7 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
   }, [members]);
 
   const assignableUsers = useMemo(() => {
-    const users = isSuccessResponse(usersResponse) ? usersResponse.data : [];
+    const users = usersResponse?.data ?? [];
 
     return users.filter((user) => !assignedUserIds.has(user.id));
   }, [usersResponse, assignedUserIds]);

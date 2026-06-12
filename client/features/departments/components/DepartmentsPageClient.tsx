@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import { DataTable } from "@/components/shared/data-table";
 import LoadTableError from "@/components/shared/LoadTableError";
 import { useDebounce } from "@/hooks/useDebounce";
-import { isSuccessResponse } from "@/types/api-response";
 import { columns } from "../columns";
 import { useGetDepartmentQuery } from "../departmentsApi";
 import { DepartmentsTableToolbar } from "./DepartmentsTableToolbar";
@@ -18,7 +17,7 @@ const DepartmentsPageClient = () => {
     useGetDepartmentQuery();
 
   const departments = useMemo(
-    () => (isSuccessResponse(data) ? (data.data ?? []) : []),
+    () => (data?.data ?? []),
     [data],
   );
   const filteredDepartments = useMemo(() => {
@@ -42,7 +41,6 @@ const DepartmentsPageClient = () => {
   return (
     <section className="flex flex-col gap-6 py-6">
   
-
       <DepartmentsTableToolbar
         search={search}
         onSearchChange={handleSearchChange}

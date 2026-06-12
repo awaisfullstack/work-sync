@@ -12,11 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Role } from "@/constants";
+import { Role } from "@/enums";
 import type { AuthUser } from "@/features/auth/authTypes";
 import { useGetProjectOptionsQuery } from "@/features/projects/projectsApi";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
-import { isSuccessResponse } from "@/types/api-response";
 import {
   ActivityAction,
   ActivityEntityType,
@@ -72,10 +71,8 @@ export function ActivityLogsTableToolbar({
   const { data: projectsResponse, isLoading: isProjectsLoading } =
     useGetProjectOptionsQuery();
 
-  const users = isSuccessResponse(usersResponse) ? usersResponse.data : [];
-  const projects = isSuccessResponse(projectsResponse)
-    ? projectsResponse.data
-    : [];
+  const users = usersResponse?.data ?? [];
+  const projects = projectsResponse?.data ?? [];
   const hasFilters =
     action !== "ALL" ||
     entityType !== "ALL" ||

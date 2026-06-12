@@ -1,7 +1,6 @@
 "use client";
 
 import FetchByIdError from "@/components/shared/FetchByIdError";
-import { isSuccessResponse } from "@/types/api-response";
 import { useGetDepartmentByIdQuery } from "../departmentsApi";
 import { DepartmentForm } from "./DepartmentForm";
 
@@ -14,7 +13,7 @@ export function EditDepartmentPageClient({
 }: EditDepartmentPageClientProps) {
   const { data, isLoading, isError, refetch } =
     useGetDepartmentByIdQuery(departmentId);
-  const department = isSuccessResponse(data) ? data.data : undefined;
+  const department = data?.data;
 
   if (isLoading) {
     return (

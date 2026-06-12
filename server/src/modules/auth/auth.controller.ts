@@ -9,15 +9,11 @@ import {
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/types/auth.types';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
@@ -30,17 +26,6 @@ import type { Response } from 'express';
 @ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post('register')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  @ApiCookieAuth('access_token')
-  @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Register a new user (admin only)' })
-  @ResponseMessage('User created successfully')
-  register(@Body() dto: CreateUserDto) {
-    return this.authService.register(dto);
-  }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')

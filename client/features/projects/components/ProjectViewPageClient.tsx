@@ -26,7 +26,6 @@ import {
 import { ProjectDetailsCard } from "./ProjectDetailsCard";
 import { ProjectMembersManager } from "./ProjectMembersManager";
 import { formatApiError } from "@/lib/utils/formatError";
-import { isSuccessResponse } from "@/types/api-response";
 import FetchByIdError from "@/components/shared/FetchByIdError";
 import ProjectViewSkeleton from "./ProjectViewSkeleton";
 // import { ProjectTasksSummary } from "./ProjectTasksSummary";
@@ -48,7 +47,7 @@ export default function ProjectViewPageClient({
   const [archiveProject, { isLoading: isArchiving }] =
     useArchiveProjectMutation();
 
-  const project = isSuccessResponse(data) ? data.data : undefined;
+  const project = data?.data;
 
   async function handleArchive() {
     if (!project) return;
