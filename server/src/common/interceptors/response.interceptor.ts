@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { map, Observable } from 'rxjs';
 import { Response } from 'express';
-import { SuccessResponse } from 'src/types/api-response.types';
+import { SuccessResponse } from '../types/api-response.types';
 import { RESPONSE_MESSAGE_KEY } from '../decorators/response-message.decorator';
 
 @Injectable()

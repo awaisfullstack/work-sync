@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -25,9 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Role } from "@/constants";
 import { formatApiError } from "@/lib/utils/formatError";
-import { useAppSelector } from "@/store/hooks";
 import { useDeleteDepartmentMutation } from "../departmentsApi";
 import type { Department } from "../departmentTypes";
 
@@ -38,7 +36,6 @@ interface DepartmentRowActionsProps {
 export function DepartmentRowActions({
   department,
 }: DepartmentRowActionsProps) {
-  const currentUser = useAppSelector((state) => state.auth.user);
   const router = useRouter();
   const [deleteDepartment, { isLoading }] = useDeleteDepartmentMutation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -70,38 +67,24 @@ export function DepartmentRowActions({
 
           <DropdownMenuItem asChild>
             <Link
-              href={`/departments/${department.id}`}
+              href={`/departments/${department.id}/edit`}
               className="cursor-pointer"
             >
-              <Eye className="mr-2 h-4 w-4" />
-              View
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
             </Link>
           </DropdownMenuItem>
 
-          {currentUser?.role === Role.ADMIN && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link
-                  href={`/departments/${department.id}/edit`}
-                  className="cursor-pointer"
-                >
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </DropdownMenuItem>
+          <DropdownMenuSeparator />
 
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem
-                disabled={isLoading}
-                onSelect={() => setDeleteDialogOpen(true)}
-                className="cursor-pointer text-red-600 focus:text-red-600"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </>
-          )}
+          <DropdownMenuItem
+            disabled={isLoading}
+            onSelect={() => setDeleteDialogOpen(true)}
+            className="cursor-pointer text-red-600 focus:text-red-600"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

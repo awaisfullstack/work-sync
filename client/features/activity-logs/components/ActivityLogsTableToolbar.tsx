@@ -17,15 +17,13 @@ import type { AuthUser } from "@/features/auth/authTypes";
 import { useGetProjectOptionsQuery } from "@/features/projects/projectsApi";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { isSuccessResponse } from "@/types/api-response";
-import type {
+import {
   ActivityAction,
   ActivityEntityType,
-  ActivitySortBy,
-  SortOrder,
+  type ActivitySortBy,
+  type SortOrder,
 } from "../activityLogTypes";
 import {
-  ACTIVITY_ACTIONS,
-  ACTIVITY_ENTITY_TYPES,
   formatActivityLabel,
 } from "../utils";
 
@@ -144,7 +142,7 @@ export function ActivityLogsTableToolbar({
 
           <SelectContent>
             <SelectItem value="ALL">All Actions</SelectItem>
-            {ACTIVITY_ACTIONS.map((actionOption) => (
+            {Object.values(ActivityAction).map((actionOption) => (
               <SelectItem key={actionOption} value={actionOption}>
                 {formatActivityLabel(actionOption)}
               </SelectItem>
@@ -159,7 +157,7 @@ export function ActivityLogsTableToolbar({
 
           <SelectContent>
             <SelectItem value="ALL">All Entities</SelectItem>
-            {ACTIVITY_ENTITY_TYPES.map((entityTypeOption) => (
+            {Object.values(ActivityEntityType).map((entityTypeOption) => (
               <SelectItem key={entityTypeOption} value={entityTypeOption}>
                 {formatActivityLabel(entityTypeOption)}
               </SelectItem>

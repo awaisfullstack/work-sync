@@ -78,7 +78,6 @@ export function DepartmentForm({
       setError("root", {
         message,
       });
-      toast.error(message);
     }
   }
 

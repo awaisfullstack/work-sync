@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { SequelizeModule } from '@nestjs/sequelize';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { SequelizeModule } from '@nestjs/sequelize';
 import { databaseConfig } from './config/database.config';
-import { DepartmentsModule } from './departments/departments.module';
-import { ProjectsModule } from './projects/projects.module';
-import { TasksModule } from './tasks/tasks.module';
-import { ShiftsModule } from './shifts/shifts.module';
-import { DashboardModule } from './dashboard/dashboard.module';
-import { ActivityLogsModule } from './activity-logs/activity-logs.module';
 import configuration from './config/configuration';
+import {
+  ActivityLogsModule,
+  AuthModule,
+  DashboardModule,
+  DepartmentsModule,
+  ProjectsModule,
+  ShiftsModule,
+  TasksModule,
+  UsersModule,
+} from './modules';
 
 @Module({
   imports: [

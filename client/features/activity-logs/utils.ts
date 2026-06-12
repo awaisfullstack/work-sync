@@ -1,6 +1,6 @@
 import type { ActivityAction, ActivityEntityType } from "./activityLogTypes";
 
-export const ACTIVITY_ACTIONS: ActivityAction[] = [
+export const ACTIVITY_ACTIONS = [
   "PROJECT_CREATED",
   "PROJECT_UPDATED",
   "PROJECT_ARCHIVED",
@@ -18,7 +18,7 @@ export const ACTIVITY_ACTIONS: ActivityAction[] = [
   "SHIFT_CLOCKED_OUT",
 ];
 
-export const ACTIVITY_ENTITY_TYPES: ActivityEntityType[] = [
+export const ACTIVITY_ENTITY_TYPES = [
   "PROJECT",
   "TASK",
   "TASK_COMMENT",

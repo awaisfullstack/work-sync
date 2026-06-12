@@ -11,5 +11,5 @@ module.exports = {
   autoLoadModels: true,
   synchronize: false,
 
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  // logging: process.env.NODE_ENV === 'development' ? console.log : false,
 };

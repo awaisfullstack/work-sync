@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ErrorResponse } from 'src/types/api-response.types';
+import { ErrorResponse } from '../types/api-response.types';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -18,9 +18,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-
-    console.log('Exception class:', exception?.constructor?.name);
-    console.log('Exception:', exception);
 
     let statusCode: number = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: string | string[] = 'Internal server error';

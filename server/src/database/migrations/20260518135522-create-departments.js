@@ -29,6 +29,9 @@ module.exports = {
         defaultValue: Sequelize.fn('NOW'),
       },
     });
+
+    await queryInterface.addIndex('departments', ['name']);
+
   },
 
   async down(queryInterface, Sequelize) {

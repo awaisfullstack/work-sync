@@ -37,7 +37,7 @@ export const departmentsApi = baseApi.injectEndpoints({
     }),
 
     updateDepartment: builder.mutation<
-      ApiResponse<Department>,
+      ApiResponse<null>,
       UpdateDepartmentRequest
     >({
       query: ({ id, body }) => ({

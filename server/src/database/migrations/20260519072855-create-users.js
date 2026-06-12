@@ -41,7 +41,7 @@ module.exports = {
           key: 'id',
         },
         onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
+        onDelete: 'RESTRICT',
       },
 
       is_active: {

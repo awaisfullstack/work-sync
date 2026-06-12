@@ -1,37 +1,36 @@
 'use strict';
 
+const departments = [
+  'Development',
+  'Human Resources',
+  'Operations',
+  'Design',
+];
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('departments', [
-      {
+    const now = new Date();
+
+    await queryInterface.bulkInsert(
+      'departments',
+      departments.map((name) => ({
         id: Sequelize.literal('gen_random_uuid()'),
-        name: 'Development',
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
+        name,
+        created_at: now,
+        updated_at: now,
+      })),
       {
-        id: Sequelize.literal('gen_random_uuid()'),
-        name: 'Human Resources',
-        created_at: new Date(),
-        updated_at: new Date(),
+        ignoreDuplicates: true,
       },
-      {
-        id: Sequelize.literal('gen_random_uuid()'),
-        name: 'Operations',
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        id: Sequelize.literal('gen_random_uuid()'),
-        name: 'Design',
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ]);
+    );
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('departments', null, {});
+    await queryInterface.bulkDelete('departments', {
+      name: {
+        [Sequelize.Op.in]: departments,
+      },
+    });
   },
 };
