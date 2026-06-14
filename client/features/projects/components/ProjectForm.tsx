@@ -15,9 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Project } from "../projectTypes";
-import { useCreateProjectMutation, useUpdateProjectMutation } from "../projectsApi";
-import { ProjectFormValues, projectSchema } from "@/lib/validations/project.schema";
+import { Project, ProjectStatus } from "../projectTypes";
+import {
+  useCreateProjectMutation,
+  useUpdateProjectMutation,
+} from "../projectsApi";
+import {
+  ProjectFormValues,
+  projectSchema,
+} from "@/lib/validations/project.schema";
 import { formatApiError } from "@/lib/utils/formatError";
 import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
@@ -57,11 +63,9 @@ function formatDateInputValue(date?: Date) {
 export function ProjectForm({ mode, project }: ProjectFormProps) {
   const router = useRouter();
 
-  const [createProject, { isLoading: isCreating }] =
-    useCreateProjectMutation();
+  const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
 
-  const [updateProject, { isLoading: isUpdating }] =
-    useUpdateProjectMutation();
+  const [updateProject, { isLoading: isUpdating }] = useUpdateProjectMutation();
 
   const isSubmitting = isCreating || isUpdating;
 
@@ -76,22 +80,27 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
     defaultValues: {
       title: project?.title ?? "",
       description: project?.description ?? "",
-      status: project?.status ?? "ACTIVE",
+      status: project?.status ?? ProjectStatus.ACTIVE,
       deadline: getDateInputValue(project?.deadline),
     },
   });
 
   async function onSubmit(values: ProjectFormValues) {
+    const payload = {
+      ...values,
+      status: values.status as ProjectStatus,
+      deadline: values.deadline?.length === 0 ? null : values.deadline,
+    };
     try {
       if (mode === "create") {
-        await createProject(values).unwrap();
+        await createProject(payload).unwrap();
         toast.success("Project created successfully");
       }
 
       if (mode === "update" && project) {
         await updateProject({
           id: project.id,
-          body: values,
+          body: payload,
         }).unwrap();
         toast.success("Project updated successfully");
       }
@@ -150,9 +159,7 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
           {...register("description")}
         />
         {errors.description?.message && (
-          <p className="text-sm text-red-600">
-            {errors.description.message}
-          </p>
+          <p className="text-sm text-red-600">{errors.description.message}</p>
         )}
       </div>
 
@@ -199,9 +206,7 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
             )}
           />
           {errors.deadline?.message && (
-            <p className="text-sm text-red-600">
-              {errors.deadline.message}
-            </p>
+            <p className="text-sm text-red-600">{errors.deadline.message}</p>
           )}
         </div>
       </div>

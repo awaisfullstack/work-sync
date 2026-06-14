@@ -30,8 +30,9 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('departments', ['name']);
-
+    await queryInterface.addIndex('departments', ['name'], {
+      name: 'departments_name_idx',
+    });
   },
 
   async down(queryInterface, Sequelize) {

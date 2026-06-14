@@ -17,12 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Command,
   CommandEmpty,
@@ -51,7 +46,7 @@ import {
   useAssignProjectMemberMutation,
   useRemoveProjectMemberMutation,
 } from "../projectsApi";
-import type { Project, ProjectMemberRole } from "../projectTypes";
+import { Project, ProjectMemberRole } from "../projectTypes";
 import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
@@ -72,19 +67,15 @@ function getInitials(name?: string) {
     .toUpperCase();
 }
 
-const projectMemberRoleLabels: Record<ProjectMemberRole, string> = {
-  MEMBER: "Member",
-  LEAD: "Lead",
-};
-
 export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
   const currentUser = useAppSelector((state) => state.auth.user);
   const canManage = canManageProjectMembers(currentUser);
 
   const [open, setOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
-  const [selectedRole, setSelectedRole] =
-    useState<ProjectMemberRole>("MEMBER");
+  const [selectedRole, setSelectedRole] = useState<ProjectMemberRole>(
+    ProjectMemberRole.MEMBER,
+  );
   const [memberToRemove, setMemberToRemove] = useState<{
     userId: string;
     name?: string;
@@ -115,7 +106,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
   }, [usersResponse, assignedUserIds]);
 
   const selectedUser = assignableUsers.find(
-    (user) => user.id === selectedUserId
+    (user) => user.id === selectedUserId,
   );
 
   async function handleAssignMember() {
@@ -124,20 +115,20 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
     setError("");
 
     try {
-      await assignProjectMember({
+      const res = await assignProjectMember({
         projectId: project.id,
         userId: selectedUserId,
         roleInProject: selectedRole,
       }).unwrap();
 
       setSelectedUserId("");
-      setSelectedRole("MEMBER");
+      setSelectedRole(ProjectMemberRole.MEMBER);
       setOpen(false);
-      toast.success("Project member assigned successfully");
+      toast.success(res.message);
     } catch (error) {
       const message = formatApiError(error);
       setError(message);
-      toast.error(message);
+      // toast.error(message);
     }
   }
 
@@ -147,16 +138,16 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
     setError("");
 
     try {
-      await removeProjectMember({
+      const res = await removeProjectMember({
         projectId: project.id,
         userId: memberToRemove.userId,
       }).unwrap();
       setMemberToRemove(null);
-      toast.success("Project member removed successfully");
+      toast.success(res.message);
     } catch (error) {
       const message = formatApiError(error);
       setError(message);
-      toast.error(message);
+      // toast.error(message);
     }
   }
 
@@ -193,7 +184,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                 </PopoverTrigger>
 
                 <PopoverContent className="w-[300px] p-0" align="end">
-                  <Command className="">
+                  <Command>
                     <CommandInput placeholder="Search employee..." />
 
                     <CommandList
@@ -208,7 +199,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                         {assignableUsers.map((user) => (
                           <CommandItem
                             key={user.id}
-                            value={`${user.name} ${user.email}`}
+                            value={user.name}
                             onSelect={() => {
                               setSelectedUserId(user.id);
                               setOpen(false);
@@ -219,15 +210,12 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                                 "mr-2 h-4 w-4",
                                 selectedUserId === user.id
                                   ? "opacity-100"
-                                  : "opacity-0"
+                                  : "opacity-0",
                               )}
                             />
 
                             <div>
                               <p className="font-medium">{user.name}</p>
-                              <p className="text-xs text-slate-500">
-                                {user.email}
-                              </p>
                             </div>
                           </CommandItem>
                         ))}
@@ -248,8 +236,15 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="MEMBER">Member</SelectItem>
-                  <SelectItem value="LEAD">Lead</SelectItem>
+                  {Object.values(ProjectMemberRole).map((projectMemberRole) => (
+                    <SelectItem
+                      key={projectMemberRole}
+                      value={projectMemberRole}
+                    >
+                      {projectMemberRole[0] +
+                        projectMemberRole.slice(1).toLowerCase()}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -301,14 +296,8 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                     </p>
 
                     <p className="truncate text-sm text-slate-500">
-                      {member.user?.email ?? member.userId}
+                      {member.user?.email}
                     </p>
-
-                    {member.user?.department?.name && (
-                      <p className="text-xs text-slate-400">
-                        {member.user.department.name}
-                      </p>
-                    )}
                   </div>
                 </div>
 
@@ -321,8 +310,8 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                           : "secondary"
                       }
                     >
-                      {projectMemberRoleLabels[member.roleInProject] ??
-                        member.roleInProject}
+                      {member.roleInProject[0] +
+                        member.roleInProject.slice(1).toLowerCase()}
                     </Badge>
 
                     <p className="text-xs text-slate-500">
@@ -369,8 +358,8 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
             <AlertDialogHeader>
               <AlertDialogTitle>Remove project member?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will remove {memberToRemove?.name ?? "this user"} from
-                this project.
+                This will remove {memberToRemove?.name ?? "this user"} from this
+                project.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

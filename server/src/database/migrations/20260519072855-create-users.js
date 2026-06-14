@@ -57,9 +57,15 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('users', ['email']);
-    await queryInterface.addIndex('users', ['role']);
-    await queryInterface.addIndex('users', ['department_id']);
+    await queryInterface.addIndex('users', ['email'], {
+      name: 'users_email_idx',
+    });
+    await queryInterface.addIndex('users', ['role'], {
+      name: 'users_role_idx',
+    });
+    await queryInterface.addIndex('users', ['department_id'], {
+      name: 'users_department_id_idx',
+    });
   },
 
   async down(queryInterface, Sequelize) {

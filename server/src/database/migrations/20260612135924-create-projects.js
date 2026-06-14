@@ -53,19 +53,27 @@ module.exports = {
         defaultValue: Sequelize.fn('NOW'),
       },
     });
-    await queryInterface.addIndex('projects', ['deadline']);
-    await queryInterface.addIndex('projects', ['created_by_id']);
-    await queryInterface.addIndex('projects', ['created_at']);
-    await queryInterface.addIndex('projects', ['updated_at']);
-    await queryInterface.addIndex('projects', ['status', 'deadline']);
+    await queryInterface.addIndex('projects', ['deadline'], {
+      name: 'projects_deadline_idx',
+    });
+    await queryInterface.addIndex('projects', ['created_by_id'], {
+      name: 'projects_created_by_id_idx',
+    });
+    await queryInterface.addIndex('projects', ['created_at'], {
+      name: 'projects_created_at_idx',
+    });
+    await queryInterface.addIndex('projects', ['updated_at'], {
+      name: 'projects_updated_at_idx',
+    });
+    await queryInterface.addIndex('projects', ['status', 'deadline'], {
+      name: 'projects_status_deadline_idx',
+    });
   },
 
   async down(queryInterface, Sequelize) {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
+    await queryInterface.dropTable('projects');
+    await queryInterface.sequelize.query(
+      'DROP TYPE IF EXISTS "enum_projects_status";'
+    );
   },
 };

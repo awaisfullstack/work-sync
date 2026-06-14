@@ -3,7 +3,12 @@
 import { columns } from "@/features/projects/columns";
 import { DataTable } from "@/components/shared/data-table";
 import { useGetProjectsQuery } from "../projectsApi";
-import type { ProjectSortBy, ProjectStatus, SortOrder } from "../projectTypes";
+import type {
+  ProjectQuery,
+  ProjectSortBy,
+  ProjectStatus,
+  SortOrder,
+} from "../projectTypes";
 import { useMemo, useState } from "react";
 import { TablePagination } from "../../../components/shared/TablePagination";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -21,14 +26,14 @@ const ProjectsPageClient = () => {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const queryArgs = useMemo(
+  const queryArgs = useMemo<ProjectQuery>(
     () => ({
       page,
       limit,
-      search: debouncedSearch,
+      search: debouncedSearch.trim() || undefined,
       status: status === "ALL" ? undefined : status,
       sortBy,
-      sortOrder,
+      sortOrder
     }),
     [page, limit, debouncedSearch, status, sortBy, sortOrder],
   );
@@ -114,18 +119,23 @@ const ProjectsPageClient = () => {
       />
 
       {isError ? (
-       <LoadTableError 
-        title="Failed to load projects"
-        message="An error occurred while fetching projects. Please try again."
-        refetch={refetch}
-       />
+        <LoadTableError
+          title="Failed to load projects"
+          message="An error occurred while fetching projects. Please try again."
+          refetch={refetch}
+        />
       ) : (
         <>
           {isFetching && !isLoading && (
             <p className="text-sm text-slate-500">Refreshing projects...</p>
           )}
 
-          <DataTable columns={columns} data={projects} isLoading={isLoading} noFoundMessage="No projects found." />
+          <DataTable
+            columns={columns}
+            data={projects}
+            isLoading={isLoading}
+            noFoundMessage="No projects found."
+          />
 
           <TablePagination
             page={page}

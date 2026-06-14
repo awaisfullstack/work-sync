@@ -9,10 +9,13 @@ module.exports = {
       allowNull: false,
     });
 
-    await queryInterface.addIndex('users', ['is_active']);
+    await queryInterface.addIndex('users', ['is_active'], {
+      name: 'users_is_active_idx',
+    });
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.removeIndex('users', 'users_is_active_idx');
     await queryInterface.removeColumn('users', 'is_active');
   },
 };

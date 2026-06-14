@@ -1,11 +1,6 @@
 import { Archive, CalendarDays, Clock, UserRound } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
@@ -25,10 +20,11 @@ export function ProjectDetailsCard({ project }: ProjectDetailsCardProps) {
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
           <div>
             <CardTitle className="text-2xl">{project.title}</CardTitle>
-
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-              {project.description}
-            </p>
+            {project.description && (
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                {project.description}
+              </p>
+            )}
           </div>
 
           <ProjectStatusBadge status={project.status} />

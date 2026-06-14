@@ -12,11 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type {
-  ProjectSortBy,
-  ProjectStatus,
-  SortOrder,
-} from "../projectTypes";
+import { ProjectSortBy, ProjectStatus, SortOrder } from "../projectTypes";
 
 interface ProjectsTableToolbarProps {
   search: string;
@@ -67,9 +63,12 @@ export function ProjectsTableToolbar({
 
           <SelectContent>
             <SelectItem value="ALL">All Status</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="COMPLETED">Completed</SelectItem>
-            <SelectItem value="ARCHIVED">Archived</SelectItem>
+            {Object.values(ProjectStatus).map((projectStatus) => (
+              <SelectItem key={projectStatus} value={projectStatus}>
+                {projectStatus[0] +
+                  projectStatus.slice(1).toLowerCase()}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -98,7 +97,11 @@ export function ProjectsTableToolbar({
         </Select>
 
         {hasFilters && (
-          <Button variant="outline" onClick={onReset} className="w-full xl:w-auto">
+          <Button
+            variant="outline"
+            onClick={onReset}
+            className="w-full xl:w-auto"
+          >
             <X className="mr-2 h-4 w-4" />
             Reset
           </Button>

@@ -1,4 +1,5 @@
 import { Role } from "@/enums";
+
 export interface UserDepartment {
   id: string;
   name: string;
@@ -37,19 +38,17 @@ export interface CreateUserRequest {
   departmentId: string | null;
 }
 
+export type UpdateUserPayload = Partial<Omit<CreateUserRequest, "password">>;
+
 export interface UpdateUserRequest {
   id: string;
-  body: Partial<Omit<CreateUserRequest, "password">> & {
-    password?: string;
-  };
+  body: UpdateUserPayload;
 }
 
 export interface UsersQuery {
   page?: number;
   limit?: number;
   search?: string;
-  role?: Role | "";
+  role?: Role;
   departmentId?: string;
-  sortBy?: string;
-  sortOrder?: "ASC" | "DESC";
 }

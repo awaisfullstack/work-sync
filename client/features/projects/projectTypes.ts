@@ -1,7 +1,16 @@
 import type { Role } from "@/enums";
 
-export type ProjectStatus = "ACTIVE" | "COMPLETED" | "ARCHIVED";
-export type ProjectMemberRole = "MEMBER" | "LEAD";
+export enum ProjectStatus {
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+  ARCHIVED = "ARCHIVED",
+}
+
+export enum ProjectMemberRole {
+  MEMBER = "MEMBER",
+  LEAD = "LEAD",
+}
+
 export type ProjectSortBy = "createdAt" | "updatedAt" | "deadline" | "title";
 
 export type SortOrder = "ASC" | "DESC";
@@ -34,21 +43,9 @@ export interface ProjectMember {
   projectId: string;
   roleInProject: ProjectMemberRole;
   joinedAt: string;
-  user?: ProjectMemberUser;
+  user: ProjectMemberUser;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface ProjectTaskSummary {
-  id: string;
-  title: string;
-  status: "TODO" | "IN_PROGRESS" | "COMPLETED";
-  dueDate: string;
-  assignedUser?: {
-    id: string;
-    name: string;
-    email: string;
-  } | null;
 }
 
 export interface Project {
@@ -56,12 +53,12 @@ export interface Project {
   title: string;
   description: string | null;
   status: ProjectStatus;
-  deadline: string;
+  deadline: string | null;
   createdById: string;
   createdBy: ProjectUser;
-  archivedAt?: string | null;
+  archivedAt: string | null;
   members?: ProjectMember[];
-  membersCount?: number;
+  membersCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,23 +67,23 @@ export interface ProjectQuery {
   page?: number;
   limit?: number;
   search?: string;
-  status?: ProjectStatus | "";
+  status?: ProjectStatus;
   sortBy?: ProjectSortBy;
   sortOrder?: SortOrder;
 }
 
 export interface CreateProjectPayload {
   title: string;
-  description: string;
-  status: ProjectStatus;
-  deadline: string;
-}
-
-export interface UpdateProjectPayload {
-  title?: string;
   description?: string;
   status?: ProjectStatus;
-  deadline?: string;
+  deadline?: string | null;
+}
+
+export type UpdateProjectPayload = Partial<CreateProjectPayload>;
+
+export interface UpdateProjectRequest {
+  id: string;
+  body: UpdateProjectPayload;
 }
 
 export interface AssignProjectMemberPayload {

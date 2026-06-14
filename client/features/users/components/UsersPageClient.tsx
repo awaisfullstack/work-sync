@@ -25,7 +25,7 @@ const UsersPageClient = () => {
     () => ({
       page,
       limit,
-      search: debouncedSearch ? debouncedSearch : undefined,
+      search: debouncedSearch.trim() || undefined,
       role: role !== "all" ? role : undefined,
       departmentId: departmentId !== "all" ? departmentId : undefined,
     }),

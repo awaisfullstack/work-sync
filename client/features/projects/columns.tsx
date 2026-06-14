@@ -3,7 +3,11 @@
 import { ProjectRowActions } from "@/features/projects/components/ProjectRowActions";
 import { ProjectStatusBadge } from "@/features/projects/components/ProjectStatusBadge";
 import type { Project } from "@/features/projects/projectTypes";
-import { formatDate, formatDate2, getDeadlineStatus } from "@/lib/utils/formatDate";
+import {
+  formatDate,
+  formatDate2,
+  getDeadlineStatus,
+} from "@/lib/utils/formatDate";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 
@@ -16,17 +20,18 @@ export const columns: ColumnDef<Project>[] = [
 
       return (
         <div>
-        <Link
-          href={`/projects/${project.id}`}
-          className="font-medium text-slate-900 hover:text-blue-700"
-        >
-          {project.title}
-        </Link>
-
-        <p className="mt-1 truncate max-w-[300px] text-sm text-slate-500">
-          {project.description}
-        </p>
-      </div>
+          <Link
+            href={`/projects/${project.id}`}
+            className="font-medium text-slate-900 hover:text-blue-700"
+          >
+            {project.title}
+          </Link>
+          {project.description && (
+            <p className="mt-1 truncate max-w-[300px] text-sm text-slate-500">
+              {project.description}
+            </p>
+          )}
+        </div>
       );
     },
   },

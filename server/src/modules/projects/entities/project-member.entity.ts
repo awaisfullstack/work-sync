@@ -37,13 +37,6 @@ export class ProjectMember extends Model<ProjectMember> {
   })
   declare userId: string;
 
-  @ForeignKey(() => User)
-  @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
-  declare userId: string;
-
   @Column({
     type: DataType.ENUM(...Object.values(ProjectMemberRole)),
     allowNull: false,

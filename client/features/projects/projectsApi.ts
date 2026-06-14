@@ -8,26 +8,19 @@ import type {
   ProjectOption,
   ProjectQuery,
   RemoveProjectMemberPayload,
-  UpdateProjectPayload,
+  UpdateProjectRequest,
 } from "./projectTypes";
 
 export const projectsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProjects: builder.query<
       SuccessResponse<PaginatedResponse<Project>>,
-      ProjectQuery | void
+      ProjectQuery
     >({
       query: (params) => ({
         url: "/projects",
         method: "GET",
-        params: {
-          page: params?.page,
-          limit: params?.limit,
-          search: params?.search || undefined,
-          status: params?.status || undefined,
-          sortBy: params?.sortBy || undefined,
-          sortOrder: params?.sortOrder || undefined,
-        },
+        params
       }),
       providesTags: (result) =>
         result
@@ -65,23 +58,24 @@ export const projectsApi = baseApi.injectEndpoints({
             ]
           : [{ type: "Projects" as const, id: "LIST" }],
     }),
-    createProject: builder.mutation<SuccessResponse<Project>, CreateProjectPayload>(
-      {
-        query: (body) => ({
-          url: "/projects",
-          method: "POST",
-          body,
-        }),
-        invalidatesTags: [
-          { type: "Projects", id: "LIST" },
-          "Dashboard",
-          "ActivityLogs",
-        ],
-      },
-    ),
+    createProject: builder.mutation<
+      SuccessResponse<Project>,
+      CreateProjectPayload
+    >({
+      query: (body) => ({
+        url: "/projects",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [
+        { type: "Projects", id: "LIST" },
+        "Dashboard",
+        "ActivityLogs",
+      ],
+    }),
     updateProject: builder.mutation<
       SuccessResponse<Project>,
-      { id: string; body: UpdateProjectPayload }
+      UpdateProjectRequest
     >({
       query: ({ id, body }) => ({
         url: `/projects/${id}`,
@@ -159,4 +153,3 @@ export const {
   useGetProjectMembersQuery,
   useRemoveProjectMemberMutation,
 } = projectsApi;
-

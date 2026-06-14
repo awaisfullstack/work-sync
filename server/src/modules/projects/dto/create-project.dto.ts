@@ -24,5 +24,5 @@ export class CreateProjectDto {
 
   @IsOptional()
   @IsDateString()
-  deadline?: string;
+  deadline?: string | null;
 }

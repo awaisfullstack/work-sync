@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsIn, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IsInt, Min } from 'class-validator';
 import { ProjectStatus } from '../enums/project-status.enum';
@@ -25,10 +25,10 @@ export class ProjectQueryDto {
   limit: number = 10;
 
   @IsOptional()
-  @IsEnum(['createdAt', 'updatedAt', 'deadline', 'title'])
-  sortBy?: 'createdAt' | 'updatedAt' | 'deadline' | 'title';
+  @IsIn(['createdAt', 'updatedAt', 'dueDate', 'title'])
+  sortBy?: 'createdAt' | 'updatedAt' | 'dueDate' | 'title' = 'createdAt';
 
   @IsOptional()
-  @IsEnum(['ASC', 'DESC'])
-  sortOrder?: 'ASC' | 'DESC';
+  @IsIn(['ASC', 'DESC'])
+  sortOrder?: 'ASC' | 'DESC' = 'DESC';
 }

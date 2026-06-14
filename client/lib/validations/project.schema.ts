@@ -13,15 +13,14 @@ export const projectSchema = z.object({
   description: z
     .string()
     .trim()
-    .min(1, "Description is required")
-    .min(10, "Description must be at least 10 characters")
-    .max(1000, "Description must be less than 1000 characters"),
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
 
   status: z.enum(["ACTIVE", "COMPLETED", "ARCHIVED"], {
     message: "Please select a valid status",
   }),
 
-  deadline: z.string().min(1, "Deadline is required"),
+  deadline: z.string().nullable(),
 });
 
 export type ProjectFormValues = z.infer<typeof projectSchema>;
