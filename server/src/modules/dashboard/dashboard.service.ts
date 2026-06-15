@@ -8,14 +8,12 @@ import { Project } from '../projects/entities/project.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { Shift, ShiftStatus } from '../shifts/entities/shift.entity';
 import { AuthenticatedUser } from '../../common/types/auth.types';
-import {
-  TaskStatus,
-  TaskStatusName,
-} from '../tasks/entities/task-status.entity';
+import { TaskStatus } from '../tasks/entities/task-status.entity';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { ProjectStatus } from '../projects/enums/project-status.enum';
 import { ProjectMember } from '../projects/entities/project-member.entity';
 import { TaskAssignment } from '../tasks/entities/task-assignment.entity';
+import { TaskStatusName } from '../tasks/enums/task-status.enum';
 
 type DateRange = {
   start: Date;

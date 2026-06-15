@@ -9,9 +9,8 @@ export const taskSchema = z.object({
 
   description: z
     .string()
-    .min(1, "Task description is required")
-    .min(10, "Description must be at least 10 characters")
-    .max(1000, "Description cannot exceed 1000 characters"),
+    .max(1000, "Description cannot exceed 1000 characters")
+    .optional(),
 
   status: z.enum(["TODO", "IN_PROGRESS", "COMPLETED"], {
     message: "Please select a valid status",
@@ -20,8 +19,6 @@ export const taskSchema = z.object({
   dueDate: z.string().min(1, "Due date is required"),
 
   projectId: z.string().min(1, "Project is required"),
-
-  assignedUserId: z.string().optional(),
 });
 
 export type TaskFormValues = z.infer<typeof taskSchema>;

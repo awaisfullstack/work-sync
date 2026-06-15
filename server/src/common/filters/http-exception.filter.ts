@@ -19,35 +19,76 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     let statusCode: number = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: string | string[] = 'Internal server error';
+
+    let errorName = 'UnknownException';
+    let errorStack: string | undefined = undefined;
+    let originalErrorMessage: string | undefined = undefined;
 
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
 
-      const res = exception.getResponse();
+      const exceptionResponse = exception.getResponse();
 
-      if (typeof res === 'string') {
-        message = res;
-      } else if (this.isErrorResponse(res)) {
-        message = res.message ?? message;
+      if (typeof exceptionResponse === 'string') {
+        message = exceptionResponse;
+      } else if (this.isExceptionResponseObject(exceptionResponse)) {
+        message = exceptionResponse.message ?? message;
+      }
+
+      if (exception instanceof Error) {
+        errorName = exception.name;
+        errorStack = exception.stack;
+        originalErrorMessage = exception.message;
+      }
+    } else if (exception instanceof Error) {
+      errorName = exception.name;
+      errorStack = exception.stack;
+      originalErrorMessage = exception.message;
+
+      // Show exact unknown error only in development
+      if (!isProduction) {
+        message = exception.message || 'Internal server error';
+      }
+    } else {
+      originalErrorMessage = JSON.stringify(exception);
+
+      if (!isProduction) {
+        message = originalErrorMessage;
       }
     }
+
     this.logger.error(
-      `${request.method} ${request.url} ${statusCode} - ${JSON.stringify(message)}`,
+      `${request.method} ${request.originalUrl} ${statusCode} - ${JSON.stringify(message)}`,
+      errorStack,
     );
 
-    response.status(statusCode).json({
+    const errorResponse = {
       success: false,
       statusCode,
-      path: request.url,
+      path: request.originalUrl,
       method: request.method,
       message,
       timestamp: new Date().toISOString(),
-    });
+
+      ...(isProduction
+        ? {}
+        : {
+            debug: {
+              errorName,
+              originalErrorMessage,
+              stack: errorStack,
+            },
+          }),
+    };
+
+    response.status(statusCode).json(errorResponse);
   }
 
-  private isErrorResponse(res: unknown): res is ErrorResponse {
-    return typeof res === 'object' && res !== null;
+  private isExceptionResponseObject(value: unknown): value is ErrorResponse {
+    return typeof value === 'object' && value !== null;
   }
 }

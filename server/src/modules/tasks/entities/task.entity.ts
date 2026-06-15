@@ -78,9 +78,9 @@ export class Task extends Model<
     type: DataType.UUID,
     allowNull: false,
   })
-  declare createdBy: string;
+  declare createdById: string;
 
-  @BelongsTo(() => User, 'createdBy')
+  @BelongsTo(() => User, 'createdById')
   declare creator?: NonAttribute<User>;
 
   @HasMany(() => TaskAssignment)

@@ -6,9 +6,9 @@ import {
   Task,
   TaskQuery,
   UpdateTaskStatusPayload,
-  UpdateTaskPayload,
   TaskComment,
   CreateTaskCommentRequest,
+  UpdateTaskRequest,
 } from "./taskTypes";
 
 export const tasksApi = baseApi.injectEndpoints({
@@ -62,10 +62,7 @@ export const tasksApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-    updateTask: builder.mutation<
-      SuccessResponse<Task>,
-      { id: string; body: UpdateTaskPayload }
-    >({
+    updateTask: builder.mutation<SuccessResponse<Task>, UpdateTaskRequest>({
       query: ({ id, body }) => ({
         url: `/tasks/${id}`,
         method: "PATCH",
@@ -183,4 +180,3 @@ export const {
   useAddTaskCommentMutation,
   useDeleteTaskCommentMutation,
 } = tasksApi;
-

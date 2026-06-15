@@ -1,11 +1,13 @@
 import {
   IsDateString,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
 } from 'class-validator';
+import { TaskStatusName } from '../enums/task-status.enum';
 
 export class CreateTaskDto {
   @IsString()
@@ -20,10 +22,9 @@ export class CreateTaskDto {
   @IsDateString()
   dueDate!: string;
 
-  @IsUUID()
-  projectId!: string;
+  @IsEnum(TaskStatusName)
+  status!: TaskStatusName;
 
   @IsUUID()
-  @IsOptional()
-  assignedUserId?: string;
+  projectId!: string;
 }

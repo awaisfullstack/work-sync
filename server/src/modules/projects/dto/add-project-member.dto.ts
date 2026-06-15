@@ -7,5 +7,5 @@ export class AddProjectMemberDto {
   userId!: string;
 
   @IsEnum(ProjectMemberRole)
-  roleInProject!: ProjectMemberRole;
+  roleInProject: ProjectMemberRole = ProjectMemberRole.MEMBER;
 }

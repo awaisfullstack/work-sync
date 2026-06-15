@@ -13,7 +13,7 @@ import { User } from '../users/entities/user.entity';
 import { Role } from '../users/enums/users.enum';
 import { ProjectStatus } from './enums/project-status.enum';
 import { ProjectQueryDto } from './dto/project-query.dto';
-import { Includeable, Op, WhereOptions } from 'sequelize';
+import { Includeable, literal, Op, WhereOptions } from 'sequelize';
 import { AddProjectMemberDto } from './dto/add-project-member.dto';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 
@@ -30,14 +30,15 @@ export class ProjectsService {
     private readonly userModel: typeof User,
   ) {}
 
-  async create(dto: CreateProjectDto, createdById: string): Promise<Project> {
-    return await this.projectModel.create({
+  async create(dto: CreateProjectDto, createdById: string): Promise<null> {
+    await this.projectModel.create({
       title: dto.title,
       description: dto.description ?? null,
       createdById,
       status: dto.status ?? ProjectStatus.ACTIVE,
       deadline: dto.deadline ? new Date(dto.deadline) : null,
     });
+    return null;
   }
 
   async findAll(query: ProjectQueryDto, user: AuthenticatedUser) {
@@ -89,6 +90,18 @@ export class ProjectsService {
 
     const { rows, count } = await this.projectModel.findAndCountAll({
       where,
+      attributes: {
+        include: [
+          [
+            literal(`(
+            SELECT COUNT(*)
+            FROM project_members AS pm
+            WHERE pm.project_id = "Project"."id"
+          )`),
+            'membersCount',
+          ],
+        ],
+      },
       limit,
       offset,
       order: [[query.sortBy || 'createdAt', query.sortOrder || 'DESC']],
@@ -96,40 +109,8 @@ export class ProjectsService {
       distinct: true,
     });
 
-    const projectIds = rows.map((project) => project.id);
-    const projectMembers = projectIds.length
-      ? await this.projectMemberModel.findAll({
-          where: {
-            projectId: {
-              [Op.in]: projectIds,
-            },
-          },
-          attributes: ['id', 'projectId', 'userId'],
-          raw: true,
-        })
-      : [];
-
-    const membersByProjectId = projectMembers.reduce<
-      Record<string, { id: string; projectId: string; userId: string }[]>
-    >((acc, member) => {
-      acc[member.projectId] ??= [];
-      acc[member.projectId].push(member);
-
-      return acc;
-    }, {});
-    console.log('membersByProjectId', membersByProjectId);
-
-    const items = rows.map((project) => {
-      const members = membersByProjectId[project.id] ?? [];
-
-      return {
-        ...project.toJSON(),
-        membersCount: members.length,
-      };
-    });
-
     return {
-      items,
+      items: rows,
       pagination: {
         total: count,
         page,
@@ -240,7 +221,7 @@ export class ProjectsService {
       throw new NotFoundException('User not found');
     }
 
-    if (user.role !== (Role.EMPLOYEE as unknown as typeof user.role)) {
+    if ((user.role as Role) !== Role.EMPLOYEE) {
       throw new ForbiddenException(
         'Only employees can be assigned to projects',
       );
@@ -262,7 +243,7 @@ export class ProjectsService {
       userId: dto.userId,
       roleInProject: dto.roleInProject,
       joinedAt: new Date(),
-    } as ProjectMember);
+    });
   }
 
   async removeMember(projectId: string, userId: string): Promise<void> {
@@ -278,26 +259,6 @@ export class ProjectsService {
     }
 
     await member.destroy();
-  }
-
-  async getProjectMembers(projectId: string): Promise<ProjectMember[]> {
-    const project = await this.projectModel.findByPk(projectId);
-
-    if (!project) {
-      throw new NotFoundException('Project not found');
-    }
-
-    return this.projectMemberModel.findAll({
-      where: { projectId },
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'name', 'email', 'role'],
-        },
-      ],
-      order: [['createdAt', 'DESC']],
-    });
   }
 
   async ensureEmployeeCanAccessProject(

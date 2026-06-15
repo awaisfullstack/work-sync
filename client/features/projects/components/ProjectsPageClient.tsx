@@ -18,7 +18,6 @@ import { ProjectsTableToolbar } from "./ProjectsTableToolbar";
 const ProjectsPageClient = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<ProjectStatus | "ALL">("ALL");
   const [sortBy, setSortBy] = useState<ProjectSortBy>("createdAt");

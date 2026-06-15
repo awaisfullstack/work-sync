@@ -5,7 +5,11 @@ import Link from "next/link";
 import { TaskStatusBadge } from "./components/TaskStatusBadge";
 import { Task } from "./taskTypes";
 import { TaskRowActions } from "./components/TaskRowActions";
-import { formatDate, getDeadlineStatus } from "@/lib/utils/formatDate";
+import {
+  formatDate,
+  formatDate2,
+  getDeadlineStatus,
+} from "@/lib/utils/formatDate";
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -16,17 +20,18 @@ export const columns: ColumnDef<Task>[] = [
 
       return (
         <div>
-        <Link
-          href={`/tasks/${task.id}`}
-          className="font-medium text-slate-900 hover:text-blue-700"
-        >
-          {task.title}
-        </Link>
-
-        <p className="mt-1 truncate max-w-[300px] text-sm text-slate-500">
-          {task.description}
-        </p>
-      </div>
+          <Link
+            href={`/tasks/${task.id}`}
+            className="font-medium text-slate-900 hover:text-blue-700"
+          >
+            {task.title}
+          </Link>
+          {task.description && (
+            <p className="mt-1 truncate max-w-[300px] text-sm text-slate-500">
+              {task.description}
+            </p>
+          )}
+        </div>
       );
     },
   },
@@ -43,7 +48,7 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
   },
-   {
+  {
     accessorKey: "creator",
     header: "Created By",
     cell: ({ row }) => {
@@ -51,6 +56,9 @@ export const columns: ColumnDef<Task>[] = [
         <div>
           <p className="text-sm font-medium text-slate-900">
             {row.original.creator?.name ?? "Unknown"}
+          </p>
+          <p className="text-xs text-slate-500">
+            {formatDate2(row.original.createdAt)}
           </p>
         </div>
       );
@@ -93,5 +101,5 @@ export const columns: ColumnDef<Task>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => <TaskRowActions task={row.original} />,
-  }, 
+  },
 ];

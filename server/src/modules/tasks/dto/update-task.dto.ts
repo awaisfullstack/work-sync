@@ -1,4 +1,11 @@
-import { IsDateString, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { TaskStatusName } from '../enums/task-status.enum';
 
 export class UpdateTaskDto {
   @IsString()
@@ -13,4 +20,8 @@ export class UpdateTaskDto {
   @IsDateString()
   @IsOptional()
   dueDate?: string;
+
+  @IsEnum(TaskStatusName)
+  @IsOptional()
+  status!: TaskStatusName;
 }

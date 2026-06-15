@@ -116,15 +116,6 @@ export const projectsApi = baseApi.injectEndpoints({
         "ActivityLogs",
       ],
     }),
-    getProjectMembers: builder.query<SuccessResponse<ProjectMember[]>, string>({
-      query: (id) => ({
-        url: `/projects/${id}/members`,
-        method: "GET",
-      }),
-      providesTags: (_result, _error, id) => [
-        { type: "Projects" as const, id },
-      ],
-    }),
     removeProjectMember: builder.mutation<
       SuccessResponse<Project>,
       RemoveProjectMemberPayload
@@ -150,6 +141,5 @@ export const {
   useUpdateProjectMutation,
   useArchiveProjectMutation,
   useAssignProjectMemberMutation,
-  useGetProjectMembersQuery,
   useRemoveProjectMemberMutation,
 } = projectsApi;

@@ -10,7 +10,7 @@ import {
   Min,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { TaskStatusName } from '../entities/task-status.entity';
+import { TaskStatusName } from '../enums/task-status.enum';
 
 export class GetTasksQueryDto {
   @IsOptional()
@@ -34,7 +34,7 @@ export class GetTasksQueryDto {
   toDate?: string;
 
   @IsOptional()
-  @IsEnum(['createdAt', 'updatedAt', 'dueDate', 'title'])
+  @IsIn(['createdAt', 'updatedAt', 'dueDate', 'title'])
   sortBy?: 'createdAt' | 'updatedAt' | 'dueDate' | 'title';
 
   @IsOptional()

@@ -1,32 +1,36 @@
 import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
 import { Task } from './task.entity';
-
-export enum TaskStatusName {
-  TODO = 'TODO',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-}
+import type {
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+  NonAttribute,
+} from 'sequelize';
+import { TaskStatusName } from '../enums/task-status.enum';
 
 @Table({
   tableName: 'task_statuses',
   timestamps: true,
   underscored: true,
 })
-export class TaskStatus extends Model<TaskStatus> {
+export class TaskStatus extends Model<
+  InferAttributes<TaskStatus>,
+  InferCreationAttributes<TaskStatus>
+> {
   @Column({
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
     primaryKey: true,
   })
-  declare id: string;
+  declare id: CreationOptional<string>;
 
   @Column({
-    type: DataType.STRING(50),
+    type: DataType.ENUM(...Object.values(TaskStatusName)),
     allowNull: false,
     unique: true,
   })
   declare name: TaskStatusName;
 
   @HasMany(() => Task)
-  declare tasks?: Task[];
+  declare tasks?: NonAttribute<Task[]>;
 }

@@ -29,35 +29,11 @@ import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
+import { getDateInputValue,formatDateInputValue,parseDateInputValue } from "@/lib/utils/index";
 
 interface ProjectFormProps {
   mode: "create" | "update";
   project?: Project;
-}
-
-function getDateInputValue(date?: string) {
-  if (!date) return "";
-  return new Date(date).toISOString().split("T")[0];
-}
-
-function parseDateInputValue(value?: string) {
-  if (!value) return undefined;
-
-  const [year, month, day] = value.split("-").map(Number);
-
-  if (!year || !month || !day) return undefined;
-
-  return new Date(year, month - 1, day);
-}
-
-function formatDateInputValue(date?: Date) {
-  if (!date) return "";
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
 }
 
 export function ProjectForm({ mode, project }: ProjectFormProps) {
@@ -93,16 +69,16 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
     };
     try {
       if (mode === "create") {
-        await createProject(payload).unwrap();
-        toast.success("Project created successfully");
+        const res = await createProject(payload).unwrap();
+        toast.success(res.message);
       }
 
       if (mode === "update" && project) {
-        await updateProject({
+        const res = await updateProject({
           id: project.id,
           body: payload,
         }).unwrap();
-        toast.success("Project updated successfully");
+        toast.success(res.message);
       }
 
       router.push("/projects");
@@ -119,7 +95,6 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
       setError("root", {
         message,
       });
-      toast.error(message);
     }
   }
 
@@ -177,9 +152,11 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="COMPLETED">Completed</SelectItem>
-                  <SelectItem value="ARCHIVED">Archived</SelectItem>
+                  {Object.values(ProjectStatus).map((projectStatus) => (
+                    <SelectItem key={projectStatus} value={projectStatus}>
+                      {projectStatus[0] + projectStatus.slice(1).toLowerCase()}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}

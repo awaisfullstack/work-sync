@@ -13,6 +13,11 @@ export interface ErrorResponse {
   path?: string;
   method?: string;
   timestamp: string;
+  debug?: {
+    errorName: string;
+    originalErrorMessage?: string;
+    stack?: string;
+  };
 }
 
 export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;

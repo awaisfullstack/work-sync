@@ -26,6 +26,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('projects')
@@ -39,6 +40,7 @@ export class ProjectsController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a project' })
+  @ResponseMessage('Project created successfully')
   create(
     @Body() createProjectDto: CreateProjectDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -81,6 +83,7 @@ export class ProjectsController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update a project' })
+  @ResponseMessage('Project updated successfully')
   update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
     return this.projectsService.update(id, dto);
   }
@@ -99,14 +102,6 @@ export class ProjectsController {
   @ApiOperation({ summary: 'Add a project member' })
   addMember(@Param('id') projectId: string, @Body() dto: AddProjectMemberDto) {
     return this.projectsService.addMember(projectId, dto);
-  }
-
-  @Get(':id/members')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'List project members' })
-  getMembers(@Param('id') projectId: string) {
-    return this.projectsService.getProjectMembers(projectId);
   }
 
   @Delete(':id/members/:userId')

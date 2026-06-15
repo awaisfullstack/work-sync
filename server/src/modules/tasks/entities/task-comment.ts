@@ -8,19 +8,28 @@ import {
 } from 'sequelize-typescript';
 import { Task } from './task.entity';
 import { User } from '../../users/entities/user.entity';
+import type {
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+  NonAttribute,
+} from 'sequelize';
 
 @Table({
   tableName: 'task_comments',
   timestamps: true,
   underscored: true,
 })
-export class TaskComment extends Model<TaskComment> {
+export class TaskComment extends Model<
+  InferAttributes<TaskComment>,
+  InferCreationAttributes<TaskComment>
+> {
   @Column({
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
     primaryKey: true,
   })
-  declare id: string;
+  declare id: CreationOptional<string>;
 
   @ForeignKey(() => Task)
   @Column({
@@ -30,7 +39,7 @@ export class TaskComment extends Model<TaskComment> {
   declare taskId: string;
 
   @BelongsTo(() => Task)
-  declare task?: Task;
+  declare task?: NonAttribute<Task>;
 
   @ForeignKey(() => User)
   @Column({
@@ -40,7 +49,7 @@ export class TaskComment extends Model<TaskComment> {
   declare userId: string;
 
   @BelongsTo(() => User)
-  declare user?: User;
+  declare user?: NonAttribute<User>;
 
   @Column({
     type: DataType.TEXT,

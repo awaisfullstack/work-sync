@@ -27,7 +27,7 @@
     "seed:run": "sequelize-cli db:seed:all",
     "seed:undo": "sequelize-cli db:seed:undo --seed",
     "seed:undo:all": "sequelize-cli db:seed:undo",
-    "reset": "sequelize-cli db:seed:undo:all && sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all"
+    "reset": "sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

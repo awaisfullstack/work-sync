@@ -51,20 +51,10 @@ import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils/formatDate";
+import { getInitials } from "@/lib/utils/index";
 
 interface ProjectMembersManagerProps {
   project: Project;
-}
-
-function getInitials(name?: string) {
-  if (!name) return "U";
-
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }
 
 export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {

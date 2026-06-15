@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { format } from "date-fns"
-import { ChevronDownIcon } from "lucide-react"
+import * as React from "react";
+import { format } from "date-fns";
+import { ChevronDownIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 
 type DatePickerProps = Omit<
   React.ComponentProps<typeof Calendar>,
   "mode" | "selected" | "onSelect" | "defaultMonth"
 > & {
-  value?: Date
-  onChange?: (date: Date | undefined) => void
-  onBlur?: React.FocusEventHandler<HTMLButtonElement>
-  placeholder?: string
-  triggerClassName?: string
-}
+  value?: Date;
+  onChange?: (date: Date | undefined) => void;
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>;
+  placeholder?: string;
+  triggerClassName?: string;
+};
 
 export function DatePicker({
   value,
@@ -31,7 +31,7 @@ export function DatePicker({
   triggerClassName,
   ...props
 }: DatePickerProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -41,10 +41,7 @@ export function DatePicker({
           variant="outline"
           data-empty={!value}
           onBlur={onBlur}
-          className={
-            triggerClassName ??
-            "w-[212px] justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
-          }
+          className={triggerClassName}
         >
           {value ? format(value, "PPP") : <span>{placeholder}</span>}
           <ChevronDownIcon />
@@ -56,12 +53,12 @@ export function DatePicker({
           mode="single"
           selected={value}
           onSelect={(date) => {
-            onChange?.(date)
-            setOpen(false)
+            onChange?.(date);
+            setOpen(false);
           }}
           defaultMonth={value}
         />
       </PopoverContent>
     </Popover>
-  )
+  );
 }

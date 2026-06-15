@@ -61,11 +61,11 @@ const TaskViewPageClient = ({ taskId }: TaskViewPageClientProps) => {
     if (!task || status === task.status.name) return;
 
     try {
-      await updateTaskStatus({
+      const res = await updateTaskStatus({
         id: task.id,
         status,
       }).unwrap();
-      toast.success("Task status updated successfully");
+      toast.success(res.message);
     } catch (error) {
       toast.error(formatApiError(error));
     }
@@ -230,13 +230,11 @@ const TaskViewPageClient = ({ taskId }: TaskViewPageClientProps) => {
         </CardContent>
       </Card>
 
-    
-        <div className="space-y-6">
-          <TaskCommentsCard taskId={task.id} />
-        </div>
+      <div className="space-y-6">
+        <TaskCommentsCard taskId={task.id} />
+      </div>
 
-        <TaskMembersManager task={task} />
-        
+      <TaskMembersManager task={task} />
     </section>
   );
 };

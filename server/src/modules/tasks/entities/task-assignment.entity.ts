@@ -8,19 +8,28 @@ import {
 } from 'sequelize-typescript';
 import { Task } from './task.entity';
 import { User } from '../../users/entities/user.entity';
+import type {
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+  NonAttribute,
+} from 'sequelize';
 
 @Table({
   tableName: 'task_assignments',
   timestamps: true,
   underscored: true,
 })
-export class TaskAssignment extends Model<TaskAssignment> {
+export class TaskAssignment extends Model<
+  InferAttributes<TaskAssignment>,
+  InferCreationAttributes<TaskAssignment>
+> {
   @Column({
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
     primaryKey: true,
   })
-  declare id: string;
+  declare id: CreationOptional<string>;
 
   @ForeignKey(() => Task)
   @Column({
@@ -30,7 +39,7 @@ export class TaskAssignment extends Model<TaskAssignment> {
   declare taskId: string;
 
   @BelongsTo(() => Task)
-  declare task?: Task;
+  declare task?: NonAttribute<Task>;
 
   @ForeignKey(() => User)
   @Column({
@@ -40,7 +49,7 @@ export class TaskAssignment extends Model<TaskAssignment> {
   declare userId: string;
 
   @BelongsTo(() => User, 'userId')
-  declare user?: User;
+  declare user?: NonAttribute<User>;
 
   @ForeignKey(() => User)
   @Column({
@@ -50,7 +59,7 @@ export class TaskAssignment extends Model<TaskAssignment> {
   declare assignedBy: string;
 
   @BelongsTo(() => User, 'assignedBy')
-  declare assigner?: User;
+  declare assigner?: NonAttribute<User>;
 
   @Column({
     type: DataType.DATE,

@@ -1,6 +1,10 @@
 import type { Role } from "@/enums";
 
-export type TaskStatus = "TODO" | "IN_PROGRESS" | "COMPLETED";
+export enum TaskStatus {
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+}
 
 export type TaskSortBy = "createdAt" | "updatedAt" | "dueDate" | "title";
 
@@ -29,15 +33,6 @@ export interface TaskComment {
   user?: TaskUser;
 }
 
-export interface TaskStatusHistory {
-  id: string;
-  taskId: string;
-  status: TaskStatus;
-  createdAt: string;
-
-  changedBy?: TaskUser;
-}
-
 export interface TaskProjectSummary {
   id: string;
   title: string;
@@ -47,6 +42,8 @@ export interface TaskAssignment {
   id: string;
   taskId: string;
   userId: string;
+  assignedBy: string;
+  assignedAt: string;
   unassignedAt?: string | null;
   user: {
     id: string;
@@ -69,7 +66,6 @@ export interface Task {
   updatedAt: string;
 
   comments?: TaskComment[];
-  statusHistory?: TaskStatusHistory[];
 }
 
 export interface TaskQuery {
@@ -79,17 +75,17 @@ export interface TaskQuery {
   projectId?: string;
   startDate?: string;
   endDate?: string;
-  status?: TaskStatus | "";
+  status?: TaskStatus;
   sortBy?: TaskSortBy;
   sortOrder?: SortOrder;
 }
 
 export interface CreateTaskPayload {
   title: string;
-  description: string;
+  description?: string;
   dueDate: string;
   projectId: string;
-  assignedUserId?: string;
+  status: TaskStatus;
 }
 
 export interface CreateTaskCommentRequest {
@@ -97,10 +93,11 @@ export interface CreateTaskCommentRequest {
   comment: string;
 }
 
-export interface UpdateTaskPayload {
-  title?: string;
-  description?: string;
-  dueDate?: string;
+export type UpdateTaskPayload = Partial<Omit<CreateTaskPayload, "projectId">>;
+
+export interface UpdateTaskRequest {
+  id: string;
+  body: UpdateTaskPayload;
 }
 
 export interface UpdateTaskStatusPayload {

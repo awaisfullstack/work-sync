@@ -8,7 +8,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Task } from './entities/task.entity';
-import { TaskStatus, TaskStatusName } from './entities/task-status.entity';
+import { TaskStatus } from './entities/task-status.entity';
 import { TaskAssignment } from './entities/task-assignment.entity';
 import { TaskComment } from './entities/task-comment';
 import { Project } from '../projects/entities/project.entity';
@@ -25,6 +25,7 @@ import {
   ActivityAction,
   ActivityEntityType,
 } from '../activity-logs/entities/activity-log.entity';
+import { TaskStatusName } from './enums/task-status.enum';
 
 @Injectable()
 export class TasksService {
@@ -113,9 +114,9 @@ export class TasksService {
   ): Promise<void> {
     if (this.isAdmin(user)) return;
 
-    const member = await this.projectMemberModel.findOne({
+    const member = await this.taskAssignmentModel.findOne({
       where: {
-        projectId: task.projectId,
+        taskId: task.id,
         userId: user.id,
       },
     });
@@ -129,26 +130,20 @@ export class TasksService {
     createTaskDto: CreateTaskDto,
     user: AuthenticatedUser,
   ): Promise<Task> {
-    const { title, description, dueDate, projectId, assignedUserId } =
-      createTaskDto;
+    const { title, description, dueDate, projectId, status } = createTaskDto;
     await this.ensureProjectExists(projectId);
 
-    if (assignedUserId) {
-      await this.ensureUserExists(assignedUserId);
-      await this.ensureUserIsProjectMember(projectId, assignedUserId);
-    }
-
-    const todoStatus = await this.getStatusByName(TaskStatusName.TODO);
+    const todoStatus = await this.getStatusByName(status);
     const task = await this.taskModel.create({
       title,
       description: description ?? null,
       dueDate,
       projectId,
-      createdBy: user.id,
+      createdById: user.id,
       statusId: todoStatus.id,
     });
 
-    await this.activityLogsService.create({
+    /* await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_CREATED,
       entityType: ActivityEntityType.TASK,
@@ -159,27 +154,7 @@ export class TasksService {
         title: task.title,
         dueDate: task.dueDate,
       },
-    });
-
-    if (assignedUserId) {
-      await this.taskAssignmentModel.create({
-        userId: assignedUserId,
-        taskId: task.id,
-        assignedBy: user.id,
-      } as TaskAssignment);
-
-      await this.activityLogsService.create({
-        actorId: user.id,
-        action: ActivityAction.TASK_ASSIGNED,
-        entityType: ActivityEntityType.TASK,
-        entityId: task.id,
-        projectId: task.projectId,
-        message: `A user was assigned to task "${task.title}".`,
-        metadata: {
-          assignedUserId,
-        },
-      });
-    }
+    }); */
 
     return this.findOne(task.id, user);
   }
@@ -238,7 +213,7 @@ export class TasksService {
       {
         model: User,
         as: 'creator',
-        attributes: ['id', 'name', 'email'],
+        attributes: ['id', 'name', 'email', 'role'],
       },
     ];
 
@@ -270,7 +245,7 @@ export class TasksService {
     const { rows, count } = await this.taskModel.findAndCountAll({
       where: taskWhere,
       attributes: {
-        exclude: ['statusId', 'projectId', 'createdBy'],
+        exclude: ['statusId', 'projectId', 'createdById'],
       },
       include,
       limit,
@@ -298,12 +273,12 @@ export class TasksService {
         },
         {
           model: Project,
-          attributes: ['id', 'title', 'status'],
+          attributes: ['id', 'title'],
         },
         {
           model: User,
           as: 'creator',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'name', 'email', 'role'],
         },
         {
           model: TaskAssignment,
@@ -338,11 +313,13 @@ export class TasksService {
   ): Promise<Task> {
     const task = await this.findOne(taskId, user);
 
-    const { title, description, dueDate } = updateTaskDto;
+    const { title, description, dueDate, status } = updateTaskDto;
+    const taskStatus = await this.getStatusByName(status);
     await task.update({
       title: title ?? task.title,
       description: description ?? task.description,
       dueDate: dueDate ?? task.dueDate,
+      statusId: taskStatus.id ?? task.statusId,
     });
 
     return this.findOne(taskId, user);
@@ -360,7 +337,7 @@ export class TasksService {
       statusId: taskStatus.id,
     });
 
-    await this.activityLogsService.create({
+    /* await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_STATUS_UPDATED,
       entityType: ActivityEntityType.TASK,
@@ -370,7 +347,7 @@ export class TasksService {
       metadata: {
         status,
       },
-    });
+    }); */
 
     return this.findOne(id, user);
   }

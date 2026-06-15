@@ -44,7 +44,7 @@ export const columns: ColumnDef<Project>[] = [
     id: "members",
     header: "Members",
     cell: ({ row }) => {
-      const membersCount = row.original.membersCount ?? 0;
+      const membersCount = Number(row.original.membersCount) ?? 0;
 
       return (
         <span className="text-sm text-slate-700">

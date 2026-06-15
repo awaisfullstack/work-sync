@@ -9,19 +9,28 @@ import {
 import { ProjectMemberRole } from '../enums/project-member-role.enum';
 import { Project } from './project.entity';
 import { User } from '../../users/entities/user.entity';
+import type {
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+  NonAttribute,
+} from 'sequelize';
 
 @Table({
   tableName: 'project_members',
   timestamps: true,
   underscored: true,
 })
-export class ProjectMember extends Model<ProjectMember> {
+export class ProjectMember extends Model<
+  InferAttributes<ProjectMember>,
+  InferCreationAttributes<ProjectMember>
+> {
   @Column({
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
     primaryKey: true,
   })
-  declare id: string;
+  declare id: CreationOptional<string>;
 
   @ForeignKey(() => Project)
   @Column({
@@ -55,11 +64,11 @@ export class ProjectMember extends Model<ProjectMember> {
     foreignKey: 'projectId',
     as: 'project',
   })
-  declare project: Project;
+  declare project: NonAttribute<Project>;
 
   @BelongsTo(() => User, {
     foreignKey: 'userId',
     as: 'user',
   })
-  declare user: User;
+  declare user: NonAttribute<User>;
 }

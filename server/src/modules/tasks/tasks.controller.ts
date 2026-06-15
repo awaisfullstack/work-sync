@@ -28,6 +28,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tasks')
@@ -40,6 +41,7 @@ export class TasksController {
   @Post()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a task' })
+  @ResponseMessage('Task created successfully')
   create(@Body() dto: CreateTaskDto, @CurrentUser() user: AuthenticatedUser) {
     return this.tasksService.create(dto, user);
   }
@@ -62,6 +64,7 @@ export class TasksController {
   @Patch(':id')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update a task' })
+  @ResponseMessage('Task updated successfully')
   update(
     @Param('id') id: string,
     @Body() dto: UpdateTaskDto,
@@ -72,6 +75,7 @@ export class TasksController {
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update task status' })
+  @ResponseMessage('Task status updated successfully')
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateTaskStatusDto,
@@ -83,6 +87,7 @@ export class TasksController {
   @Post(':id/assign')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Assign a user to a task' })
+  @ResponseMessage('Task member assigned successfully')
   assign(
     @Param('id') id: string,
     @Body() dto: AssignTaskDto,
@@ -94,6 +99,7 @@ export class TasksController {
   @Patch(':id/unassign/:userId')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Unassign a user from a task' })
+  @ResponseMessage('Task member removed successfully')
   unassign(
     @Param('id') id: string,
     @Param('userId') userId: string,

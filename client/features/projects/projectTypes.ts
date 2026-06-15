@@ -58,7 +58,7 @@ export interface Project {
   createdBy: ProjectUser;
   archivedAt: string | null;
   members?: ProjectMember[];
-  membersCount: number;
+  membersCount: string;
   createdAt: string;
   updatedAt: string;
 }

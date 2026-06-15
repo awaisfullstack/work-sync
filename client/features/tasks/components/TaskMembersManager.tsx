@@ -16,12 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Command,
   CommandEmpty,
@@ -44,20 +39,10 @@ import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
 import { Task } from "../taskTypes";
 import { useAssignTaskMutation, useUnassignTaskMutation } from "../tasksApi";
+import { getInitials } from "@/lib/utils/index";
 
 interface TaskMembersManagerProps {
   task: Task;
-}
-
-function getInitials(name?: string) {
-  if (!name) return "U";
-
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }
 
 export function TaskMembersManager({ task }: TaskMembersManagerProps) {
@@ -96,7 +81,7 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
   }, [usersResponse, assignedUserIds]);
 
   const selectedUser = assignableUsers.find(
-    (user) => user.id === selectedUserId
+    (user) => user.id === selectedUserId,
   );
 
   async function handleAssignMember() {
@@ -105,18 +90,17 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
     setError("");
 
     try {
-      await assignTaskMember({
+      const res = await assignTaskMember({
         id: task.id,
         userId: selectedUserId,
       }).unwrap();
 
       setSelectedUserId("");
       setOpen(false);
-      toast.success("Task member assigned successfully");
+      toast.success(res.message);
     } catch (error) {
       const message = formatApiError(error);
       setError(message);
-      toast.error(message);
     }
   }
 
@@ -126,16 +110,15 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
     setError("");
 
     try {
-      await unassignTaskMember({
+     const res = await unassignTaskMember({
         id: task.id,
         userId: memberToRemove.userId,
       }).unwrap();
       setMemberToRemove(null);
-      toast.success("Task member removed successfully");
+      toast.success(res.message);
     } catch (error) {
       const message = formatApiError(error);
       setError(message);
-      toast.error(message);
     }
   }
 
@@ -198,7 +181,7 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
                                 "mr-2 h-4 w-4",
                                 selectedUserId === user.id
                                   ? "opacity-100"
-                                  : "opacity-0"
+                                  : "opacity-0",
                               )}
                             />
 
@@ -307,8 +290,8 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
             <AlertDialogHeader>
               <AlertDialogTitle>Remove task member?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will remove {memberToRemove?.name ?? "this user"} from
-                this task.
+                This will remove {memberToRemove?.name ?? "this user"} from this
+                task.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

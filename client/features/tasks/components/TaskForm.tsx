@@ -18,47 +18,24 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useGetProjectOptionsQuery } from "@/features/projects/projectsApi";
-import { useGetUserOptionsQuery } from "@/features/users/usersApi";
 import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
 import { taskSchema, type TaskFormValues } from "@/lib/validations/task.schema";
-import type { Task } from "../taskTypes";
+import { TaskStatus, type Task } from "../taskTypes";
 import {
   useCreateTaskMutation,
   useUpdateTaskMutation,
-  useUpdateTaskStatusMutation,
 } from "../tasksApi";
+import {
+  getDateInputValue,
+  formatDateInputValue,
+  parseDateInputValue,
+} from "@/lib/utils/index";
 
 interface TaskFormProps {
   mode: "create" | "update";
   task?: Task;
-}
-
-function getDateInputValue(date?: string) {
-  if (!date) return "";
-
-  return date.split("T")[0];
-}
-
-function parseDateInputValue(value?: string) {
-  if (!value) return undefined;
-
-  const [year, month, day] = value.split("-").map(Number);
-
-  if (!year || !month || !day) return undefined;
-
-  return new Date(year, month - 1, day);
-}
-
-function formatDateInputValue(date?: Date) {
-  if (!date) return "";
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
 }
 
 export function TaskForm({ mode, task }: TaskFormProps) {
@@ -66,18 +43,13 @@ export function TaskForm({ mode, task }: TaskFormProps) {
 
   const { data: projectsResponse, isLoading: isProjectsLoading } =
     useGetProjectOptionsQuery();
-  const { data: usersResponse, isLoading: isUsersLoading } =
-    useGetUserOptionsQuery();
 
   const [createTask, { isLoading: isCreating }] = useCreateTaskMutation();
   const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
-  const [updateTaskStatus, { isLoading: isUpdatingStatus }] =
-    useUpdateTaskStatusMutation();
 
   const projects = projectsResponse?.data ?? [];
-  const users = usersResponse?.data ?? [];
 
-  const isSubmitting = isCreating || isUpdating || isUpdatingStatus;
+  const isSubmitting = isCreating || isUpdating;
 
   const {
     register,
@@ -90,52 +62,38 @@ export function TaskForm({ mode, task }: TaskFormProps) {
     defaultValues: {
       title: task?.title ?? "",
       description: task?.description ?? "",
-      status: task?.status.name ?? "TODO",
+      status: task?.status.name ?? TaskStatus.TODO,
       dueDate: getDateInputValue(task?.dueDate),
       projectId: task?.projectId ?? task?.project?.id ?? "",
-      assignedUserId: "",
     },
   });
 
   async function onSubmit(values: TaskFormValues) {
     try {
       if (mode === "create") {
-        const response = await createTask({
+        const res = await createTask({
           title: values.title,
           description: values.description,
           dueDate: values.dueDate,
           projectId: values.projectId,
-          assignedUserId: values.assignedUserId || undefined,
+          status: values.status as TaskStatus,
         }).unwrap();
 
-        if (values.status !== "TODO") {
-          await updateTaskStatus({
-            id: response.data.id,
-            status: values.status,
-          }).unwrap();
-        }
-
-        toast.success("Task created successfully");
+        toast.success(res.message);
       }
 
       if (mode === "update" && task) {
-        await updateTask({
+        const res = await updateTask({
           id: task.id,
           body: {
             title: values.title,
             description: values.description,
             dueDate: values.dueDate,
+            status: values.status as TaskStatus,
           },
         }).unwrap();
 
-        if (task.status.name !== values.status) {
-          await updateTaskStatus({
-            id: task.id,
-            status: values.status,
-          }).unwrap();
-        }
-
-        toast.success("Task updated successfully");
+        toast.success(res.message);
       }
 
       router.push("/tasks");
@@ -152,7 +110,6 @@ export function TaskForm({ mode, task }: TaskFormProps) {
       setError("root", {
         message,
       });
-      toast.error(message);
     }
   }
 
@@ -247,82 +204,43 @@ export function TaskForm({ mode, task }: TaskFormProps) {
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        {mode === "create" && (
-          <div className="grid w-full gap-2">
-            <Label>Project</Label>
-            <Controller
-              name="projectId"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={isSubmitting || isProjectsLoading}
-                >
-                  <SelectTrigger className="w-auto" onBlur={field.onBlur}>
-                    <SelectValue
-                      placeholder={
-                        isProjectsLoading
-                          ? "Loading projects..."
-                          : "Select project"
-                      }
-                    />
-                  </SelectTrigger>
+      {mode === "create" && (
+        <div className="grid w-full gap-2">
+          <Label>Project</Label>
+          <Controller
+            name="projectId"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isSubmitting || isProjectsLoading}
+              >
+                <SelectTrigger className="w-auto" onBlur={field.onBlur}>
+                  <SelectValue
+                    placeholder={
+                      isProjectsLoading
+                        ? "Loading projects..."
+                        : "Select project"
+                    }
+                  />
+                </SelectTrigger>
 
-                  <SelectContent>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.projectId?.message && (
-              <p className="text-sm text-red-600">{errors.projectId.message}</p>
+                <SelectContent>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
-          </div>
-        )}
-        {mode === "create" && (
-          <div className="grid w-full gap-2">
-            <Label>Assign To</Label>
-            <Controller
-              name="assignedUserId"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={isSubmitting || isUsersLoading}
-                >
-                  <SelectTrigger className="w-auto" onBlur={field.onBlur}>
-                    <SelectValue
-                      placeholder={
-                        isUsersLoading ? "Loading users..." : "Select employee"
-                      }
-                    />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name} - {user.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.assignedUserId?.message && (
-              <p className="text-sm text-red-600">
-                {errors.assignedUserId.message}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+          />
+          {errors.projectId?.message && (
+            <p className="text-sm text-red-600">{errors.projectId.message}</p>
+          )}
+        </div>
+      )}
 
       <div className="flex justify-end gap-3">
         <Button
