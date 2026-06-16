@@ -1,4 +1,4 @@
-import { EditDepartmentPageClient } from "@/features/departments/components/EditDepartmentPageClient";
+import { EditDepartmentPageClient } from "@/modules/departments/components/EditDepartmentPageClient";
 
 interface EditDepartmentPageProps {
   params: Promise<{

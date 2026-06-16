@@ -1,4 +1,4 @@
-import { ManualShiftForm } from "@/features/shifts/components/ManualShiftForm";
+import { ManualShiftForm } from "@/modules/shifts/components/ManualShiftForm";
 
 export default function CreateShiftPage() {
   return (

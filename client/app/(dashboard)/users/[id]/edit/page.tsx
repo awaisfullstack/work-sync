@@ -1,4 +1,4 @@
-import { EditUserPageClient } from "@/features/users/components/EditUserPageClient";
+import { EditUserPageClient } from "@/modules/users/components/EditUserPageClient";
 
 interface EditUserPageProps {
   params: Promise<{

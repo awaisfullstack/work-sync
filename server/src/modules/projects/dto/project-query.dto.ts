@@ -25,8 +25,8 @@ export class ProjectQueryDto {
   limit: number = 10;
 
   @IsOptional()
-  @IsIn(['createdAt', 'updatedAt', 'deadline', 'title'])
-  sortBy?: 'createdAt' | 'updatedAt' | 'deadline' | 'title' = 'createdAt';
+  @IsIn(['createdAt', 'updatedAt', 'deadline'])
+  sortBy?: 'createdAt' | 'updatedAt' | 'deadline' = 'createdAt';
 
   @IsOptional()
   @IsIn(['ASC', 'DESC'])

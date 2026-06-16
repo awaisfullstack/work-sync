@@ -1,5 +1,5 @@
-import PageHeader from "@/components/shared/PageHeader";
-import UsersPageClient from "@/features/users/components/UsersPageClient";
+import PageHeader from "@/components/common/PageHeader";
+import UsersPageClient from "@/modules/users/components/UsersPageClient";
 
 export default function UsersPage() {
   return (

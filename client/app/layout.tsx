@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Public_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { StoreProvider } from "@/store/provider";
+import { ReduxProvider } from "@/providers/ReduxProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { FrontendErrorLogger } from "@/components/FrontendErrorLogger";
+import { FrontendErrorLogger } from "@/components/common/FrontendErrorLogger";
 
 const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -44,9 +44,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <FrontendErrorLogger />
-        <StoreProvider>
+        <ReduxProvider>
           <TooltipProvider>{children}</TooltipProvider>
-        </StoreProvider>
+        </ReduxProvider>
         <Toaster />
       </body>
     </html>

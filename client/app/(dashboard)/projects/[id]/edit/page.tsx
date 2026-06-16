@@ -1,5 +1,5 @@
 
-import { EditProjectPageClient } from "@/features/projects/components/EditProjectPageClient";
+import { EditProjectPageClient } from "@/modules/projects/components/EditProjectPageClient";
 
 interface EditProjectPageProps {
   params: Promise<{

@@ -54,6 +54,9 @@ module.exports = {
     await queryInterface.addIndex('shifts', ['clock_in_at'], {
       name: 'shifts_clock_in_at_idx',
     });
+    await queryInterface.addIndex('shifts', ['created_at'], {
+      name: 'shifts_created_at_idx',
+    });
     await queryInterface.addIndex('shifts', ['user_id', 'status'], {
       name: 'shifts_user_id_status_idx',
     });

@@ -1,4 +1,4 @@
-import { UserForm } from "@/features/users/components/UserForm";
+import { UserForm } from "@/modules/users/components/UserForm";
 
 export default function CreateUserPage() {
   return (

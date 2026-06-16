@@ -1,5 +1,5 @@
-import PageHeader from "@/components/shared/PageHeader";
-import ActivityLogsPageClient from "@/features/activity-logs/components/ActivityLogsPageClient";
+import PageHeader from "@/components/common/PageHeader";
+import ActivityLogsPageClient from "@/modules/activity-logs/components/ActivityLogsPageClient";
 
 export default function ActivityLogsPage() {
   return (

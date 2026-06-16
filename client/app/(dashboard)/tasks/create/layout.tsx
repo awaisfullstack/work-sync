@@ -1,4 +1,4 @@
-import AdminRoutes from "@/components/shared/AdminRoutes";
+import AdminRoutes from "@/components/layout/AdminRoutes";
 import type { ReactNode } from "react";
 
 export default function CreateTaskLayout({ children }: { children: ReactNode }) {

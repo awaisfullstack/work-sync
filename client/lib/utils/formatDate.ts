@@ -1,4 +1,4 @@
-import { TaskStatus } from "@/features/tasks/taskTypes";
+import { TaskStatus } from "@/types/task.types";
 import { GetDeadlineStatus } from "@/types";
 import { format } from "date-fns";
 

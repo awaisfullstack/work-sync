@@ -1,5 +1,5 @@
-import ProjectsPageClient from "@/features/projects/components/ProjectsPageClient";
-import PageHeader from "@/components/shared/PageHeader";
+import ProjectsPageClient from "@/modules/projects/components/ProjectsPageClient";
+import PageHeader from "@/components/common/PageHeader";
 
 export default function ProjectsPage() {
 

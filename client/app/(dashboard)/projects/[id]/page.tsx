@@ -1,4 +1,4 @@
-import ProjectViewPageClient from "@/features/projects/components/ProjectViewPageClient";
+import ProjectViewPageClient from "@/modules/projects/components/ProjectViewPageClient";
 
 interface ProjectViewPageProps {
   params: Promise<{

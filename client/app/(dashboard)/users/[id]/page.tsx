@@ -1,4 +1,4 @@
-import UserViewPageClient from "@/features/users/components/UserViewPageClient";
+import UserViewPageClient from "@/modules/users/components/UserViewPageClient";
 
 interface UserViewPageProps {
   params: Promise<{

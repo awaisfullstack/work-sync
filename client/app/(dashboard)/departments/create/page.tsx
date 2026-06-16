@@ -1,4 +1,4 @@
-import { DepartmentForm } from "@/features/departments/components/DepartmentForm";
+import { DepartmentForm } from "@/modules/departments/components/DepartmentForm";
 
 export default function CreateDepartmentPage() {
   return (

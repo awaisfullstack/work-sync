@@ -1,5 +1,5 @@
 
-import { ProjectForm } from "@/features/projects/components/ProjectForm";
+import { ProjectForm } from "@/modules/projects/components/ProjectForm";
 
 export default function CreateProjectPage() {
   return (

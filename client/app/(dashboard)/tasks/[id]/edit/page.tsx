@@ -1,4 +1,4 @@
-import { EditTaskPageClient } from "@/features/tasks/components/EditTaskPageClient";
+import { EditTaskPageClient } from "@/modules/tasks/components/EditTaskPageClient";
 
 interface EditTaskPageProps {
   params: Promise<{

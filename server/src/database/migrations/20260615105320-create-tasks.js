@@ -76,6 +76,12 @@ module.exports = {
     await queryInterface.addIndex('tasks', ['project_id'], {
       name: 'tasks_project_id_idx',
     });
+    await queryInterface.addIndex('tasks', ['created_at'], {
+      name: 'tasks_created_at_idx',
+    });
+    await queryInterface.addIndex('tasks', ['updated_at'], {
+      name: 'tasks_updated_at_idx',
+    });
     await queryInterface.addIndex('tasks', ['project_id', 'status_id'], {
       name: 'tasks_project_id_status_id_idx',
     });

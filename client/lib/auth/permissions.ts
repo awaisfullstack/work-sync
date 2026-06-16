@@ -1,5 +1,5 @@
-import { Role } from "@/enums";
-import type { AuthUser } from "@/features/auth/authTypes";
+import { Role } from "@/types/auth.types";
+import type { AuthUser } from "@/types/auth.types";
 
 export function isAdmin(user: AuthUser | null | undefined) {
   return user?.role === Role.ADMIN;

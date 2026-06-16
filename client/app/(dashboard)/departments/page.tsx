@@ -1,5 +1,5 @@
-import PageHeader from "@/components/shared/PageHeader";
-import DepartmentsPageClient from "@/features/departments/components/DepartmentsPageClient";
+import PageHeader from "@/components/common/PageHeader";
+import DepartmentsPageClient from "@/modules/departments/components/DepartmentsPageClient";
 
 export default function DepartmentsPage() {
   return (

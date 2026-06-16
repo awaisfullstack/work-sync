@@ -1,4 +1,4 @@
-import TaskViewPageClient from "@/features/tasks/components/TaskViewPageClient";
+import TaskViewPageClient from "@/modules/tasks/components/TaskViewPageClient";
 
 interface TaskViewPageProps {
   params: Promise<{

@@ -1,5 +1,5 @@
-import PageHeader from "@/components/shared/PageHeader";
-import TasksPageClient from "@/features/tasks/components/TasksPageClient";
+import PageHeader from "@/components/common/PageHeader";
+import TasksPageClient from "@/modules/tasks/components/TasksPageClient";
 
 export default function TasksPage() {
 

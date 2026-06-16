@@ -1,6 +1,6 @@
-import PageHeader from "@/components/shared/PageHeader";
-import DashboardPageClient from "@/features/dashboard/components/DashboardPageClient";
-import type { DashboardData } from "@/features/dashboard/dashboardTypes";
+import PageHeader from "@/components/common/PageHeader";
+import DashboardPageClient from "@/modules/dashboard/components/DashboardPageClient";
+import type { DashboardData } from "@/types/dashboard.types";
 import { serverFetch } from "@/lib/api/serverFetch";
 import type { SuccessResponse } from "@/types/api-response";
 

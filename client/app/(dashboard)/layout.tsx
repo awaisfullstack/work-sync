@@ -1,14 +1,14 @@
 "use client";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import AppLoader from "@/components/shared/AppLoader";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import AppLoader from "@/components/common/AppLoader";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useGetMeQuery } from "@/features/auth/authApi";
-import { logout, setUser } from "@/features/auth/authSlice";
+import { useGetMeQuery } from "@/store/api/authApi";
+import { logout, setUser } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";

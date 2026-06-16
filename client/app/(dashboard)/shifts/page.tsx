@@ -1,5 +1,5 @@
-import PageHeader from "@/components/shared/PageHeader";
-import ShiftsPageClient from "@/features/shifts/components/ShiftsPageClient";
+import PageHeader from "@/components/common/PageHeader";
+import ShiftsPageClient from "@/modules/shifts/components/ShiftsPageClient";
 
 export default function ShiftsPage() {
   return (
