@@ -1,12 +1,14 @@
 import { Type } from 'class-transformer';
 import {
   IsDateString,
+  IsEnum,
   IsIn,
   IsInt,
   IsOptional,
   IsUUID,
   Min,
 } from 'class-validator';
+import { ShiftStatus } from '../enums/shift-status.enum';
 
 export class ShiftQueryDto {
   @IsOptional()
@@ -22,8 +24,8 @@ export class ShiftQueryDto {
   toDate?: string;
 
   @IsOptional()
-  @IsIn(['ACTIVE', 'COMPLETED'])
-  status?: 'ACTIVE' | 'COMPLETED';
+  @IsEnum(ShiftStatus)
+  status?: ShiftStatus;
 
   @IsOptional()
   @IsIn(['clockInAt', 'clockOutAt', 'createdAt'])

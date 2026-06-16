@@ -55,7 +55,6 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
     userId: string;
     name?: string;
   } | null>(null);
-  const [error, setError] = useState("");
 
   const { data: usersResponse, isLoading: isUsersLoading } =
     useGetUserOptionsQuery(undefined, {
@@ -87,8 +86,6 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
   async function handleAssignMember() {
     if (!selectedUserId) return;
 
-    setError("");
-
     try {
       const res = await assignTaskMember({
         id: task.id,
@@ -100,17 +97,15 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
       toast.success(res.message);
     } catch (error) {
       const message = formatApiError(error);
-      setError(message);
+      toast.error(message);
     }
   }
 
   async function handleRemoveMember() {
     if (!memberToRemove) return;
 
-    setError("");
-
     try {
-     const res = await unassignTaskMember({
+      const res = await unassignTaskMember({
         id: task.id,
         userId: memberToRemove.userId,
       }).unwrap();
@@ -118,7 +113,7 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
       toast.success(res.message);
     } catch (error) {
       const message = formatApiError(error);
-      setError(message);
+      toast.error(message);
     }
   }
 
@@ -212,12 +207,6 @@ export function TaskMembersManager({ task }: TaskMembersManagerProps) {
       </CardHeader>
 
       <CardContent>
-        {error && (
-          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
         {members.length === 0 ? (
           <div className="rounded-xl border border-dashed p-8 text-center">
             <h3 className="font-semibold text-slate-900">

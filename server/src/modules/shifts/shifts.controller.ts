@@ -6,6 +6,8 @@ import {
   Param,
   UseGuards,
   Query,
+  Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ShiftsService } from './shifts.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -75,17 +77,14 @@ export class ShiftsController {
   @Get('me/worked-hours')
   @Roles(Role.EMPLOYEE)
   @ApiOperation({ summary: 'Get current employee worked hours' })
-  getMyWorkedHours(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string,
-  ) {
-    return this.shiftsService.getEmployeeWorkedHours(user.id, fromDate, toDate);
+  getMyWorkedHours(@CurrentUser() user: AuthenticatedUser) {
+    return this.shiftsService.getEmployeeWorkedHours(user.id);
   }
 
   @Post('manual')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a manual shift record' })
+  @ResponseMessage('Manual shift created successfully')
   createManualShift(@Body() dto: ManualShiftDto) {
     return this.shiftsService.createManualShift(dto);
   }
@@ -93,28 +92,36 @@ export class ShiftsController {
   @Get('worked-hours')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get worked hours for all employees' })
-  getAllEmployeesWorkedHours(
-    @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string,
-  ) {
-    return this.shiftsService.getWorkedHours(undefined, fromDate, toDate);
+  getAllEmployeesWorkedHours() {
+    return this.shiftsService.getWorkedHours(undefined);
+  }
+
+  @Get('all-active-shifts')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get all active shifts count' })
+  getAllActiveShifts() {
+    return this.shiftsService.getAllActiveShiftsCount();
   }
 
   @Get('user/:userId/worked-hours')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get worked hours for one employee' })
-  getEmployeeWorkedHours(
-    @Param('userId') userId: string,
-    @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string,
-  ) {
-    return this.shiftsService.getEmployeeWorkedHours(userId, fromDate, toDate);
+  getEmployeeWorkedHours(@Param('userId') userId: string) {
+    return this.shiftsService.getEmployeeWorkedHours(userId);
   }
 
   @Get(':id')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get one shift by id' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.shiftsService.findOne(id);
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete one shift by id' })
+  @ResponseMessage('Shift deleted successfully')
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.shiftsService.remove(id);
   }
 }

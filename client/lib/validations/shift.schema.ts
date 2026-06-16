@@ -5,17 +5,19 @@ export const manualShiftSchema = z
     userId: z.string().min(1, "Employee is required"),
     clockInDate: z.string().min(1, "Clock in date is required"),
     clockInTime: z.string().min(1, "Clock in time is required"),
-    clockOutDate: z.string().min(1, "Clock out date is required"),
-    clockOutTime: z.string().min(1, "Clock out time is required"),
+    clockOutDate: z.string().optional(),
+    clockOutTime: z.string().optional(),
   })
   .refine(
+    (values) => (!values.clockOutDate && !values.clockOutTime) || Boolean(values.clockOutDate && values.clockOutTime),
+    {
+      message: "Clock out date and time must both be provided",
+      path: ["clockOutTime"],
+    },
+  )
+  .refine(
     (values) => {
-      if (
-        !values.clockInDate ||
-        !values.clockInTime ||
-        !values.clockOutDate ||
-        !values.clockOutTime
-      ) {
+      if (!values.clockOutDate || !values.clockOutTime) {
         return true;
       }
 

@@ -1,6 +1,9 @@
 import type { Role } from "@/enums";
 
-export type ShiftStatus = "ACTIVE" | "COMPLETED";
+export enum ShiftStatus {
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+}
 export type ShiftSortBy = "clockInAt" | "clockOutAt" | "createdAt";
 export type SortOrder = "ASC" | "DESC";
 
@@ -9,6 +12,10 @@ export interface ShiftUser {
   name: string;
   email: string;
   role: Role;
+}
+
+export interface TotalActiveShifts {
+  totalActiveShifts: number;
 }
 
 export interface Shift {
@@ -25,13 +32,11 @@ export interface Shift {
 export interface ManualShiftPayload {
   userId: string;
   clockInAt: string;
-  clockOutAt: string;
+  clockOutAt?: string;
 }
 
 export interface ShiftWorkedHours {
   userId: string;
-  fromDate?: string | null;
-  toDate?: string | null;
   weekStart?: string;
   weekEnd?: string;
   totalMinutes: number;

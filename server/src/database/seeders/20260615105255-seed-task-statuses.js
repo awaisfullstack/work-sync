@@ -1,6 +1,19 @@
 'use strict';
 
-const taskStatuses = ['TODO', 'IN_PROGRESS', 'COMPLETED'];
+const taskStatuses = [
+  {
+    id: '40000000-0000-4000-8000-000000000001',
+    name: 'TODO',
+  },
+  {
+    id: '40000000-0000-4000-8000-000000000002',
+    name: 'IN_PROGRESS',
+  },
+  {
+    id: '40000000-0000-4000-8000-000000000003',
+    name: 'COMPLETED',
+  },
+];
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -9,9 +22,9 @@ module.exports = {
 
     await queryInterface.bulkInsert(
       'task_statuses',
-      taskStatuses.map((name) => ({
-        id: Sequelize.literal('gen_random_uuid()'),
-        name,
+      taskStatuses.map((status) => ({
+        id: status.id,
+        name: status.name,
         created_at: now,
         updated_at: now,
       })),
@@ -23,9 +36,18 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('task_statuses', {
-      name: {
-        [Sequelize.Op.in]: taskStatuses,
-      },
+      [Sequelize.Op.or]: [
+        {
+          id: {
+            [Sequelize.Op.in]: taskStatuses.map((status) => status.id),
+          },
+        },
+        {
+          name: {
+            [Sequelize.Op.in]: taskStatuses.map((status) => status.name),
+          },
+        },
+      ],
     });
   },
 };

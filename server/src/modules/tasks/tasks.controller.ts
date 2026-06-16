@@ -110,6 +110,7 @@ export class TasksController {
 
   @Post(':id/comments')
   @ApiOperation({ summary: 'Add a task comment' })
+  @ResponseMessage('Comment added successfully')
   addComment(
     @Param('id') id: string,
     @Body() dto: AddTaskCommentDto,
@@ -121,6 +122,7 @@ export class TasksController {
   @Delete(':id')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Delete a task' })
+  @ResponseMessage('Task deleted successfully')
   remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.tasksService.remove(id, user);
   }
@@ -136,6 +138,7 @@ export class TasksController {
 
   @Delete(':id/comments/:commentId')
   @ApiOperation({ summary: 'Delete a task comment' })
+  @ResponseMessage('Comment deleted successfully')
   deleteTaskComment(
     @Param('id') id: string,
     @Param('commentId') commentId: string,

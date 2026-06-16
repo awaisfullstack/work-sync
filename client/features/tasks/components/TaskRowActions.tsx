@@ -43,9 +43,9 @@ export function TaskRowActions({ task }: TaskRowActionsProps) {
 
   async function handleDelete() {
     try {
-      await deleteTask(task.id).unwrap();
+      const res = await deleteTask(task.id).unwrap();
       router.refresh();
-      toast.success("Task deleted successfully");
+      toast.success(res.message);
     } catch (error) {
       toast.error(formatApiError(error));
     }

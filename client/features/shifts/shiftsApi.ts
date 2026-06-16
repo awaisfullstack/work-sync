@@ -5,6 +5,7 @@ import type {
   Shift,
   ShiftQuery,
   ShiftWorkedHours,
+  TotalActiveShifts,
 } from "./shiftTypes";
 
 export const shiftsApi = baseApi.injectEndpoints({
@@ -46,7 +47,17 @@ export const shiftsApi = baseApi.injectEndpoints({
       }),
       providesTags: [{ type: "Shifts", id: "ACTIVE" }],
     }),
-    getWeeklyWorkedHours: builder.query<SuccessResponse<ShiftWorkedHours>, void>({
+    getAllActiveShifts: builder.query<SuccessResponse<TotalActiveShifts>, void>({
+      query: () => ({
+        url: "/shifts/all-active-shifts",
+        method: "GET",
+      }),
+      providesTags: [{ type: "Shifts", id: "All_ACTIVE" }],
+    }),
+    getWeeklyWorkedHours: builder.query<
+      SuccessResponse<ShiftWorkedHours>,
+      void
+    >({
       query: () => ({
         url: "/shifts/me/weekly-hours",
         method: "GET",
@@ -55,34 +66,34 @@ export const shiftsApi = baseApi.injectEndpoints({
     }),
     getMyWorkedHours: builder.query<
       SuccessResponse<ShiftWorkedHours>,
-      { fromDate?: string; toDate?: string }
+     void
     >({
-      query: (params) => ({
+      query: () => ({
         url: "/shifts/me/worked-hours",
         method: "GET",
-        params,
       }),
       providesTags: [{ type: "Shifts", id: "WORKED_HOURS" }],
     }),
-    getShifts: builder.query<SuccessResponse<PaginatedResponse<Shift>>, ShiftQuery>(
-      {
-        query: (params) => ({
-          url: "/shifts/me",
-          method: "GET",
-          params,
-        }),
-        providesTags: (result) =>
-          result
-            ? [
-                ...result.data.items.map((shift) => ({
-                  type: "Shifts" as const,
-                  id: shift.id,
-                })),
-                { type: "Shifts" as const, id: "LIST" },
-              ]
-            : [{ type: "Shifts" as const, id: "LIST" }],
-      },
-    ),
+    getShifts: builder.query<
+      SuccessResponse<PaginatedResponse<Shift>>,
+      ShiftQuery
+    >({
+      query: (params) => ({
+        url: "/shifts/me",
+        method: "GET",
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.data.items.map((shift) => ({
+                type: "Shifts" as const,
+                id: shift.id,
+              })),
+              { type: "Shifts" as const, id: "LIST" },
+            ]
+          : [{ type: "Shifts" as const, id: "LIST" }],
+    }),
     getShiftById: builder.query<SuccessResponse<Shift>, string>({
       query: (id) => ({
         url: `/shifts/${id}`,
@@ -90,30 +101,38 @@ export const shiftsApi = baseApi.injectEndpoints({
       }),
       providesTags: (_result, _error, id) => [{ type: "Shifts", id }],
     }),
-    createManualShift: builder.mutation<SuccessResponse<Shift>, ManualShiftPayload>(
-      {
-        query: (body) => ({
-          url: "/shifts/manual",
-          method: "POST",
-          body,
-        }),
-        invalidatesTags: (_result, _error, body) => [
-          { type: "Shifts", id: "LIST" },
-          { type: "Shifts", id: `${body.userId}-WORKED_HOURS` },
-          { type: "Shifts", id: "ALL_WORKED_HOURS" },
-          "Dashboard",
-          "ActivityLogs",
-        ],
-      },
-    ),
+    createManualShift: builder.mutation<
+      SuccessResponse<Shift>,
+      ManualShiftPayload
+    >({
+      query: (body) => ({
+        url: "/shifts/manual",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_result, _error, body) => [
+        { type: "Shifts", id: "LIST" },
+        { type: "Shifts", id: "All_ACTIVE" },
+        { type: "Shifts", id: `${body.userId}-WORKED_HOURS` },
+        { type: "Shifts", id: "ALL_WORKED_HOURS" },
+        "Dashboard",
+        "ActivityLogs",
+      ],
+    }),
+    deleteShift: builder.mutation<SuccessResponse<null>, string>({
+      query: (id) => ({
+        url: `/shifts/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Shifts", "Dashboard", "ActivityLogs"],
+    }),
     getEmployeeWorkedHours: builder.query<
       SuccessResponse<ShiftWorkedHours>,
-      { userId: string; fromDate?: string; toDate?: string }
+      { userId: string }
     >({
-      query: ({ userId, fromDate, toDate }) => ({
+      query: ({ userId }) => ({
         url: `/shifts/user/${userId}/worked-hours`,
         method: "GET",
-        params: { fromDate, toDate },
       }),
       providesTags: (_result, _error, { userId }) => [
         { type: "Shifts", id: `${userId}-WORKED_HOURS` },
@@ -121,12 +140,11 @@ export const shiftsApi = baseApi.injectEndpoints({
     }),
     getAllEmployeesWorkedHours: builder.query<
       SuccessResponse<ShiftWorkedHours>,
-      { fromDate?: string; toDate?: string }
+      void
     >({
-      query: (params) => ({
+      query: () => ({
         url: "/shifts/worked-hours",
         method: "GET",
-        params,
       }),
       providesTags: [{ type: "Shifts", id: "ALL_WORKED_HOURS" }],
     }),
@@ -138,11 +156,12 @@ export const {
   useClockOutMutation,
   useCreateManualShiftMutation,
   useGetActiveShiftQuery,
+  useGetAllActiveShiftsQuery,
   useGetAllEmployeesWorkedHoursQuery,
   useGetEmployeeWorkedHoursQuery,
   useGetMyWorkedHoursQuery,
   useGetShiftByIdQuery,
   useGetShiftsQuery,
   useGetWeeklyWorkedHoursQuery,
+  useDeleteShiftMutation,
 } = shiftsApi;
-

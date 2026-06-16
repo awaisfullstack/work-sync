@@ -1,12 +1,14 @@
+import { ShiftStatus } from "./shiftTypes";
+
 export function getShiftDurationMinutes(
   clockInAt: string,
   clockOutAt: string | null,
-  status: "ACTIVE" | "COMPLETED",
+  status: ShiftStatus,
 ) {
   const start = new Date(clockInAt).getTime();
   const end =
     status === "ACTIVE" || !clockOutAt
-      ? Date.now()
+      ? 0
       : new Date(clockOutAt).getTime();
 
   if (Number.isNaN(start) || Number.isNaN(end) || end <= start) {

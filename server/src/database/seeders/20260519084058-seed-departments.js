@@ -1,10 +1,22 @@
 'use strict';
 
 const departments = [
-  'Development',
-  'Human Resources',
-  'Operations',
-  'Design',
+  {
+    id: '10000000-0000-4000-8000-000000000001',
+    name: 'Development',
+  },
+  {
+    id: '10000000-0000-4000-8000-000000000002',
+    name: 'Human Resources',
+  },
+  {
+    id: '10000000-0000-4000-8000-000000000003',
+    name: 'Operations',
+  },
+  {
+    id: '10000000-0000-4000-8000-000000000004',
+    name: 'Design',
+  },
 ];
 
 /** @type {import('sequelize-cli').Migration} */
@@ -14,9 +26,9 @@ module.exports = {
 
     await queryInterface.bulkInsert(
       'departments',
-      departments.map((name) => ({
-        id: Sequelize.literal('gen_random_uuid()'),
-        name,
+      departments.map((department) => ({
+        id: department.id,
+        name: department.name,
         created_at: now,
         updated_at: now,
       })),
@@ -28,9 +40,20 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('departments', {
-      name: {
-        [Sequelize.Op.in]: departments,
-      },
+      [Sequelize.Op.or]: [
+        {
+          id: {
+            [Sequelize.Op.in]: departments.map((department) => department.id),
+          },
+        },
+        {
+          name: {
+            [Sequelize.Op.in]: departments.map(
+              (department) => department.name,
+            ),
+          },
+        },
+      ],
     });
   },
 };

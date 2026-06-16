@@ -1,4 +1,4 @@
-import { IsDateString, IsUUID } from 'class-validator';
+import { IsDateString, IsOptional, IsUUID } from 'class-validator';
 
 export class ManualShiftDto {
   @IsUUID()
@@ -7,6 +7,7 @@ export class ManualShiftDto {
   @IsDateString()
   clockInAt!: string;
 
+  @IsOptional()
   @IsDateString()
-  clockOutAt!: string;
+  clockOutAt?: string;
 }

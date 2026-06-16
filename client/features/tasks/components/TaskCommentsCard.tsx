@@ -34,7 +34,6 @@ interface TaskCommentsCardProps {
 export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
   const currentUser = useAppSelector((state) => state.auth.user);
   const [comment, setComment] = useState("");
-  const [error, setError] = useState("");
 
   const { data, isLoading, isFetching } = useGetTaskCommentsQuery(taskId);
 
@@ -47,35 +46,29 @@ export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
   async function handleAddComment() {
     if (!comment.trim()) return;
 
-    setError("");
-
     try {
-      await addComment({
+      const res = await addComment({
         taskId,
         comment: comment.trim(),
       }).unwrap();
 
       setComment("");
-      toast.success("Comment added successfully");
+      toast.success(res.message);
     } catch (error) {
       const message = formatApiError(error);
-      setError(message);
       toast.error(message);
     }
   }
 
   async function handleDeleteComment(commentId: string) {
-    setError("");
-
     try {
-      await deleteComment({
+      const res = await deleteComment({
         taskId,
         commentId,
       }).unwrap();
-      toast.success("Comment deleted successfully");
+      toast.success(res.message);
     } catch (error) {
       const message = formatApiError(error);
-      setError(message);
       toast.error(message);
     }
   }
@@ -87,12 +80,6 @@ export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-5">
-        {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
         <div className="space-y-3">
           <Textarea
             rows={4}
@@ -133,10 +120,7 @@ export function TaskCommentsCard({ taskId }: TaskCommentsCardProps) {
                 item.userId === currentUser?.id;
 
               return (
-                <div
-                  key={item.id}
-                  className="flex gap-3 rounded-lg border p-4"
-                >
+                <div key={item.id} className="flex gap-3 rounded-lg border p-4">
                   <Avatar>
                     <AvatarFallback>
                       {getInitials(item.user?.name)}

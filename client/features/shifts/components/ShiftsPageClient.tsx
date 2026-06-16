@@ -10,6 +10,7 @@ import { Role } from "@/enums";
 import { useAppSelector } from "@/store/hooks";
 import { columns } from "../columns";
 import {
+  useGetAllActiveShiftsQuery,
   useGetAllEmployeesWorkedHoursQuery,
   useGetEmployeeWorkedHoursQuery,
   useGetMyWorkedHoursQuery,
@@ -19,16 +20,7 @@ import type { ShiftSortBy, ShiftStatus, SortOrder } from "../shiftTypes";
 import { formatShiftDuration } from "../utils";
 import { ShiftClockCard } from "./ShiftClockCard";
 import { ShiftsTableToolbar } from "./ShiftsTableToolbar";
-
-function formatDateParam(date?: Date) {
-  if (!date) return undefined;
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
+import { formatDateInputValue } from "@/lib/utils/index";
 
 const ShiftsPageClient = () => {
   const currentUser = useAppSelector((state) => state.auth.user);
@@ -42,8 +34,8 @@ const ShiftsPageClient = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("DESC");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  const fromDate = formatDateParam(dateRange?.from);
-  const toDate = formatDateParam(dateRange?.to);
+  const fromDate = formatDateInputValue(dateRange?.from);
+  const toDate = formatDateInputValue(dateRange?.to);
 
   const queryArgs = useMemo(
     () => ({
@@ -53,68 +45,46 @@ const ShiftsPageClient = () => {
       status: status === "ALL" ? undefined : status,
       sortBy,
       sortOrder,
-      fromDate,
-      toDate,
+      fromDate: fromDate || undefined,
+      toDate: toDate || undefined,
     }),
     [page, limit, employeeId, status, sortBy, sortOrder, fromDate, toDate],
-  );
-  const activeShiftsQueryArgs = useMemo(
-    () => ({
-      page: 1,
-      limit: 1,
-      userId: employeeId === "all" ? undefined : employeeId,
-      status: "ACTIVE" as ShiftStatus,
-      sortBy,
-      sortOrder,
-      fromDate,
-      toDate,
-    }),
-    [employeeId, sortBy, sortOrder, fromDate, toDate],
   );
 
   const { data, isLoading, isFetching, isError, refetch } =
     useGetShiftsQuery(queryArgs);
-  const { data: activeShiftsResponse } =
-    useGetShiftsQuery(activeShiftsQueryArgs);
+
+  const { data: allActiveShiftsResponse } = useGetAllActiveShiftsQuery(
+    undefined,
+    {
+      skip: !isAdmin,
+    },
+  );
+
   const { data: employeeWorkedHoursResponse } = useGetEmployeeWorkedHoursQuery(
     {
       userId: employeeId,
-      fromDate,
-      toDate,
     },
     {
       skip: !isAdmin || employeeId === "all",
     },
   );
   const { data: allEmployeesWorkedHoursResponse } =
-    useGetAllEmployeesWorkedHoursQuery(
-      {
-        fromDate,
-        toDate,
-      },
-      {
-        skip: !isAdmin || employeeId !== "all",
-      },
-    );
-  const { data: myWorkedHoursResponse } = useGetMyWorkedHoursQuery(
-    {
-      fromDate,
-      toDate,
-    },
-    {
-      skip: isAdmin,
-    },
-  );
+    useGetAllEmployeesWorkedHoursQuery(undefined, {
+      skip: !isAdmin || employeeId !== "all",
+    });
+  const { data: myWorkedHoursResponse } = useGetMyWorkedHoursQuery(undefined, {
+    skip: isAdmin,
+  });
 
   const shiftsData = data?.data;
-  const activeShiftsData = activeShiftsResponse?.data;
+  const totalActiveShifts = allActiveShiftsResponse?.data.totalActiveShifts;
   const employeeWorkedHours = employeeWorkedHoursResponse?.data;
   const allEmployeesWorkedHours = allEmployeesWorkedHoursResponse?.data;
   const myWorkedHours = myWorkedHoursResponse?.data;
   const shifts = shiftsData?.items ?? [];
   const totalItems = shiftsData?.pagination.total ?? 0;
   const totalPages = shiftsData?.pagination.totalPages ?? 1;
-  const activeShiftsCount = activeShiftsData?.pagination.total ?? 0;
   const workedHoursMinutes = isAdmin
     ? employeeId === "all"
       ? (allEmployeesWorkedHours?.totalMinutes ?? 0)
@@ -177,7 +147,7 @@ const ShiftsPageClient = () => {
         <div className="rounded-2xl border bg-white p-5 shadow-sm">
           <p className="text-sm text-slate-500">Active Shifts</p>
           <h3 className="mt-2 text-2xl font-bold text-green-700">
-            {activeShiftsCount}
+            {totalActiveShifts}
           </h3>
         </div>
 
@@ -185,8 +155,8 @@ const ShiftsPageClient = () => {
           <p className="text-sm text-slate-500">
             {isAdmin
               ? employeeId === "all"
-                ? "All Employees Hours"
-                : "Selected Employee Hours"
+                ? "All Employees Total Hours"
+                : "Selected Employee Total Hours"
               : "Total Worked Hours"}
           </p>
           <h3 className="mt-2 text-2xl font-bold text-slate-700">

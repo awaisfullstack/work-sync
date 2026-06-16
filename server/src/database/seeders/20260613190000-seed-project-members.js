@@ -2,63 +2,75 @@
 
 const projectMembers = [
   {
-    project_title: 'WorkSync Backend API',
-    user_email: 'taha.siddiqui@worksync.com',
+    id: '31000000-0000-4000-8000-000000000001',
+    project_id: '30000000-0000-4000-8000-000000000001',
+    user_id: '20000000-0000-4000-8000-000000000016',
     role_in_project: 'LEAD',
   },
   {
-    project_title: 'WorkSync Backend API',
-    user_email: 'imran.qureshi@worksync.com',
+    id: '31000000-0000-4000-8000-000000000002',
+    project_id: '30000000-0000-4000-8000-000000000001',
+    user_id: '20000000-0000-4000-8000-000000000017',
     role_in_project: 'MEMBER',
   },
   {
-    project_title: 'WorkSync Backend API',
-    user_email: 'noor.fatima@worksync.com',
+    id: '31000000-0000-4000-8000-000000000003',
+    project_id: '30000000-0000-4000-8000-000000000001',
+    user_id: '20000000-0000-4000-8000-000000000022',
     role_in_project: 'MEMBER',
   },
   {
-    project_title: 'WorkSync Frontend Dashboard',
-    user_email: 'maryam.iqbal@worksync.com',
+    id: '31000000-0000-4000-8000-000000000004',
+    project_id: '30000000-0000-4000-8000-000000000002',
+    user_id: '20000000-0000-4000-8000-000000000018',
     role_in_project: 'LEAD',
   },
   {
-    project_title: 'WorkSync Frontend Dashboard',
-    user_email: 'laiba.hassan@worksync.com',
+    id: '31000000-0000-4000-8000-000000000005',
+    project_id: '30000000-0000-4000-8000-000000000002',
+    user_id: '20000000-0000-4000-8000-000000000019',
     role_in_project: 'MEMBER',
   },
   {
-    project_title: 'WorkSync Frontend Dashboard',
-    user_email: 'hania.sheikh@worksync.com',
+    id: '31000000-0000-4000-8000-000000000006',
+    project_id: '30000000-0000-4000-8000-000000000002',
+    user_id: '20000000-0000-4000-8000-000000000023',
     role_in_project: 'MEMBER',
   },
   {
-    project_title: 'Internal HR Portal',
-    user_email: 'sara.malik@worksync.com',
+    id: '31000000-0000-4000-8000-000000000007',
+    project_id: '30000000-0000-4000-8000-000000000003',
+    user_id: '20000000-0000-4000-8000-000000000006',
     role_in_project: 'LEAD',
   },
   {
-    project_title: 'Internal HR Portal',
-    user_email: 'ayesha.noor@worksync.com',
+    id: '31000000-0000-4000-8000-000000000008',
+    project_id: '30000000-0000-4000-8000-000000000003',
+    user_id: '20000000-0000-4000-8000-000000000007',
     role_in_project: 'MEMBER',
   },
   {
-    project_title: 'QA Automation Setup',
-    user_email: 'ahmed.faraz@worksync.com',
+    id: '31000000-0000-4000-8000-000000000009',
+    project_id: '30000000-0000-4000-8000-000000000004',
+    user_id: '20000000-0000-4000-8000-000000000012',
     role_in_project: 'LEAD',
   },
   {
-    project_title: 'QA Automation Setup',
-    user_email: 'danish.mehmood@worksync.com',
+    id: '31000000-0000-4000-8000-000000000010',
+    project_id: '30000000-0000-4000-8000-000000000004',
+    user_id: '20000000-0000-4000-8000-000000000013',
     role_in_project: 'MEMBER',
   },
   {
-    project_title: 'Reporting and Analytics Module',
-    user_email: 'iqra.javed@worksync.com',
+    id: '31000000-0000-4000-8000-000000000011',
+    project_id: '30000000-0000-4000-8000-000000000005',
+    user_id: '20000000-0000-4000-8000-000000000020',
     role_in_project: 'LEAD',
   },
   {
-    project_title: 'Reporting and Analytics Module',
-    user_email: 'sana.tariq@worksync.com',
+    id: '31000000-0000-4000-8000-000000000012',
+    project_id: '30000000-0000-4000-8000-000000000005',
+    user_id: '20000000-0000-4000-8000-000000000021',
     role_in_project: 'MEMBER',
   },
 ];
@@ -66,62 +78,11 @@ const projectMembers = [
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const requiredProjectTitles = [
-      ...new Set(projectMembers.map((member) => member.project_title)),
-    ];
-    const requiredUserEmails = [
-      ...new Set(projectMembers.map((member) => member.user_email)),
-    ];
-
-    const projectRows = await queryInterface.sequelize.query(
-      `
-      SELECT id, title
-      FROM projects
-      WHERE title IN (:titles)
-      `,
-      {
-        replacements: { titles: requiredProjectTitles },
-        type: Sequelize.QueryTypes.SELECT,
-      },
-    );
-    const userRows = await queryInterface.sequelize.query(
-      `
-      SELECT id, email
-      FROM users
-      WHERE email IN (:emails)
-      `,
-      {
-        replacements: { emails: requiredUserEmails },
-        type: Sequelize.QueryTypes.SELECT,
-      },
-    );
-
-    const projectByTitle = new Map(
-      projectRows.map((project) => [project.title, project.id]),
-    );
-    const userByEmail = new Map(userRows.map((user) => [user.email, user.id]));
-
-    const missingProjects = requiredProjectTitles.filter(
-      (title) => !projectByTitle.has(title),
-    );
-    const missingUsers = requiredUserEmails.filter(
-      (email) => !userByEmail.has(email),
-    );
-
-    if (missingProjects.length > 0) {
-      throw new Error(
-        `Required projects not found: ${missingProjects.join(', ')}`,
-      );
-    }
-
-    if (missingUsers.length > 0) {
-      throw new Error(`Required users not found: ${missingUsers.join(', ')}`);
-    }
-
     const now = new Date();
     const values = projectMembers.map((member) => ({
-      project_id: projectByTitle.get(member.project_title),
-      user_id: userByEmail.get(member.user_email),
+      id: member.id,
+      project_id: member.project_id,
+      user_id: member.user_id,
       role_in_project: member.role_in_project,
       joined_at: now,
       created_at: now,
@@ -129,63 +90,19 @@ module.exports = {
     }));
 
     await queryInterface.bulkDelete('project_members', {
-      [Sequelize.Op.or]: values.map((member) => ({
-        project_id: member.project_id,
-        user_id: member.user_id,
-      })),
+      id: {
+        [Sequelize.Op.in]: projectMembers.map((member) => member.id),
+      },
     });
 
     await queryInterface.bulkInsert('project_members', values);
   },
 
   async down(queryInterface, Sequelize) {
-    const requiredProjectTitles = [
-      ...new Set(projectMembers.map((member) => member.project_title)),
-    ];
-    const requiredUserEmails = [
-      ...new Set(projectMembers.map((member) => member.user_email)),
-    ];
-
-    const projectRows = await queryInterface.sequelize.query(
-      `
-      SELECT id, title
-      FROM projects
-      WHERE title IN (:titles)
-      `,
-      {
-        replacements: { titles: requiredProjectTitles },
-        type: Sequelize.QueryTypes.SELECT,
-      },
-    );
-    const userRows = await queryInterface.sequelize.query(
-      `
-      SELECT id, email
-      FROM users
-      WHERE email IN (:emails)
-      `,
-      {
-        replacements: { emails: requiredUserEmails },
-        type: Sequelize.QueryTypes.SELECT,
-      },
-    );
-
-    const projectByTitle = new Map(
-      projectRows.map((project) => [project.title, project.id]),
-    );
-    const userByEmail = new Map(userRows.map((user) => [user.email, user.id]));
-    const deletePairs = projectMembers
-      .map((member) => ({
-        project_id: projectByTitle.get(member.project_title),
-        user_id: userByEmail.get(member.user_email),
-      }))
-      .filter((member) => member.project_id && member.user_id);
-
-    if (deletePairs.length === 0) {
-      return;
-    }
-
     await queryInterface.bulkDelete('project_members', {
-      [Sequelize.Op.or]: deletePairs,
+      id: {
+        [Sequelize.Op.in]: projectMembers.map((member) => member.id),
+      },
     });
   },
 };

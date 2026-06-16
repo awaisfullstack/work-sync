@@ -6,25 +6,30 @@ import {
   ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
+import type {
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+  NonAttribute,
+} from 'sequelize';
 import { User } from '../../users/entities/user.entity';
-
-export enum ShiftStatus {
-  ACTIVE = 'ACTIVE',
-  COMPLETED = 'COMPLETED',
-}
+import { ShiftStatus } from '../enums/shift-status.enum';
 
 @Table({
   tableName: 'shifts',
   timestamps: true,
   underscored: true,
 })
-export class Shift extends Model<Shift> {
+export class Shift extends Model<
+  InferAttributes<Shift>,
+  InferCreationAttributes<Shift>
+> {
   @Column({
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
     primaryKey: true,
   })
-  declare id: string;
+  declare id: CreationOptional<string>;
 
   @ForeignKey(() => User)
   @Column({
@@ -50,8 +55,8 @@ export class Shift extends Model<Shift> {
     allowNull: false,
     defaultValue: ShiftStatus.ACTIVE,
   })
-  declare status: ShiftStatus;
+  declare status: CreationOptional<ShiftStatus>;
 
   @BelongsTo(() => User)
-  declare user: User;
+  declare user?: NonAttribute<User>;
 }

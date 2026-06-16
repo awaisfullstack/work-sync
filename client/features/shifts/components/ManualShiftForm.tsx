@@ -25,26 +25,8 @@ import {
   type ManualShiftFormValues,
 } from "@/lib/validations/shift.schema";
 import { useCreateManualShiftMutation } from "../shiftsApi";
-
-function parseDateInputValue(value?: string) {
-  if (!value) return undefined;
-
-  const [year, month, day] = value.split("-").map(Number);
-
-  if (!year || !month || !day) return undefined;
-
-  return new Date(year, month - 1, day);
-}
-
-function formatDateInputValue(date?: Date) {
-  if (!date) return "";
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
+import { formatDateInputValue, parseDateInputValue } from "@/lib/utils/index";
+import type { ManualShiftPayload } from "../shiftTypes";
 
 function toIsoDateTime(date: string, time: string) {
   return new Date(`${date}T${time}`).toISOString();
@@ -78,13 +60,21 @@ export function ManualShiftForm() {
 
   async function onSubmit(values: ManualShiftFormValues) {
     try {
-      await createManualShift({
+      const payload: ManualShiftPayload = {
         userId: values.userId,
         clockInAt: toIsoDateTime(values.clockInDate, values.clockInTime),
-        clockOutAt: toIsoDateTime(values.clockOutDate, values.clockOutTime),
-      }).unwrap();
+      };
 
-      toast.success("Manual shift created successfully");
+      if (values.clockOutDate && values.clockOutTime) {
+        payload.clockOutAt = toIsoDateTime(
+          values.clockOutDate,
+          values.clockOutTime,
+        );
+      }
+
+      const res = await createManualShift(payload).unwrap();
+
+      toast.success(res.message);
       router.push("/shifts");
     } catch (error) {
       const message = formatApiError(error);
@@ -96,7 +86,6 @@ export function ManualShiftForm() {
         },
       });
       setError("root", { message });
-      toast.error(message);
     }
   }
 
@@ -141,7 +130,7 @@ export function ManualShiftForm() {
               <SelectContent>
                 {employees.map((employee) => (
                   <SelectItem key={employee.id} value={employee.id}>
-                    {employee.name} - {employee.email}
+                    {employee.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -171,9 +160,7 @@ export function ManualShiftForm() {
             )}
           />
           {errors.clockInDate?.message && (
-            <p className="text-sm text-red-600">
-              {errors.clockInDate.message}
-            </p>
+            <p className="text-sm text-red-600">{errors.clockInDate.message}</p>
           )}
         </div>
 
@@ -182,13 +169,12 @@ export function ManualShiftForm() {
           <Input
             id="clockInTime"
             type="time"
+            className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
             disabled={isCreating}
             {...register("clockInTime")}
           />
           {errors.clockInTime?.message && (
-            <p className="text-sm text-red-600">
-              {errors.clockInTime.message}
-            </p>
+            <p className="text-sm text-red-600">{errors.clockInTime.message}</p>
           )}
         </div>
 
@@ -220,6 +206,7 @@ export function ManualShiftForm() {
           <Input
             id="clockOutTime"
             type="time"
+            className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
             disabled={isCreating}
             {...register("clockOutTime")}
           />

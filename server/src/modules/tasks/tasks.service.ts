@@ -376,7 +376,7 @@ export class TasksService {
       assignedBy: user.id,
     } as TaskAssignment);
 
-    await this.activityLogsService.create({
+    /* await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_ASSIGNED,
       entityType: ActivityEntityType.TASK,
@@ -386,7 +386,7 @@ export class TasksService {
       metadata: {
         assignedUserId: dto.userId,
       },
-    });
+    }); */
 
     return this.findOne(taskId, user);
   }
@@ -428,9 +428,9 @@ export class TasksService {
       taskId: task.id,
       userId: user.id,
       comment: dto.comment,
-    } as TaskComment);
+    });
 
-    await this.activityLogsService.create({
+    /* await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_COMMENT_ADDED,
       entityType: ActivityEntityType.TASK_COMMENT,
@@ -440,7 +440,7 @@ export class TasksService {
       metadata: {
         taskId: task.id,
       },
-    });
+    }); */
 
     return comment;
   }
@@ -496,7 +496,7 @@ export class TasksService {
 
     await comment.destroy();
 
-    await this.activityLogsService.create({
+    /* await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_COMMENT_DELETED,
       entityType: ActivityEntityType.TASK_COMMENT,
@@ -507,6 +507,6 @@ export class TasksService {
         taskId: task.id,
         commentId: comment.id,
       },
-    });
+    }); */
   }
 }

@@ -8,7 +8,8 @@ import {
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../users/enums/users.enum';
-import { Shift, ShiftStatus } from './entities/shift.entity';
+import { Shift } from './entities/shift.entity';
+import { ShiftStatus } from './enums/shift-status.enum';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { ShiftQueryDto } from './dto/shift-query.dto';
 
@@ -72,7 +73,16 @@ export class ShiftsService {
       clockInAt: new Date(),
       clockOutAt: null,
       status: ShiftStatus.ACTIVE,
-    } as Shift);
+    });
+  }
+
+  async getAllActiveShiftsCount() {
+    const totalActiveShifts = await this.shiftModel.count({
+      where: {
+        status: ShiftStatus.ACTIVE,
+      },
+    });
+    return { totalActiveShifts };
   }
 
   async getMyActiveShift(userId: string): Promise<Shift | null> {
@@ -124,19 +134,6 @@ export class ShiftsService {
       };
     }
 
-    /* if (query.fromDate || query.toDate) {
-      if (query.fromDate) {
-        where.clockInAt = {
-          [Op.gte]: query.fromDate,
-        };
-      }
-      if (query.toDate) {
-        where.clockInAt = {
-          [Op.lte]: query.toDate,
-        };
-      }
-    } */
-
     if (user.role !== Role.ADMIN) {
       where.userId = user.id;
     }
@@ -181,26 +178,43 @@ export class ShiftsService {
     }
 
     const clockInAt = new Date(dto.clockInAt);
-    const clockOutAt = new Date(dto.clockOutAt);
+    const clockOutAt = dto.clockOutAt ? new Date(dto.clockOutAt) : null;
 
-    if (clockOutAt <= clockInAt) {
+    if (clockOutAt && clockOutAt <= clockInAt) {
       throw new BadRequestException(
         'Clock out time must be after clock in time',
       );
     }
 
+    const activeShift = await this.shiftModel.findOne({
+      where: {
+        userId: dto.userId,
+        status: ShiftStatus.ACTIVE,
+      },
+    });
+
+    if (!clockOutAt && activeShift) {
+      throw new ConflictException('Employee already has an active shift');
+    }
+
+    if (clockOutAt && activeShift && clockOutAt > activeShift.clockInAt) {
+      throw new ConflictException('Shift overlaps with an existing shift');
+    }
+
+    const overlapEnd = clockOutAt ?? new Date();
     const overlappingShift = await this.shiftModel.findOne({
       where: {
         userId: dto.userId,
+        status: ShiftStatus.COMPLETED,
         [Op.or]: [
           {
             clockInAt: {
-              [Op.between]: [clockInAt, clockOutAt],
+              [Op.between]: [clockInAt, overlapEnd],
             },
           },
           {
             clockOutAt: {
-              [Op.between]: [clockInAt, clockOutAt],
+              [Op.between]: [clockInAt, overlapEnd],
             },
           },
           {
@@ -212,7 +226,7 @@ export class ShiftsService {
               },
               {
                 clockOutAt: {
-                  [Op.gte]: clockOutAt,
+                  [Op.gte]: overlapEnd,
                 },
               },
             ],
@@ -229,8 +243,8 @@ export class ShiftsService {
       userId: dto.userId,
       clockInAt,
       clockOutAt,
-      status: ShiftStatus.COMPLETED,
-    } as Shift);
+      status: clockOutAt ? ShiftStatus.COMPLETED : ShiftStatus.ACTIVE,
+    });
   }
 
   async getWeeklyWorkedHours(userId: string) {
@@ -274,35 +288,17 @@ export class ShiftsService {
     };
   }
 
-  async getEmployeeWorkedHours(
-    userId: string,
-    fromDate?: string,
-    toDate?: string,
-  ) {
-    return this.getWorkedHours(userId, fromDate, toDate);
+  async getEmployeeWorkedHours(userId: string) {
+    return this.getWorkedHours(userId);
   }
 
-  async getWorkedHours(userId?: string, fromDate?: string, toDate?: string) {
+  async getWorkedHours(userId?: string) {
     const where: WhereOptions<Shift> = {
       status: ShiftStatus.COMPLETED,
     };
 
     if (userId) {
       where.userId = userId;
-    }
-
-    if (fromDate || toDate) {
-      where.clockInAt = {};
-
-      if (fromDate) {
-        where.clockInAt[Op.gte] = new Date(fromDate);
-      }
-
-      if (toDate) {
-        const end = new Date(toDate);
-        end.setHours(23, 59, 59, 999);
-        where.clockInAt[Op.lte] = end;
-      }
     }
 
     const shifts = await this.shiftModel.findAll({ where });
@@ -315,8 +311,6 @@ export class ShiftsService {
 
     return {
       userId: userId ?? null,
-      fromDate: fromDate ?? null,
-      toDate: toDate ?? null,
       totalMinutes,
       totalHours: Number((totalMinutes / 60).toFixed(2)),
     };
@@ -338,5 +332,11 @@ export class ShiftsService {
       clockOutAt: new Date(),
       status: ShiftStatus.COMPLETED,
     });
+  }
+
+  async remove(id: string): Promise<null> {
+    const shift = await this.findOne(id);
+    await shift.destroy();
+    return null;
   }
 }
