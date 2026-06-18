@@ -25,7 +25,7 @@ import {
   useDeleteTaskCommentMutation,
   useGetTaskCommentsQuery,
 } from "@/store/api/tasksApi";
-import { getInitials } from "@/lib/utils/index";
+import { getInitials } from "@/lib/utils/avatar";
 
 interface TaskCommentsCardProps {
   taskId: string;

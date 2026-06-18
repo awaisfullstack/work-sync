@@ -21,11 +21,11 @@ export const departmentsApi = baseApi.injectEndpoints({
         url: `/departments/${id}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, id) => [{ type: "Departments", id }],
+      providesTags: ["Departments"],
     }),
 
     createDepartment: builder.mutation<
-      SuccessResponse<Department>,
+      SuccessResponse<null>,
       CreateDepartmentRequest
     >({
       query: (body) => ({
@@ -45,13 +45,7 @@ export const departmentsApi = baseApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Departments", id },
-        "Departments",
-        "Users",
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Departments", "Users", "Dashboard", "ActivityLogs"],
     }),
   }),
 });
@@ -62,4 +56,3 @@ export const {
   useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
 } = departmentsApi;
-

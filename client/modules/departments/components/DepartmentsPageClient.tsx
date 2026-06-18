@@ -16,10 +16,8 @@ const DepartmentsPageClient = () => {
   const { data, isLoading, isFetching, isError, refetch } =
     useGetDepartmentQuery();
 
-  const departments = useMemo(
-    () => (data?.data ?? []),
-    [data],
-  );
+  const departments = useMemo(() => data?.data ?? [], [data]);
+
   const filteredDepartments = useMemo(() => {
     const query = debouncedSearch.trim().toLowerCase();
 
@@ -40,7 +38,6 @@ const DepartmentsPageClient = () => {
 
   return (
     <section className="flex flex-col gap-6 py-6">
-  
       <DepartmentsTableToolbar
         search={search}
         onSearchChange={handleSearchChange}
@@ -56,9 +53,7 @@ const DepartmentsPageClient = () => {
       ) : (
         <>
           {isFetching && !isLoading && (
-            <p className="text-sm text-slate-500">
-              Refreshing departments...
-            </p>
+            <p className="text-sm text-slate-500">Refreshing departments...</p>
           )}
 
           <DataTable

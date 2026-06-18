@@ -1,5 +1,3 @@
-import type { Role } from "@/types/auth.types";
-
 export enum ActivityAction {
   PROJECT_CREATED = 'PROJECT_CREATED',
   PROJECT_UPDATED = 'PROJECT_UPDATED',
@@ -29,45 +27,4 @@ export enum ActivityAction {
   SHIFT_CLOCKED_OUT = 'SHIFT_CLOCKED_OUT',
   SHIFT_MANUAL_CREATED = 'SHIFT_MANUAL_CREATED',
   SHIFT_DELETED = 'SHIFT_DELETED',
-}
-
-export enum ActivityEntityType {
-  PROJECT = 'PROJECT',
-  TASK = 'TASK',
-  TASK_COMMENT = 'TASK_COMMENT',
-  TASK_ASSIGNMENT = 'TASK_ASSIGNMENT',
-  SHIFT = 'SHIFT',
-  USER = 'USER',
-  DEPARTMENT = 'DEPARTMENT',
-}
-
-export type SortOrder = "ASC" | "DESC";
-
-export interface ActivityActor {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-}
-
-export interface ActivityLog {
-  id: string;
-  actorId: string | null;
-  action: ActivityAction;
-  entityType: ActivityEntityType;
-  entityId: string | null;
-  message: string;
-  actor?: ActivityActor | null;
-  createdAt: string;
-}
-
-export interface ActivityLogsQuery {
-  page?: number;
-  limit?: number;
-  action?: ActivityAction;
-  entityType?: ActivityEntityType;
-  actorId?: string;
-  fromDate?: string;
-  toDate?: string;
-  sortOrder?: SortOrder;
 }

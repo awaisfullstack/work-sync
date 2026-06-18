@@ -2,7 +2,7 @@
 
 import { columns } from "@/modules/tasks/columns";
 import { DataTable } from "@/components/common/data-table";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { TablePagination } from "@/components/common/TablePagination";
 import { useDebounce } from "@/hooks/useDebounce";
 import LoadTableError from "@/components/common/LoadTableError";
@@ -10,16 +10,7 @@ import { SortOrder, TaskSortBy, TaskStatus } from "@/types/task.types";
 import { useGetTasksQuery } from "@/store/api/tasksApi";
 import { TasksTableToolbar } from "./TasksTableToolbar";
 import { DateRange } from "react-day-picker";
-
-function formatDateParam(date?: Date) {
-  if (!date) return undefined;
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
+import { formatDateInputValue } from "@/lib/utils/dateInput";
 
 const TasksPageClient = () => {
   const [page, setPage] = useState(1);
@@ -32,38 +23,27 @@ const TasksPageClient = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("DESC");
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const startDate = formatDateParam(dateRange?.from);
-  const endDate = formatDateParam(dateRange?.to);
+  const fromDate = formatDateInputValue(dateRange?.from) || undefined;
+  const toDate = formatDateInputValue(dateRange?.to) || undefined;
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const queryArgs = useMemo(
-    () => ({
-      page,
-      limit,
-      search: debouncedSearch,
-      status: status === "ALL" ? undefined : status,
-      sortBy,
-      sortOrder,
-      startDate,
-      endDate,
-      projectId: projectId === "all" ? undefined : projectId,
-    }),
-    [
-      page,
-      limit,
-      debouncedSearch,
-      status,
-      sortBy,
-      sortOrder,
-      projectId,
-      startDate,
-      endDate,
-    ],
-  );
+  const queryArgs = {
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+    status: status === "ALL" ? undefined : status,
+    sortBy,
+    sortOrder,
+    fromDate,
+    toDate,
+    projectId: projectId === "all" ? undefined : projectId,
+  };
 
   const { data, isLoading, isFetching, isError, refetch } =
     useGetTasksQuery(queryArgs);
+
+  console.log("Hello");
 
   const tasksData = data?.data;
   const tasks = tasksData?.items ?? [];

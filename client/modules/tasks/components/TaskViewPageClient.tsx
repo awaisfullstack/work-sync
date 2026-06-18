@@ -9,8 +9,10 @@ import {
   Edit,
   FolderKanban,
   UserRound,
+  UsersRound,
 } from "lucide-react";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +32,8 @@ import {
   isOverdue,
 } from "@/lib/utils/formatDate";
 import { formatApiError } from "@/lib/utils/formatError";
+import { getInitials } from "@/lib/utils/avatar";
+import { formatEnumLabel } from "@/lib/utils/label";
 
 import { useGetTaskByIdQuery, useUpdateTaskStatusMutation } from "@/store/api/tasksApi";
 import type { TaskStatus } from "@/types/task.types";
@@ -89,6 +93,7 @@ const TaskViewPageClient = ({ taskId }: TaskViewPageClientProps) => {
 
   const overdue = isOverdue(task.dueDate, task.status.name);
   const deadlineStatus = getDeadlineStatus(task.dueDate);
+  const projectMembers = task.project?.members ?? [];
 
   return (
     <section className="space-y-6 mb-4">
@@ -151,9 +156,18 @@ const TaskViewPageClient = ({ taskId }: TaskViewPageClientProps) => {
                 Project
               </div>
 
-              <p className="mt-2 text-lg font-semibold text-slate-900">
-                {task.project?.title ?? "No project"}
-              </p>
+              {task.project ? (
+                <Link
+                  href={`/projects/${task.project.id}`}
+                  className="mt-2 block text-lg font-semibold text-slate-900 hover:text-blue-700"
+                >
+                  {task.project.title}
+                </Link>
+              ) : (
+                <p className="mt-2 text-lg font-semibold text-slate-900">
+                  No project
+                </p>
+              )}
 
               <p className="mt-1 text-sm text-slate-500">Linked project</p>
             </div>
@@ -227,6 +241,58 @@ const TaskViewPageClient = ({ taskId }: TaskViewPageClientProps) => {
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-2xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UsersRound className="h-5 w-5" />
+            Project Members
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          {projectMembers.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center">
+              <p className="font-medium text-slate-900">
+                No project members found
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                This task&apos;s project does not have any members yet.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {projectMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex min-w-0 items-center justify-between gap-3 rounded-xl border p-3"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Avatar>
+                      <AvatarFallback>
+                        {getInitials(member.user?.name)}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-slate-900">
+                        {member.user?.name ?? "Unknown User"}
+                      </p>
+                      <p className="truncate text-sm text-slate-500">
+                        {member.user?.email ?? member.userId}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Badge variant="secondary" className="shrink-0">
+                    {formatEnumLabel(member.roleInProject)}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -4,9 +4,10 @@ import { UsersController } from './users.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from './entities/user.entity';
 import { Department } from '../departments/entities/department.entity';
+import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([User, Department])],
+  imports: [SequelizeModule.forFeature([User, Department]), ActivityLogsModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],

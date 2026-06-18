@@ -26,7 +26,10 @@ import {
 import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
-import { useCreateUserMutation, useUpdateUserMutation } from "@/store/api/usersApi";
+import {
+  useCreateUserMutation,
+  useUpdateUserMutation,
+} from "@/store/api/usersApi";
 import type { User } from "@/types/user.types";
 
 interface UserFormProps {
@@ -64,6 +67,10 @@ export function UserForm({ mode, user }: UserFormProps) {
       departmentId: user?.department?.id ?? null,
     },
   });
+  const passwordError =
+    mode === "create"
+      ? (errors as FieldErrors<CreateUserFormValues>).password
+      : undefined;
 
   async function onSubmit(values: UserFormFields) {
     try {
@@ -148,8 +155,8 @@ export function UserForm({ mode, user }: UserFormProps) {
             placeholder="Enter password"
             {...register("password")}
           />
-          {errors.password?.message && (
-            <p className="text-sm text-red-600">{errors.password.message}</p>
+          {passwordError?.message && (
+            <p className="text-sm text-red-600">{passwordError.message}</p>
           )}
         </div>
       )}

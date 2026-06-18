@@ -1,26 +1,20 @@
 "use client";
 
-type FrontendLogLevel = "debug" | "info" | "warn" | "error";
+type LogLevel = "debug" | "info" | "warn" | "error";
 
-type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | { [key: string]: JsonValue };
+type LogDetails = Record<string, unknown>;
 
-interface FrontendLogInput {
-  level: FrontendLogLevel;
-  message: string;
+type LogOptions = {
   source: string;
-  route?: string;
-  userId?: string;
-  sessionId?: string;
-  metadata?: Record<string, JsonValue>;
-}
+  metadata?: LogDetails;
+};
 
-function getCurrentRoute() {
+type LogInput = LogOptions & {
+  level: LogLevel;
+  message: string;
+};
+
+function currentRoute() {
   if (typeof window === "undefined") {
     return undefined;
   }
@@ -28,79 +22,37 @@ function getCurrentRoute() {
   return `${window.location.pathname}${window.location.search}`;
 }
 
-function toJsonValue(value: unknown, depth = 0): JsonValue {
-  if (depth > 4) {
-    return "[Max depth reached]";
-  }
-
-  if (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "boolean"
-  ) {
-    return value;
-  }
-
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : String(value);
-  }
-
-  if (Array.isArray(value)) {
-    return value.map((item) => toJsonValue(item, depth + 1));
-  }
-
-  if (value instanceof Error) {
+function formatError(error: unknown) {
+  if (error instanceof Error) {
     return {
-      name: value.name,
-      message: value.message,
-      stack: value.stack ?? null,
+      name: error.name,
+      message: error.message,
     };
   }
 
-  if (typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([key, item]) => [
-        key,
-        toJsonValue(item, depth + 1),
-      ]),
-    );
-  }
-
-  return String(value);
+  return error;
 }
 
-function sanitizeMetadata(metadata?: Record<string, unknown>) {
-  if (!metadata) {
-    return undefined;
-  }
-
-  return Object.fromEntries(
-    Object.entries(metadata).map(([key, value]) => [key, toJsonValue(value)]),
-  );
-}
-
-export async function logFrontendEvent(input: FrontendLogInput) {
-  const payload: FrontendLogInput = {
-    ...input,
-    route: input.route ?? getCurrentRoute(),
+export async function logFrontendEvent(input: LogInput) {
+  const details = {
+    route: currentRoute(),
+    ...input.metadata,
   };
 
   try {
-    const response = await fetch("/api/logs", {
+    await fetch("/api/logs", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        level: input.level,
+        message: input.message,
+        source: input.source,
+        details,
+      }),
       keepalive: true,
     });
-
-    if (!response.ok) {
-      console.error("Failed to store frontend log", {
-        status: response.status,
-        payload,
-      });
-    }
   } catch (error) {
     console.error("Failed to send frontend log", error);
   }
@@ -109,31 +61,26 @@ export async function logFrontendEvent(input: FrontendLogInput) {
 export function logFrontendError(
   message: string,
   error: unknown,
-  options: Omit<FrontendLogInput, "level" | "message" | "metadata"> & {
-    metadata?: Record<string, unknown>;
-  },
+  options: LogOptions,
 ) {
   return logFrontendEvent({
     ...options,
     level: "error",
     message,
-    metadata: sanitizeMetadata({
+    metadata: {
       ...options.metadata,
-      error,
-    }),
+      error: formatError(error),
+    },
   });
 }
 
 export function logFrontendValidationIssue(
   message: string,
-  options: Omit<FrontendLogInput, "level" | "message" | "metadata"> & {
-    metadata?: Record<string, unknown>;
-  },
+  options: LogOptions,
 ) {
   return logFrontendEvent({
     ...options,
     level: "warn",
     message,
-    metadata: sanitizeMetadata(options.metadata),
   });
 }

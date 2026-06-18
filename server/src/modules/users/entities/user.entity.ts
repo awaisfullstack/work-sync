@@ -78,6 +78,9 @@ export class User extends Model<
   })
   declare isActive: CreationOptional<boolean>;
 
-  @HasMany(() => ProjectMember)
+  @HasMany(() => ProjectMember, {
+    foreignKey: 'userId',
+    as: 'projectMemberships',
+  })
   declare projectMemberships: NonAttribute<ProjectMember[]>;
 }

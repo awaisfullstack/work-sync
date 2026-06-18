@@ -48,8 +48,8 @@ export function ShiftClockCard() {
 
   async function handleClockIn() {
     try {
-      await clockIn().unwrap();
-      toast.success("Clock in successful");
+      const res = await clockIn().unwrap();
+      toast.success(res.message);
     } catch (error) {
       toast.error(formatApiError(error));
     }
@@ -57,8 +57,8 @@ export function ShiftClockCard() {
 
   async function handleClockOut() {
     try {
-      await clockOut().unwrap();
-      toast.success("Clock out successful");
+      const res = await clockOut().unwrap();
+      toast.success(res.message);
     } catch (error) {
       toast.error(formatApiError(error));
     }
@@ -110,24 +110,14 @@ export function ShiftClockCard() {
             <p className="mt-2 text-lg font-semibold text-slate-900">
               {activeShift ? formatDateTime(activeShift.clockInAt) : "N/A"}
             </p>
-            {activeShift && (
-              <p className="mt-1 text-sm text-slate-500">
-                {formatShiftDuration(activeDuration)} elapsed
-              </p>
-            )}
           </div>
 
           <div className="rounded-xl border bg-slate-50 p-4">
-            <p className="text-sm font-medium text-slate-700">
-              Weekly Hours
-            </p>
+            <p className="text-sm font-medium text-slate-700">Weekly Hours</p>
             <p className="mt-2 text-lg font-semibold text-slate-900">
               {weeklyHours
                 ? formatShiftDuration(weeklyHours.totalMinutes)
                 : "0m"}
-            </p>
-            <p className="mt-1 text-sm text-slate-500">
-              {weeklyHours?.totalHours ?? 0} hours
             </p>
           </div>
         </div>

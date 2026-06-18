@@ -2,7 +2,7 @@
 
 import { columns } from "@/modules/users/columns";
 import { DataTable } from "@/components/common/data-table";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { TablePagination } from "@/components/common/TablePagination";
 import { useDebounce } from "@/hooks/useDebounce";
 import LoadTableError from "@/components/common/LoadTableError";
@@ -17,22 +17,19 @@ const UsersPageClient = () => {
 
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<Role | "all">("all");
-  const [departmentId, setDepartmentId] = useState("all");
+  const [departmentId, setDepartmentId] = useState("all");  
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const queryArgs = useMemo(
-    () => ({
-      page,
-      limit,
-      search: debouncedSearch.trim() || undefined,
-      role: role !== "all" ? role : undefined,
-      departmentId: departmentId !== "all" ? departmentId : undefined,
-    }),
-    [page, limit, debouncedSearch, role, departmentId],
-  );
+  const queryArgs = {
+    page,
+    limit,
+    search: debouncedSearch.trim() || undefined,
+    role: role !== "all" ? role : undefined,
+    departmentId: departmentId !== "all" ? departmentId : undefined,
+  };
 
-  const { data, isLoading, isFetching, isError, refetch } =
+  const { data, isLoading, isFetching, isError, refetch} =
     useGetUsersQuery(queryArgs);
   const { data: departmentsData } = useGetDepartmentQuery();
 

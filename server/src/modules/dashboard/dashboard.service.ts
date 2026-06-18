@@ -2,24 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op, WhereOptions } from 'sequelize';
 
-import { User } from '../users/entities/user.entity';
-import { Role } from '../users/enums/users.enum';
+import { AuthenticatedUser } from '../../common/types/auth.types';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
+import { ProjectMember } from '../projects/entities/project-member.entity';
 import { Project } from '../projects/entities/project.entity';
-import { Task } from '../tasks/entities/task.entity';
+import { ProjectStatus } from '../projects/enums/project-status.enum';
 import { Shift } from '../shifts/entities/shift.entity';
 import { ShiftStatus } from '../shifts/enums/shift-status.enum';
-import { AuthenticatedUser } from '../../common/types/auth.types';
-import { TaskStatus } from '../tasks/entities/task-status.entity';
-import { ActivityLogsService } from '../activity-logs/activity-logs.service';
-import { ProjectStatus } from '../projects/enums/project-status.enum';
-import { ProjectMember } from '../projects/entities/project-member.entity';
 import { TaskAssignment } from '../tasks/entities/task-assignment.entity';
+import { TaskStatus } from '../tasks/entities/task-status.entity';
+import { Task } from '../tasks/entities/task.entity';
 import { TaskStatusName } from '../tasks/enums/task-status.enum';
-
-type DateRange = {
-  start: Date;
-  end: Date;
-};
+import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/users.enum';
 
 @Injectable()
 export class DashboardService {
@@ -48,335 +43,256 @@ export class DashboardService {
     private readonly activityLogsService: ActivityLogsService,
   ) {}
 
-  private isAdmin(user: AuthenticatedUser): boolean {
-    return user.role === Role.ADMIN;
-  }
-
-  private getCurrentWeekRange(): DateRange {
-    const now = new Date();
-
-    const day = now.getDay();
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-
-    const start = new Date(now);
-    start.setDate(now.getDate() + diffToMonday);
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date(start);
-    end.setDate(start.getDate() + 7);
-    end.setHours(0, 0, 0, 0);
-
-    return { start, end };
-  }
-
-  private calculateHours(clockInAt: Date, clockOutAt: Date): number {
-    const milliseconds = clockOutAt.getTime() - clockInAt.getTime();
-    return milliseconds / (1000 * 60 * 60);
-  }
-
-  private formatDateOnly(date: Date): string {
-    return date.toISOString().split('T')[0];
-  }
-
-  async getDashboard(authUser: AuthenticatedUser) {
-    if (this.isAdmin(authUser)) {
-      return this.getAdminDashboard(authUser);
+  async getDashboard(user: AuthenticatedUser) {
+    if (user.role === Role.ADMIN) {
+      return this.getAdminDashboard(user);
     }
 
-    return this.getEmployeeDashboard(authUser);
+    return this.getEmployeeDashboard(user);
   }
 
-  private async getAdminDashboard(authUser: AuthenticatedUser) {
-    const weekRange = this.getCurrentWeekRange();
-    const taskStatusSummary = await this.getTaskStatusSummary();
-    const projectStatusSummary = await this.getProjectStatusSummary();
+  private async getAdminDashboard(user: AuthenticatedUser) {
+    const recentActivity = await this.activityLogsService.findRecent(6);
 
-    const totalUsers = await this.userModel.count();
-    const totalEmployees = await this.userModel.count({
-      where: {
-        role: Role.EMPLOYEE,
-      },
-    });
-    const activeEmployees = await this.userModel.count({
-      where: {
-        role: Role.EMPLOYEE,
-        isActive: true,
-      },
-    });
-    const totalTasks = await this.taskModel.count();
-    const totalProjects = await this.projectModel.count();
-    const totalActiveProjects = this.getSummaryCount(
-      projectStatusSummary,
-      ProjectStatus.ACTIVE,
-    );
-    const totalCompletedTasks = this.getSummaryCount(
-      taskStatusSummary,
-      TaskStatusName.COMPLETED,
-    );
-    const overdueTasks = await this.countTasks({
-      dueDate: {
-        [Op.lt]: this.formatDateOnly(new Date()),
-      },
-    });
-    const activeShifts = await this.shiftModel.count({
-      where: {
-        status: ShiftStatus.ACTIVE,
-      },
-    });
-
-    const weeklyShifts = await this.shiftModel.findAll({
-      where: {
-        clockInAt: {
-          [Op.gte]: weekRange.start,
-          [Op.lt]: weekRange.end,
-        },
-        clockOutAt: {
-          [Op.ne]: null,
-        },
-      },
-      attributes: ['id', 'userId', 'clockInAt', 'clockOutAt'],
-    });
-    const recentActivity = await this.activityLogsService.findRecent(10);
-    const weeklyWorkedHours = this.getWorkedHoursFromShifts(weeklyShifts);
+    const [
+      totalUsers,
+      totalEmployees,
+      totalTasks,
+      totalProjects,
+      completedTasks,
+      activeProjects,
+      activeShifts,
+      overdueTasks,
+      weeklyWorkedHours,
+    ] = await Promise.all([
+      this.userModel.count(),
+      this.userModel.count({ where: { role: Role.EMPLOYEE } }),
+      this.taskModel.count(),
+      this.projectModel.count(),
+      this.countCompletedTasks(),
+      this.countActiveProjects(),
+      this.shiftModel.count({ where: { status: ShiftStatus.ACTIVE } }),
+      this.countOverdueTasks(),
+      this.getWeeklyWorkedHours(),
+    ]);
 
     return {
-      role: authUser.role,
-      totalCompletedTasks,
-      totalActiveProjects,
+      role: user.role,
+      completedTasks,
+      activeProjects,
       weeklyWorkedHours,
+      recentActivity,
       stats: {
         totalUsers,
         totalEmployees,
-        activeEmployees,
         totalTasks,
-        totalCompletedTasks,
-        totalActiveProjects,
         totalProjects,
-        overdueTasks,
         activeShifts,
+        overdueTasks,
       },
-      taskStatusSummary,
-      projectStatusSummary,
-      recentActivity,
     };
   }
 
-  private async getEmployeeDashboard(authUser: AuthenticatedUser) {
-    const weekRange = this.getCurrentWeekRange();
-    const today = this.formatDateOnly(new Date());
-    const memberships = await this.projectMemberModel.findAll({
-      where: {
-        userId: authUser.id,
-      },
-      attributes: ['projectId'],
-    });
-    const projectIds = memberships.map((membership) => membership.projectId);
-    const activeAssignments = await this.taskAssignmentModel.findAll({
-      where: {
-        userId: authUser.id,
-        unassignedAt: null,
-      },
-      attributes: ['taskId'],
-    });
-    const assignedTaskIds = [
-      ...new Set(activeAssignments.map((assignment) => assignment.taskId)),
-    ];
-    const assignedTaskWhere = this.getAssignedTaskWhere(assignedTaskIds);
-    const projectWhere = this.getProjectScopeWhere(projectIds);
-    const taskStatusSummary =
-      await this.getTaskStatusSummary(assignedTaskWhere);
-    const projectStatusSummary =
-      await this.getProjectStatusSummary(projectWhere);
-    const totalCompletedTasks = this.getSummaryCount(
-      taskStatusSummary,
-      TaskStatusName.COMPLETED,
-    );
-    const totalActiveProjects = this.getSummaryCount(
-      projectStatusSummary,
-      ProjectStatus.ACTIVE,
-    );
-    const myAssignedTasks = assignedTaskIds.length;
-    const myOpenTasks =
-      this.getSummaryCount(taskStatusSummary, TaskStatusName.TODO) +
-      this.getSummaryCount(taskStatusSummary, TaskStatusName.IN_PROGRESS);
-    const overdueTasks = await this.countTasks({
-      ...assignedTaskWhere,
-      dueDate: {
-        [Op.lt]: today,
-      },
-    });
-    const dueSoonTasks = await this.countTasks({
-      ...assignedTaskWhere,
-      dueDate: {
-        [Op.gte]: today,
-        [Op.lte]: this.formatDateOnly(
-          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        ),
-      },
-    });
-    const activeShift = await this.shiftModel.findOne({
-      where: {
-        userId: authUser.id,
-        status: ShiftStatus.ACTIVE,
-      },
-      attributes: ['id', 'userId', 'clockInAt', 'clockOutAt', 'status'],
-    });
-    const weeklyShifts = await this.shiftModel.findAll({
-      where: {
-        userId: authUser.id,
-        clockInAt: {
-          [Op.gte]: weekRange.start,
-          [Op.lt]: weekRange.end,
-        },
-        clockOutAt: {
-          [Op.ne]: null,
-        },
-      },
-      attributes: ['id', 'userId', 'clockInAt', 'clockOutAt'],
-    });
-    const recentActivity = await this.activityLogsService.findRecentForUser(
-      authUser.id,
-      projectIds,
-      10,
-    );
-    const weeklyWorkedHours = this.getWorkedHoursFromShifts(weeklyShifts);
+  private async getEmployeeDashboard(user: AuthenticatedUser) {
+    const [projectIds, taskIds] = await Promise.all([
+      this.getUserProjectIds(user.id),
+      this.getUserTaskIds(user.id),
+    ]);
+
+    const taskWhere = this.whereIdIn<Task>(taskIds);
+    const projectWhere = this.whereIdIn<Project>(projectIds);
+
+    const [recentActivity, activeShift, completedTasks, activeProjects] =
+      await Promise.all([
+        this.activityLogsService.findRecentForUser(user.id, 6),
+        this.shiftModel.findOne({
+          where: {
+            userId: user.id,
+            status: ShiftStatus.ACTIVE,
+          },
+          attributes: ['id', 'userId', 'clockInAt', 'clockOutAt', 'status'],
+        }),
+        this.countCompletedTasks(taskWhere),
+        this.countActiveProjects(projectWhere),
+      ]);
+
+    const [weeklyWorkedHours, openTasks, overdueTasks, dueSoonTasks] =
+      await Promise.all([
+        this.getWeeklyWorkedHours(user.id),
+        this.countOpenTasks(taskWhere),
+        this.countOverdueTasks(taskWhere),
+        this.countDueSoonTasks(taskWhere),
+      ]);
 
     return {
-      role: authUser.role,
-      totalCompletedTasks,
-      totalActiveProjects,
+      role: user.role,
+      completedTasks,
+      activeProjects,
       weeklyWorkedHours,
+      recentActivity,
+      activeShift,
       stats: {
         myProjects: projectIds.length,
-        myActiveProjects: totalActiveProjects,
-        myAssignedTasks,
-        myOpenTasks,
-        myCompletedTasks: totalCompletedTasks,
+        assignedTasks: taskIds.length,
+        openTasks,
         overdueTasks,
         dueSoonTasks,
         hasActiveShift: Boolean(activeShift),
       },
-      activeShift,
-      taskStatusSummary,
-      projectStatusSummary,
-      recentActivity,
     };
   }
 
-  private getWorkedHoursFromShifts(shifts: Shift[]): number {
-    const weeklyWorkedHours = shifts.reduce((total, shift) => {
-      if (!shift.clockOutAt) return total;
-
-      return total + this.calculateHours(shift.clockInAt, shift.clockOutAt);
-    }, 0);
-
-    return Number(weeklyWorkedHours.toFixed(2));
-  }
-
-  private getSummaryCount<TStatus extends string>(
-    summary: { status: TStatus; count: number }[],
-    status: TStatus,
-  ) {
-    return summary.find((item) => item.status === status)?.count ?? 0;
-  }
-
-  private getAssignedTaskWhere(taskIds: string[]): WhereOptions<Task> {
-    if (taskIds.length === 0) {
-      return {
-        id: {
-          [Op.in]: [],
-        },
-      };
-    }
-
-    return {
-      id: {
-        [Op.in]: taskIds,
-      },
-    };
-  }
-
-  private getProjectScopeWhere(projectIds: string[]): WhereOptions<Project> {
-    if (projectIds.length === 0) {
-      return {
-        id: {
-          [Op.in]: [],
-        },
-      };
-    }
-
-    return {
-      id: {
-        [Op.in]: projectIds,
-      },
-    };
-  }
-
-  private async countTasks(where: WhereOptions<Task>) {
-    return this.taskModel.count({ where });
-  }
-
-  private async getTaskStatusSummary(taskWhere: WhereOptions<Task> = {}) {
-    const statuses = await this.taskStatusModel.findAll({
-      attributes: ['id', 'name'],
+  private async getUserProjectIds(userId: string) {
+    const memberships = await this.projectMemberModel.findAll({
+      where: { userId },
+      attributes: ['projectId'],
     });
 
-    const result: { status: TaskStatusName; count: number }[] = [];
-
-    for (const status of statuses) {
-      const count = await this.taskModel.count({
-        where: {
-          ...taskWhere,
-          statusId: status.id,
-        },
-      });
-
-      result.push({
-        status: status.name,
-        count,
-      });
-    }
-
-    return result;
+    return memberships.map((membership) => membership.projectId);
   }
 
-  private async getProjectStatusSummary(
-    projectWhere: WhereOptions<Project> = {},
-  ) {
-    const activeProjects = await this.projectModel.count({
+  private async getUserTaskIds(userId: string) {
+    const assignments = await this.taskAssignmentModel.findAll({
       where: {
-        ...projectWhere,
+        userId,
+        unassignedAt: null,
+      },
+      attributes: ['taskId'],
+    });
+
+    return [...new Set(assignments.map((assignment) => assignment.taskId))];
+  }
+
+  private whereIdIn<TModel>(ids: string[]): WhereOptions<TModel> {
+    return {
+      id: {
+        [Op.in]: ids,
+      },
+    } as WhereOptions<TModel>;
+  }
+
+  private async countActiveProjects(where: WhereOptions<Project> = {}) {
+    return this.projectModel.count({
+      where: {
+        ...where,
         status: ProjectStatus.ACTIVE,
       },
     });
+  }
 
-    const archivedProjects = await this.projectModel.count({
-      where: {
-        ...projectWhere,
-        status: ProjectStatus.ARCHIVED,
-      },
+  private async countCompletedTasks(where: WhereOptions<Task> = {}) {
+    const completedStatus = await this.taskStatusModel.findOne({
+      where: { name: TaskStatusName.COMPLETED },
+      attributes: ['id'],
     });
 
-    const completedProjects = await this.projectModel.count({
+    if (!completedStatus) {
+      return 0;
+    }
+
+    return this.taskModel.count({
       where: {
-        ...projectWhere,
-        status: ProjectStatus.COMPLETED,
+        ...where,
+        statusId: completedStatus.id,
       },
     });
+  }
 
-    return [
-      {
-        status: 'ACTIVE',
-        count: activeProjects,
+  private async countOpenTasks(where: WhereOptions<Task>) {
+    const completedStatus = await this.taskStatusModel.findOne({
+      where: { name: TaskStatusName.COMPLETED },
+      attributes: ['id'],
+    });
+
+    if (!completedStatus) {
+      return 0;
+    }
+
+    return this.taskModel.count({
+      where: {
+        ...where,
+        statusId: {
+          [Op.ne]: completedStatus.id,
+        },
       },
-      {
-        status: 'COMPLETED',
-        count: completedProjects,
+    });
+  }
+
+  private countOverdueTasks(where: WhereOptions<Task> = {}) {
+    return this.taskModel.count({
+      where: {
+        ...where,
+        dueDate: {
+          [Op.lt]: this.today(),
+        },
       },
-      {
-        status: 'ARCHIVED',
-        count: archivedProjects,
+    });
+  }
+
+  private countDueSoonTasks(where: WhereOptions<Task>) {
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    return this.taskModel.count({
+      where: {
+        ...where,
+        dueDate: {
+          [Op.gte]: this.today(),
+          [Op.lte]: this.dateOnly(nextWeek),
+        },
       },
-    ];
+    });
+  }
+
+  private async getWeeklyWorkedHours(userId?: string) {
+    const weekStart = this.startOfWeek();
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    const shifts = await this.shiftModel.findAll({
+      where: {
+        ...(userId ? { userId } : {}),
+        clockInAt: {
+          [Op.gte]: weekStart,
+          [Op.lt]: weekEnd,
+        },
+        clockOutAt: {
+          [Op.ne]: null,
+        },
+      },
+      attributes: ['clockInAt', 'clockOutAt'],
+    });
+
+    const hours = shifts.reduce((total, shift) => {
+      if (!shift.clockOutAt) return total;
+
+      return total + this.hoursBetween(shift.clockInAt, shift.clockOutAt);
+    }, 0);
+
+    return Number(hours.toFixed(2));
+  }
+
+  private startOfWeek() {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const start = new Date(now);
+
+    start.setDate(now.getDate() + diffToMonday);
+    start.setHours(0, 0, 0, 0);
+
+    return start;
+  }
+
+  private hoursBetween(start: Date, end: Date) {
+    return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+  }
+
+  private today() {
+    return this.dateOnly(new Date());
+  }
+
+  private dateOnly(date: Date) {
+    return date.toISOString().split('T')[0];
   }
 }

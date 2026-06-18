@@ -14,12 +14,10 @@ import {
 } from "@/components/ui/select";
 import { Role } from "@/types/auth.types";
 import type { AuthUser } from "@/types/auth.types";
-import { useGetProjectOptionsQuery } from "@/store/api/projectsApi";
 import { useGetUserOptionsQuery } from "@/store/api/usersApi";
 import {
   ActivityAction,
   ActivityEntityType,
-  type ActivitySortBy,
   type SortOrder,
 } from "@/types/activity-log.types";
 import {
@@ -31,15 +29,11 @@ interface ActivityLogsTableToolbarProps {
   action: ActivityAction | "ALL";
   entityType: ActivityEntityType | "ALL";
   actorId: string;
-  projectId: string;
-  sortBy: ActivitySortBy;
   sortOrder: SortOrder;
   dateRange?: DateRange;
   onActionChange: (value: ActivityAction | "ALL") => void;
   onEntityTypeChange: (value: ActivityEntityType | "ALL") => void;
   onActorIdChange: (value: string) => void;
-  onProjectIdChange: (value: string) => void;
-  onSortByChange: (value: ActivitySortBy) => void;
   onSortOrderChange: (value: SortOrder) => void;
   onDateRangeChange: (value: DateRange | undefined) => void;
   onReset: () => void;
@@ -50,15 +44,11 @@ export function ActivityLogsTableToolbar({
   action,
   entityType,
   actorId,
-  projectId,
-  sortBy,
   sortOrder,
   dateRange,
   onActionChange,
   onEntityTypeChange,
   onActorIdChange,
-  onProjectIdChange,
-  onSortByChange,
   onSortOrderChange,
   onDateRangeChange,
   onReset,
@@ -68,18 +58,13 @@ export function ActivityLogsTableToolbar({
     useGetUserOptionsQuery(undefined, {
       skip: !isAdmin,
     });
-  const { data: projectsResponse, isLoading: isProjectsLoading } =
-    useGetProjectOptionsQuery();
 
   const users = usersResponse?.data ?? [];
-  const projects = projectsResponse?.data ?? [];
   const hasFilters =
     action !== "ALL" ||
     entityType !== "ALL" ||
     (isAdmin && actorId !== "all") ||
-    projectId !== "all" ||
     dateRange !== undefined ||
-    sortBy !== "createdAt" ||
     sortOrder !== "DESC";
 
   return (
@@ -88,8 +73,8 @@ export function ActivityLogsTableToolbar({
         <p className="text-sm font-medium text-slate-900">Audit Trail</p>
         <p className="mt-1 text-sm text-slate-500">
           {isAdmin
-            ? "Filter activity by actor, project, action, entity, date, and order."
-            : "Review your activity by project, action, entity, date, and order."}
+            ? "Filter activity by actor, action, entity, date, and order."
+            : "Review your activity by action, entity, date, and order."}
         </p>
       </div>
 
@@ -113,24 +98,6 @@ export function ActivityLogsTableToolbar({
             </SelectContent>
           </Select>
         )}
-
-        <Select value={projectId} onValueChange={onProjectIdChange}>
-          <SelectTrigger
-            disabled={isProjectsLoading}
-            className="w-full xl:w-[190px]"
-          >
-            <SelectValue placeholder="Project" />
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectItem value="all">All Projects</SelectItem>
-            {projects.map((project) => (
-              <SelectItem key={project.id} value={project.id}>
-                {project.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         <Select value={action} onValueChange={onActionChange}>
           <SelectTrigger className="w-full xl:w-[210px]">
@@ -159,17 +126,6 @@ export function ActivityLogsTableToolbar({
                 {formatActivityLabel(entityTypeOption)}
               </SelectItem>
             ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={sortBy} onValueChange={onSortByChange}>
-          <SelectTrigger className="w-full xl:w-[160px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectItem value="createdAt">Created</SelectItem>
-            <SelectItem value="updatedAt">Updated</SelectItem>
           </SelectContent>
         </Select>
 

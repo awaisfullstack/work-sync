@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { formatEnumLabel } from "@/lib/utils/label";
 import { ProjectSortBy, ProjectStatus, SortOrder } from "@/types/project.types";
 
 interface ProjectsTableToolbarProps {
@@ -65,8 +66,7 @@ export function ProjectsTableToolbar({
             <SelectItem value="ALL">All Status</SelectItem>
             {Object.values(ProjectStatus).map((projectStatus) => (
               <SelectItem key={projectStatus} value={projectStatus}>
-                {projectStatus[0] +
-                  projectStatus.slice(1).toLowerCase()}
+                {formatEnumLabel(projectStatus)}
               </SelectItem>
             ))}
           </SelectContent>

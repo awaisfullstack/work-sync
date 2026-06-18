@@ -129,7 +129,7 @@ export class TasksService {
   async create(
     createTaskDto: CreateTaskDto,
     user: AuthenticatedUser,
-  ): Promise<Task> {
+  ): Promise<null> {
     const { title, description, dueDate, projectId, status } = createTaskDto;
     await this.ensureProjectExists(projectId);
 
@@ -143,20 +143,15 @@ export class TasksService {
       statusId: todoStatus.id,
     });
 
-    /* await this.activityLogsService.create({
+    await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_CREATED,
       entityType: ActivityEntityType.TASK,
       entityId: task.id,
-      projectId: task.projectId,
       message: `Task "${task.title}" was created.`,
-      metadata: {
-        title: task.title,
-        dueDate: task.dueDate,
-      },
-    }); */
+    });
 
-    return this.findOne(task.id, user);
+    return null;
   }
 
   async findAll(query: GetTasksQueryDto, user: AuthenticatedUser) {
@@ -274,6 +269,20 @@ export class TasksService {
         {
           model: Project,
           attributes: ['id', 'title'],
+          include: [
+            {
+              model: ProjectMember,
+              as: 'members',
+              attributes: ['id', 'userId', 'roleInProject', 'joinedAt'],
+              include: [
+                {
+                  model: User,
+                  as: 'user',
+                  attributes: ['id', 'name', 'email'],
+                },
+              ],
+            },
+          ],
         },
         {
           model: User,
@@ -310,7 +319,7 @@ export class TasksService {
     taskId: string,
     updateTaskDto: UpdateTaskDto,
     user: AuthenticatedUser,
-  ): Promise<Task> {
+  ): Promise<null> {
     const task = await this.findOne(taskId, user);
 
     const { title, description, dueDate, status } = updateTaskDto;
@@ -322,14 +331,22 @@ export class TasksService {
       statusId: taskStatus.id ?? task.statusId,
     });
 
-    return this.findOne(taskId, user);
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.TASK_UPDATED,
+      entityType: ActivityEntityType.TASK,
+      entityId: task.id,
+      message: `Task "${task.title}" was updated.`,
+    });
+
+    return null;
   }
 
   async updateStatus(
     id: string,
     status: TaskStatusName,
     user: AuthenticatedUser,
-  ): Promise<Task> {
+  ): Promise<null> {
     const task = await this.findOne(id, user);
     const taskStatus = await this.getStatusByName(status);
 
@@ -337,22 +354,22 @@ export class TasksService {
       statusId: taskStatus.id,
     });
 
-    /* await this.activityLogsService.create({
+    await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_STATUS_UPDATED,
       entityType: ActivityEntityType.TASK,
       entityId: task.id,
-      projectId: task.projectId,
       message: `Task "${task.title}" status was updated to ${status}.`,
-      metadata: {
-        status,
-      },
-    }); */
+    });
 
-    return this.findOne(id, user);
+    return null;
   }
 
-  async assign(taskId: string, dto: AssignTaskDto, user: AuthenticatedUser) {
+  async assign(
+    taskId: string,
+    dto: AssignTaskDto,
+    user: AuthenticatedUser,
+  ): Promise<null> {
     const task = await this.findOne(taskId, user);
 
     await this.ensureUserExists(dto.userId);
@@ -370,32 +387,28 @@ export class TasksService {
       throw new BadRequestException('User is already assigned to this task');
     }
 
-    await this.taskAssignmentModel.create({
+    const assignment = await this.taskAssignmentModel.create({
       taskId: task.id,
       userId: dto.userId,
       assignedBy: user.id,
     } as TaskAssignment);
 
-    /* await this.activityLogsService.create({
+    await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_ASSIGNED,
-      entityType: ActivityEntityType.TASK,
-      entityId: task.id,
-      projectId: task.projectId,
+      entityType: ActivityEntityType.TASK_ASSIGNMENT,
+      entityId: assignment.id,
       message: `A user was assigned to task "${task.title}".`,
-      metadata: {
-        assignedUserId: dto.userId,
-      },
-    }); */
+    });
 
-    return this.findOne(taskId, user);
+    return null;
   }
 
   async unassign(
     taskId: string,
     userId: string,
     user: AuthenticatedUser,
-  ): Promise<Task> {
+  ): Promise<null> {
     const task = await this.findOne(taskId, user);
 
     const assignment = await this.taskAssignmentModel.findOne({
@@ -414,14 +427,22 @@ export class TasksService {
       unassignedAt: new Date(),
     });
 
-    return this.findOne(task.id, user);
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.TASK_UNASSIGNED,
+      entityType: ActivityEntityType.TASK_ASSIGNMENT,
+      entityId: assignment.id,
+      message: `A user was removed from task "${task.title}".`,
+    });
+
+    return null;
   }
 
   async addComment(
     taskId: string,
     dto: AddTaskCommentDto,
     user: AuthenticatedUser,
-  ): Promise<TaskComment> {
+  ): Promise<null> {
     const task = await this.findOne(taskId, user);
 
     const comment = await this.taskCommentModel.create({
@@ -430,25 +451,30 @@ export class TasksService {
       comment: dto.comment,
     });
 
-    /* await this.activityLogsService.create({
+    await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_COMMENT_ADDED,
       entityType: ActivityEntityType.TASK_COMMENT,
       entityId: comment.id,
-      projectId: task.projectId,
       message: `A comment was added on task "${task.title}".`,
-      metadata: {
-        taskId: task.id,
-      },
-    }); */
+    });
 
-    return comment;
+    return null;
   }
 
-  async remove(id: string, user: AuthenticatedUser): Promise<void> {
+  async remove(id: string, user: AuthenticatedUser): Promise<null> {
     const task = await this.findOne(id, user);
 
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.TASK_DELETED,
+      entityType: ActivityEntityType.TASK,
+      entityId: task.id,
+      message: `Task "${task.title}" was deleted.`,
+    });
+
     await task.destroy();
+    return null;
   }
 
   async getTaskComments(taskId: string, user: AuthenticatedUser) {
@@ -474,7 +500,7 @@ export class TasksService {
     taskId: string,
     commentId: string,
     user: AuthenticatedUser,
-  ): Promise<void> {
+  ): Promise<null> {
     const task = await this.findOne(taskId, user);
 
     const comment = await this.taskCommentModel.findOne({
@@ -496,17 +522,14 @@ export class TasksService {
 
     await comment.destroy();
 
-    /* await this.activityLogsService.create({
+    await this.activityLogsService.create({
       actorId: user.id,
       action: ActivityAction.TASK_COMMENT_DELETED,
       entityType: ActivityEntityType.TASK_COMMENT,
       entityId: comment.id,
-      projectId: task.projectId,
       message: `A comment was deleted from task "${task.title}".`,
-      metadata: {
-        taskId: task.id,
-        commentId: comment.id,
-      },
-    }); */
+    });
+
+    return null;
   }
 }

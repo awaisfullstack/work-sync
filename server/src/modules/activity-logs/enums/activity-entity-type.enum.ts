@@ -1,0 +1,9 @@
+export enum ActivityEntityType {
+  PROJECT = 'PROJECT',
+  TASK = 'TASK',
+  TASK_COMMENT = 'TASK_COMMENT',
+  TASK_ASSIGNMENT = 'TASK_ASSIGNMENT',
+  SHIFT = 'SHIFT',
+  USER = 'USER',
+  DEPARTMENT = 'DEPARTMENT',
+}

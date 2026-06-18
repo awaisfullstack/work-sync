@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { Eye, MoreHorizontal, Trash2 } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,9 +45,9 @@ export function ShiftRowActions({ shift }: ShiftRowActionsProps) {
 
   async function handleDelete() {
     try {
-      await deleteShift(shift.id).unwrap();
+      const res = await deleteShift(shift.id).unwrap();
       router.refresh();
-      toast.success("Shift deleted successfully");
+      toast.success(res.message);
     } catch (error) {
       toast.error(formatApiError(error));
     }

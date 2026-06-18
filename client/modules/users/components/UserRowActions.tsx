@@ -44,9 +44,9 @@ export function UserRowActions({ user }: UserRowActionsProps) {
 
   async function handleDelete() {
     try {
-      await deleteUser(user.id).unwrap();
+      const res = await deleteUser(user.id).unwrap();
       router.refresh();
-      toast.success("User deleted successfully");
+      toast.success(res.message);
     } catch (error) {
       toast.error(formatApiError(error));
     }

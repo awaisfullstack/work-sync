@@ -1,4 +1,9 @@
-import type { ActivityAction, ActivityEntityType } from "@/types/activity-log.types";
+import type {
+  ActivityAction,
+  ActivityEntityType,
+} from "@/types/activity-log.types";
+import { formatEnumLabel } from "@/lib/utils/label";
+import { BadgeVariant } from "@/types";
 
 export const ACTIVITY_ACTIONS = [
   "PROJECT_CREATED",
@@ -6,6 +11,13 @@ export const ACTIVITY_ACTIONS = [
   "PROJECT_ARCHIVED",
   "PROJECT_MEMBER_ADDED",
   "PROJECT_MEMBER_REMOVED",
+  "USER_CREATED",
+  "USER_UPDATED",
+  "USER_ACTIVATED",
+  "USER_DEACTIVATED",
+  "USER_DELETED",
+  "DEPARTMENT_CREATED",
+  "DEPARTMENT_UPDATED",
   "TASK_CREATED",
   "TASK_UPDATED",
   "TASK_DELETED",
@@ -16,6 +28,8 @@ export const ACTIVITY_ACTIONS = [
   "TASK_COMMENT_DELETED",
   "SHIFT_CLOCKED_IN",
   "SHIFT_CLOCKED_OUT",
+  "SHIFT_MANUAL_CREATED",
+  "SHIFT_DELETED",
 ];
 
 export const ACTIVITY_ENTITY_TYPES = [
@@ -25,29 +39,33 @@ export const ACTIVITY_ENTITY_TYPES = [
   "TASK_ASSIGNMENT",
   "SHIFT",
   "USER",
+  "DEPARTMENT",
 ];
 
-export function formatActivityLabel(value: string) {
-  return value
-    .split("_")
-    .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
-    .join(" ");
-}
+export const formatActivityLabel = formatEnumLabel;
 
-export function getActionTone(action: ActivityAction) {
-  if (action.includes("DELETED") || action.includes("REMOVED")) {
-    return "destructive" as const;
+export function getActionTone(action: ActivityAction): BadgeVariant {
+  if (
+    action.includes("DEACTIVATED") ||
+    action.includes("DELETED") ||
+    action.includes("REMOVED")
+  ) {
+    return "destructive";
   }
 
-  if (action.includes("CREATED") || action.includes("ADDED")) {
-    return "default" as const;
+  if (
+    action.includes("ACTIVATED") ||
+    action.includes("CREATED") ||
+    action.includes("ADDED")
+  ) {
+    return "default";
   }
 
   if (action.includes("UPDATED") || action.includes("ASSIGNED")) {
-    return "secondary" as const;
+    return "secondary";
   }
 
-  return "outline" as const;
+  return "outline";
 }
 
 export function getEntityClassName(entityType: ActivityEntityType) {
@@ -61,6 +79,7 @@ export function getEntityClassName(entityType: ActivityEntityType) {
     case "SHIFT":
       return "border-emerald-200 bg-emerald-50 text-emerald-700";
     case "USER":
+    case "DEPARTMENT":
       return "border-slate-200 bg-slate-50 text-slate-700";
     default:
       return "";

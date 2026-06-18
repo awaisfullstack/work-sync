@@ -8,7 +8,7 @@ import {
   Building2,
   CalendarDays,
   Clock,
-  KeyRound,
+  FolderKanban,
   Mail,
   Pencil,
   ShieldCheck,
@@ -17,10 +17,12 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import FetchByIdError from "@/components/common/FetchByIdError";
-import { formatDate, formatDateTime } from "@/lib/utils/formatDate";
+import { formatDate } from "@/lib/utils/formatDate";
+import { formatEnumLabel } from "@/lib/utils/label";
 import { formatApiError } from "@/lib/utils/formatError";
 import { Role } from "@/types/auth.types";
 import { useAppSelector } from "@/store/hooks";
@@ -87,15 +89,16 @@ export default function UserViewPageClient({
   const isCurrentUser = currentUser?.id === selectedUser.id;
   const isStatusSubmitting = isActivating || isDeactivating;
   const statusAction = selectedUser.isActive ? "deactivate" : "activate";
+  const projectMemberships = selectedUser.projectMemberships ?? [];
 
   async function handleStatusChange() {
     try {
       if (selectedUser.isActive) {
-        await deactivateUser(selectedUser.id).unwrap();
-        toast.success("User deactivated successfully");
+        const res = await deactivateUser(selectedUser.id).unwrap();
+        toast.success(res.message);
       } else {
-        await activateUser(selectedUser.id).unwrap();
-        toast.success("User activated successfully");
+        const res = await activateUser(selectedUser.id).unwrap();
+        toast.success(res.message);
       }
     } catch (error) {
       toast.error(formatApiError(error));
@@ -234,35 +237,56 @@ export default function UserViewPageClient({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="rounded-2xl">
         <CardHeader>
-          <CardTitle>Account Information</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <FolderKanban className="h-5 w-5" />
+            Projects
+          </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-4 text-sm">
-          <InfoRow
-            label="User ID"
-            value={selectedUser.id}
-            icon={<KeyRound className="h-4 w-4" />}
-          />
-          <InfoRow
-            label="Department ID"
-            value={selectedUser.departmentId ?? "N/A"}
-            icon={<Building2 className="h-4 w-4" />}
-          />
-          <Separator />
-          <InfoRow
-            label="Created At"
-            value={formatDateTime(selectedUser.createdAt)}
-            icon={<CalendarDays className="h-4 w-4" />}
-          />
-          <InfoRow
-            label="Updated At"
-            value={formatDateTime(selectedUser.updatedAt)}
-            icon={<Clock className="h-4 w-4" />}
-          />
+        <CardContent>
+          {projectMemberships.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center">
+              <p className="font-medium text-slate-900">
+                No projects assigned
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                This user is not a member of any project yet.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {projectMemberships.map((membership) => (
+                <Link
+                  key={membership.id}
+                  href={`/projects/${membership.project.id}`}
+                  className="flex flex-col gap-3 rounded-xl border p-4 transition-colors hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-slate-900">
+                      {membership.project.title}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Joined {formatDate(membership.joinedAt)}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">
+                      {formatEnumLabel(membership.roleInProject)}
+                    </Badge>
+                    <Badge variant="outline">
+                      {formatEnumLabel(membership.project.status)}
+                    </Badge>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
     </section>
   );
 }
@@ -286,27 +310,6 @@ function DetailTile({
       <p className="mt-2 break-words text-lg font-semibold text-slate-900">
         {value}
       </p>
-    </div>
-  );
-}
-
-function InfoRow({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {icon}
-        {label}
-      </p>
-
-      <p className="break-all font-medium text-slate-800">{value}</p>
     </div>
   );
 }

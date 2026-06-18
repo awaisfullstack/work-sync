@@ -15,68 +15,40 @@ export const tasksApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getTasks: builder.query<
       SuccessResponse<PaginatedResponse<Task>>,
-      TaskQuery | void
+      TaskQuery
     >({
       query: (params) => ({
         url: "/tasks",
         method: "GET",
-        params: {
-          page: params?.page,
-          limit: params?.limit,
-          search: params?.search || undefined,
-          projectId: params?.projectId || undefined,
-          status: params?.status || undefined,
-          sortBy: params?.sortBy || undefined,
-          sortOrder: params?.sortOrder || undefined,
-          fromDate: params?.startDate || undefined,
-          toDate: params?.endDate || undefined,
-        },
+        params,
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.data.items.map((task) => ({
-                type: "Tasks" as const,
-                id: task.id,
-              })),
-              { type: "Tasks" as const, id: "LIST" },
-            ]
-          : [{ type: "Tasks" as const, id: "LIST" }],
+      providesTags: ["Tasks"],
     }),
     getTaskById: builder.query<SuccessResponse<Task>, string>({
       query: (id) => ({
         url: `/tasks/${id}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, id) => [{ type: "Tasks" as const, id }],
+      providesTags: ["Tasks"],
     }),
-    createTask: builder.mutation<SuccessResponse<Task>, CreateTaskPayload>({
+    createTask: builder.mutation<SuccessResponse<null>, CreateTaskPayload>({
       query: (body) => ({
         url: "/tasks",
         method: "POST",
         body,
       }),
-      invalidatesTags: [
-        { type: "Tasks", id: "LIST" },
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Tasks", "Dashboard", "ActivityLogs"],
     }),
-    updateTask: builder.mutation<SuccessResponse<Task>, UpdateTaskRequest>({
+    updateTask: builder.mutation<SuccessResponse<null>, UpdateTaskRequest>({
       query: ({ id, body }) => ({
         url: `/tasks/${id}`,
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Tasks", id },
-        { type: "Tasks", id: "LIST" },
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Tasks", "Dashboard", "ActivityLogs"],
     }),
     updateTaskStatus: builder.mutation<
-      SuccessResponse<Task>,
+      SuccessResponse<null>,
       UpdateTaskStatusPayload
     >({
       query: ({ id, status }) => ({
@@ -84,59 +56,39 @@ export const tasksApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: { status },
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Tasks", id },
-        { type: "Tasks", id: "LIST" },
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Tasks", "Dashboard", "ActivityLogs"],
     }),
-    assignTask: builder.mutation<SuccessResponse<Task>, AssignTaskPayload>({
+    assignTask: builder.mutation<SuccessResponse<null>, AssignTaskPayload>({
       query: ({ id, userId }) => ({
         url: `/tasks/${id}/assign`,
         method: "POST",
         body: { userId },
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Tasks", id },
-        { type: "Tasks", id: "LIST" },
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Tasks", "Dashboard", "ActivityLogs"],
     }),
-    unassignTask: builder.mutation<SuccessResponse<Task>, AssignTaskPayload>({
+    unassignTask: builder.mutation<SuccessResponse<null>, AssignTaskPayload>({
       query: ({ id, userId }) => ({
         url: `/tasks/${id}/unassign/${userId}`,
         method: "PATCH",
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Tasks", id },
-        { type: "Tasks", id: "LIST" },
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Tasks", "Dashboard", "ActivityLogs"],
     }),
-    deleteTask: builder.mutation<SuccessResponse, string>({
+    deleteTask: builder.mutation<SuccessResponse<null>, string>({
       query: (id) => ({
         url: `/tasks/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_result, _error, id) => [
-        { type: "Tasks" as const, id },
-        { type: "Tasks" as const, id: "LIST" },
-      ],
+      invalidatesTags: ["Tasks", "Dashboard", "ActivityLogs"],
     }),
     getTaskComments: builder.query<SuccessResponse<TaskComment[]>, string>({
       query: (taskId) => ({
         url: `/tasks/${taskId}/comments`,
         method: "GET",
       }),
-      providesTags: (_result, _error, taskId) => [
-        { type: "Tasks", id: `${taskId}-comments` },
-      ],
+      providesTags: ["Tasks"],
     }),
     addTaskComment: builder.mutation<
-      SuccessResponse<TaskComment>,
+      SuccessResponse<null>,
       CreateTaskCommentRequest
     >({
       query: ({ taskId, comment }) => ({
@@ -144,11 +96,7 @@ export const tasksApi = baseApi.injectEndpoints({
         method: "POST",
         body: { comment },
       }),
-      invalidatesTags: (_result, _error, { taskId }) => [
-        { type: "Tasks", id: `${taskId}-comments` },
-        { type: "Tasks", id: taskId },
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Tasks", "ActivityLogs"],
     }),
     deleteTaskComment: builder.mutation<
       SuccessResponse<null>,
@@ -158,11 +106,7 @@ export const tasksApi = baseApi.injectEndpoints({
         url: `/tasks/${taskId}/comments/${commentId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_result, _error, { taskId }) => [
-        { type: "Tasks", id: `${taskId}-comments` },
-        { type: "Tasks", id: taskId },
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Tasks", "ActivityLogs"],
     }),
   }),
 });

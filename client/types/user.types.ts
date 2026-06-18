@@ -1,4 +1,5 @@
 import { Role } from "@/types/auth.types";
+import { ProjectMemberRole, ProjectStatus } from "./project.types";
 
 export interface UserDepartment {
   id: string;
@@ -9,6 +10,18 @@ export interface UserOption {
   id: string;
   name: string;
   email: string;
+}
+
+export interface ProjectMembership {
+  id: string;
+  projectId: string;
+  roleInProject: ProjectMemberRole;
+  joinedAt: string;
+  project: {
+    id: string;
+    title: string;
+    status: ProjectStatus;
+  };
 }
 
 export interface User {
@@ -22,6 +35,7 @@ export interface User {
   departmentId?: string | null;
 
   department?: UserDepartment | null;
+  projectMemberships?: ProjectMembership[];
 }
 
 export interface UsersStats {

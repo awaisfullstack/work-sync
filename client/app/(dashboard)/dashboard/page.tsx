@@ -16,11 +16,10 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         title="Dashboard"
-        description="Track work, projects, shifts, and recent activity."
+        description="A simple overview of tasks, projects, shifts, and activity."
       />
 
       <DashboardPageClient initialDashboard={initialDashboard} />
     </>
   );
 }
-

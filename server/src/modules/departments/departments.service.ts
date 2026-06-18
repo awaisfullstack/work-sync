@@ -7,15 +7,22 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Department } from './entities/department.entity';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
+import {
+  ActivityAction,
+  ActivityEntityType,
+} from '../activity-logs/entities/activity-log.entity';
 
 @Injectable()
 export class DepartmentsService {
   constructor(
     @InjectModel(Department)
     private readonly departmentModel: typeof Department,
+
+    private readonly activityLogsService: ActivityLogsService,
   ) {}
 
-  async create(dto: CreateDepartmentDto): Promise<Department> {
+  async create(dto: CreateDepartmentDto, actorId: string): Promise<null> {
     const existingDepartment = await this.departmentModel.findOne({
       where: { name: dto.name },
     });
@@ -24,7 +31,17 @@ export class DepartmentsService {
       throw new ConflictException('Department name already exists');
     }
 
-    return this.departmentModel.create(dto);
+    const department = await this.departmentModel.create(dto);
+
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.DEPARTMENT_CREATED,
+      entityType: ActivityEntityType.DEPARTMENT,
+      entityId: department.id,
+      message: `Department "${department.name}" was created.`,
+    });
+
+    return null;
   }
 
   async findAll(): Promise<Department[]> {
@@ -43,7 +60,11 @@ export class DepartmentsService {
     return department;
   }
 
-  async update(id: string, dto: UpdateDepartmentDto): Promise<null> {
+  async update(
+    id: string,
+    dto: UpdateDepartmentDto,
+    actorId: string,
+  ): Promise<null> {
     const department = await this.findOne(id);
 
     if (dto.name) {
@@ -57,6 +78,14 @@ export class DepartmentsService {
     }
 
     await department.update(dto);
+
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.DEPARTMENT_UPDATED,
+      entityType: ActivityEntityType.DEPARTMENT,
+      entityId: department.id,
+      message: `Department "${department.name}" was updated.`,
+    });
 
     return null;
   }

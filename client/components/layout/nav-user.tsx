@@ -15,19 +15,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  CaretUpDownIcon,
-  SignOutIcon,
-} from "@phosphor-icons/react";
+import { CaretUpDownIcon, SignOutIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useLogoutMutation } from "@/store/api/authApi";
-import {
-  logout as logoutState,
-} from "@/store/slices/authSlice";
+import { logout as logoutState } from "@/store/slices/authSlice";
 import { baseApi } from "@/store/api/baseApi";
 import { useAppDispatch } from "@/store/hooks";
+import { getInitials } from "@/lib/utils/avatar";
 
 export function NavUser({
   user,
@@ -44,16 +40,20 @@ export function NavUser({
   const [logout, { isLoading }] = useLogoutMutation();
 
   async function handleLogout() {
+    let successMessage = "Logged out successfully";
 
     try {
-      await logout().unwrap();
+      const res = await logout().unwrap();
+      successMessage = Array.isArray(res.message)
+        ? res.message.join(", ")
+        : res.message;
     } catch {
       // Local logout should still complete if the session is already expired.
     } finally {
       dispatch(logoutState());
       dispatch(baseApi.util.resetApiState());
       router.replace("/login");
-      toast.success("Logged out successfully");
+      toast.success(successMessage);
     }
   }
 
@@ -69,11 +69,7 @@ export function NavUser({
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg">
-                  {user.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
+                  {getInitials(user.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">

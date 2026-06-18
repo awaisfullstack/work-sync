@@ -55,24 +55,6 @@ export const columns: ColumnDef<ActivityLog>[] = [
     ),
   },
   {
-    accessorKey: "project",
-    header: "Project",
-    cell: ({ row }) => {
-      const project = row.original.project;
-
-      return (
-        <div>
-          <p className="text-sm font-medium text-slate-900">
-            {project?.title ?? "No project"}
-          </p>
-          <p className="text-xs text-slate-500">
-            {project?.status ?? "Not linked"}
-          </p>
-        </div>
-      );
-    },
-  },
-  {
     accessorKey: "createdAt",
     header: "Logged At",
     cell: ({ row }) => (

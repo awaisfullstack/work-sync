@@ -32,7 +32,7 @@ export const usersApi = baseApi.injectEndpoints({
         url: `/users/${id}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, id) => [{ type: "Users", id }],
+      providesTags: ["Users"],
     }),
 
     getUserOptions: builder.query<SuccessResponse<UserOption[]>, void>({
@@ -43,7 +43,7 @@ export const usersApi = baseApi.injectEndpoints({
       providesTags: ["Users"],
     }),
 
-    createUser: builder.mutation<SuccessResponse<User>, CreateUserRequest>({
+    createUser: builder.mutation<SuccessResponse<null>, CreateUserRequest>({
       query: (body) => ({
         url: "/users",
         method: "POST",
@@ -58,12 +58,7 @@ export const usersApi = baseApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Users", id },
-        "Users",
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Users", "Dashboard", "ActivityLogs"],
     }),
 
     deleteUser: builder.mutation<SuccessResponse<null>, string>({
@@ -74,36 +69,20 @@ export const usersApi = baseApi.injectEndpoints({
       invalidatesTags: ["Users", "Dashboard", "ActivityLogs"],
     }),
 
-    activateUser: builder.mutation<
-      SuccessResponse<null>,
-      string
-    >({
+    activateUser: builder.mutation<SuccessResponse<null>, string>({
       query: (id) => ({
         url: `/users/${id}/activate`,
         method: "PATCH",
       }),
-      invalidatesTags: (_result, _error, id) => [
-        { type: "Users", id },
-        "Users",
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Users", "Dashboard", "ActivityLogs"],
     }),
 
-    deactivateUser: builder.mutation<
-      SuccessResponse<null>,
-      string
-    >({
+    deactivateUser: builder.mutation<SuccessResponse<null>, string>({
       query: (id) => ({
         url: `/users/${id}/deactivate`,
         method: "PATCH",
       }),
-      invalidatesTags: (_result, _error, id) => [
-        { type: "Users", id },
-        "Users",
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Users", "Dashboard", "ActivityLogs"],
     }),
   }),
 });

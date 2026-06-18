@@ -15,6 +15,11 @@ import { ShiftQueryDto } from './dto/shift-query.dto';
 
 import { Op, WhereOptions } from 'sequelize';
 import { ManualShiftDto } from './dto/manual-shift.dto';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
+import {
+  ActivityAction,
+  ActivityEntityType,
+} from '../activity-logs/entities/activity-log.entity';
 
 @Injectable()
 export class ShiftsService {
@@ -24,6 +29,8 @@ export class ShiftsService {
 
     @InjectModel(User)
     private readonly userModel: typeof User,
+
+    private readonly activityLogsService: ActivityLogsService,
   ) {}
 
   private async isUserExist(id: string): Promise<User> {
@@ -51,7 +58,7 @@ export class ShiftsService {
     return Math.floor(diffMs / 1000 / 60);
   }
 
-  async clockIn(id: string): Promise<Shift> {
+  async clockIn(id: string): Promise<null> {
     const user = await this.isUserExist(id);
 
     if ((user.role as Role) !== Role.EMPLOYEE) {
@@ -68,12 +75,22 @@ export class ShiftsService {
     if (shift) {
       throw new ConflictException('You already have an active shift');
     }
-    return await this.shiftModel.create({
+    const newShift = await this.shiftModel.create({
       userId: user.id,
       clockInAt: new Date(),
       clockOutAt: null,
       status: ShiftStatus.ACTIVE,
     });
+
+    await this.activityLogsService.create({
+      actorId: user.id,
+      action: ActivityAction.SHIFT_CLOCKED_IN,
+      entityType: ActivityEntityType.SHIFT,
+      entityId: newShift.id,
+      message: `${user.name} clocked in.`,
+    });
+
+    return null;
   }
 
   async getAllActiveShiftsCount() {
@@ -164,7 +181,7 @@ export class ShiftsService {
     };
   }
 
-  async createManualShift(dto: ManualShiftDto): Promise<Shift> {
+  async createManualShift(dto: ManualShiftDto, actorId: string): Promise<null> {
     const employee = await this.userModel.findByPk(dto.userId);
 
     if (!employee) {
@@ -239,12 +256,22 @@ export class ShiftsService {
       throw new ConflictException('Shift overlaps with an existing shift');
     }
 
-    return await this.shiftModel.create({
+    const shift = await this.shiftModel.create({
       userId: dto.userId,
       clockInAt,
       clockOutAt,
       status: clockOutAt ? ShiftStatus.COMPLETED : ShiftStatus.ACTIVE,
     });
+
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.SHIFT_MANUAL_CREATED,
+      entityType: ActivityEntityType.SHIFT,
+      entityId: shift.id,
+      message: `Manual shift was created for ${employee.name}.`,
+    });
+
+    return null;
   }
 
   async getWeeklyWorkedHours(userId: string) {
@@ -316,7 +343,7 @@ export class ShiftsService {
     };
   }
 
-  async clockOut(userId: string) {
+  async clockOut(userId: string): Promise<null> {
     const shift = await this.shiftModel.findOne({
       where: {
         userId,
@@ -332,10 +359,29 @@ export class ShiftsService {
       clockOutAt: new Date(),
       status: ShiftStatus.COMPLETED,
     });
+
+    await this.activityLogsService.create({
+      actorId: userId,
+      action: ActivityAction.SHIFT_CLOCKED_OUT,
+      entityType: ActivityEntityType.SHIFT,
+      entityId: shift.id,
+      message: `A user clocked out.`,
+    });
+
+    return null;
   }
 
-  async remove(id: string): Promise<null> {
+  async remove(id: string, actorId: string): Promise<null> {
     const shift = await this.findOne(id);
+
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.SHIFT_DELETED,
+      entityType: ActivityEntityType.SHIFT,
+      entityId: shift.id,
+      message: `A shift record was deleted.`,
+    });
+
     await shift.destroy();
     return null;
   }

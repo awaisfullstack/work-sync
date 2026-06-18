@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -44,7 +45,7 @@ export class ProjectsController {
   create(
     @Body() createProjectDto: CreateProjectDto,
     @CurrentUser() user: AuthenticatedUser,
-  ) {
+  ): Promise<null> {
     return this.projectsService.create(createProjectDto, user.id);
   }
 
@@ -69,7 +70,7 @@ export class ProjectsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get one project by id' })
   async findOne(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: AuthenticatedUser,
   ) {
     if (user.role === Role.EMPLOYEE) {
@@ -84,34 +85,49 @@ export class ProjectsController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update a project' })
   @ResponseMessage('Project updated successfully')
-  update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
-    return this.projectsService.update(id, dto);
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateProjectDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.projectsService.update(id, dto, user.id);
   }
 
   @Patch(':id/archive')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Archive a project' })
-  archive(@Param('id') id: string) {
-    return this.projectsService.archive(id);
+  @ResponseMessage('Project archived successfully')
+  archive(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.projectsService.archive(id, user.id);
   }
 
   @Post(':id/members')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Add a project member' })
-  addMember(@Param('id') projectId: string, @Body() dto: AddProjectMemberDto) {
-    return this.projectsService.addMember(projectId, dto);
+  @ResponseMessage('Project member assigned successfully')
+  addMember(
+    @Param('id', ParseUUIDPipe) projectId: string,
+    @Body() dto: AddProjectMemberDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.projectsService.addMember(projectId, dto, user.id);
   }
 
   @Delete(':id/members/:userId')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Remove a project member' })
+  @ResponseMessage('Project member removed successfully')
   removeMember(
-    @Param('id') projectId: string,
-    @Param('userId') userId: string,
-  ) {
-    return this.projectsService.removeMember(projectId, userId);
+    @Param('id', ParseUUIDPipe) projectId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.projectsService.removeMember(projectId, userId, user.id);
   }
 }

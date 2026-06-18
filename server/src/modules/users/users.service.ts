@@ -13,6 +13,13 @@ import { Department } from '../departments/entities/department.entity';
 import * as bcrypt from 'bcrypt';
 import { QueryUsersDto } from './dto/query-users.dto';
 import { Op, WhereOptions } from 'sequelize';
+import { ProjectMember } from '../projects/entities/project-member.entity';
+import { Project } from '../projects/entities/project.entity';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
+import {
+  ActivityAction,
+  ActivityEntityType,
+} from '../activity-logs/entities/activity-log.entity';
 
 @Injectable()
 export class UsersService {
@@ -22,9 +29,11 @@ export class UsersService {
 
     @InjectModel(Department)
     private readonly departmentModel: typeof Department,
+
+    private readonly activityLogsService: ActivityLogsService,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<null> {
+  async create(dto: CreateUserDto, actorId: string): Promise<null> {
     const { email, password, departmentId, role } = dto;
     const existingUser = await this.userModel.findOne({
       where: { email },
@@ -50,12 +59,20 @@ export class UsersService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await this.userModel.create({
+    const user = await this.userModel.create({
       ...dto,
       role: userRole,
       password: hashedPassword,
       departmentId: departmentId ?? null,
       isActive: true,
+    });
+
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.USER_CREATED,
+      entityType: ActivityEntityType.USER,
+      entityId: user.id,
+      message: `User "${user.name}" was created.`,
     });
 
     return null;
@@ -165,6 +182,18 @@ export class UsersService {
           model: Department,
           attributes: ['id', 'name'],
         },
+        {
+          model: ProjectMember,
+          as: 'projectMemberships',
+          attributes: ['id', 'projectId', 'roleInProject', 'joinedAt'],
+          include: [
+            {
+              model: Project,
+              as: 'project',
+              attributes: ['id', 'title', 'status'],
+            },
+          ],
+        },
       ],
     });
 
@@ -187,7 +216,11 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<null> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    actorId: string,
+  ): Promise<null> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
@@ -225,10 +258,18 @@ export class UsersService {
 
     await user.update(updateUserDto);
 
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.USER_UPDATED,
+      entityType: ActivityEntityType.USER,
+      entityId: user.id,
+      message: `User "${user.name}" was updated.`,
+    });
+
     return null;
   }
 
-  async deactivate(id: string): Promise<null> {
+  async deactivate(id: string, actorId: string): Promise<null> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
@@ -239,10 +280,18 @@ export class UsersService {
       isActive: false,
     });
 
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.USER_DEACTIVATED,
+      entityType: ActivityEntityType.USER,
+      entityId: user.id,
+      message: `User "${user.name}" was deactivated.`,
+    });
+
     return null;
   }
 
-  async activate(id: string): Promise<null> {
+  async activate(id: string, actorId: string): Promise<null> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
@@ -253,15 +302,31 @@ export class UsersService {
       isActive: true,
     });
 
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.USER_ACTIVATED,
+      entityType: ActivityEntityType.USER,
+      entityId: user.id,
+      message: `User "${user.name}" was activated.`,
+    });
+
     return null;
   }
 
-  async remove(id: string): Promise<null> {
+  async remove(id: string, actorId: string): Promise<null> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.USER_DELETED,
+      entityType: ActivityEntityType.USER,
+      entityId: user.id,
+      message: `User "${user.name}" was deleted.`,
+    });
 
     await user.destroy();
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
 import { DataTable } from "@/components/common/data-table";
@@ -13,20 +13,10 @@ import { useGetActivityLogsQuery } from "@/store/api/activityLogsApi";
 import type {
   ActivityAction,
   ActivityEntityType,
-  ActivitySortBy,
   SortOrder,
 } from "@/types/activity-log.types";
 import { ActivityLogsTableToolbar } from "./ActivityLogsTableToolbar";
-
-function formatDateParam(date?: Date) {
-  if (!date) return undefined;
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
+import { formatDateInputValue } from "@/lib/utils/dateInput";
 
 export default function ActivityLogsPageClient() {
   const currentUser = useAppSelector((state) => state.auth.user);
@@ -39,41 +29,22 @@ export default function ActivityLogsPageClient() {
     "ALL",
   );
   const [actorId, setActorId] = useState("all");
-  const [projectId, setProjectId] = useState("all");
-  const [sortBy, setSortBy] = useState<ActivitySortBy>("createdAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("DESC");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  const fromDate = formatDateParam(dateRange?.from);
-  const toDate = formatDateParam(dateRange?.to);
+  const fromDate = formatDateInputValue(dateRange?.from);
+  const toDate = formatDateInputValue(dateRange?.to);
 
-  const queryArgs = useMemo(
-    () => ({
-      page,
-      limit,
-      action: action === "ALL" ? undefined : action,
-      entityType: entityType === "ALL" ? undefined : entityType,
-      actorId: isAdmin && actorId !== "all" ? actorId : undefined,
-      projectId: projectId === "all" ? undefined : projectId,
-      fromDate,
-      toDate,
-      sortBy,
-      sortOrder,
-    }),
-    [
-      page,
-      limit,
-      action,
-      entityType,
-      isAdmin,
-      actorId,
-      projectId,
-      fromDate,
-      toDate,
-      sortBy,
-      sortOrder,
-    ],
-  );
+  const queryArgs = {
+    page,
+    limit,
+    action: action === "ALL" ? undefined : action,
+    entityType: entityType === "ALL" ? undefined : entityType,
+    actorId: isAdmin && actorId !== "all" ? actorId : undefined,
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+    sortOrder,
+  };
 
   const { data, isLoading, isFetching, isError, refetch } =
     useGetActivityLogsQuery(queryArgs);
@@ -107,16 +78,6 @@ export default function ActivityLogsPageClient() {
     setPage(1);
   }
 
-  function handleProjectIdChange(value: string) {
-    setProjectId(value);
-    setPage(1);
-  }
-
-  function handleSortByChange(value: ActivitySortBy) {
-    setSortBy(value);
-    setPage(1);
-  }
-
   function handleSortOrderChange(value: SortOrder) {
     setSortOrder(value);
     setPage(1);
@@ -131,9 +92,7 @@ export default function ActivityLogsPageClient() {
     setAction("ALL");
     setEntityType("ALL");
     setActorId("all");
-    setProjectId("all");
     setDateRange(undefined);
-    setSortBy("createdAt");
     setSortOrder("DESC");
     setPage(1);
   }
@@ -179,15 +138,11 @@ export default function ActivityLogsPageClient() {
         action={action}
         entityType={entityType}
         actorId={actorId}
-        projectId={projectId}
-        sortBy={sortBy}
         sortOrder={sortOrder}
         dateRange={dateRange}
         onActionChange={handleActionChange}
         onEntityTypeChange={handleEntityTypeChange}
         onActorIdChange={handleActorIdChange}
-        onProjectIdChange={handleProjectIdChange}
-        onSortByChange={handleSortByChange}
         onSortOrderChange={handleSortOrderChange}
         onDateRangeChange={handleDateRangeChange}
         onReset={resetFilters}

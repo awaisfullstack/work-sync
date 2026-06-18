@@ -15,12 +15,9 @@ export const columns: ColumnDef<Department>[] = [
       const department = row.original;
 
       return (
-        <Link
-          href={`/departments/${department.id}`}
-          className="font-medium text-slate-900 hover:text-blue-700"
-        >
+        <p className="font-medium text-slate-900">
           {department.name}
-        </Link>
+        </p>
       );
     },
   },

@@ -51,7 +51,8 @@ import { useGetUserOptionsQuery } from "@/store/api/usersApi";
 import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils/formatDate";
-import { getInitials } from "@/lib/utils/index";
+import { getInitials } from "@/lib/utils/avatar";
+import { formatEnumLabel } from "@/lib/utils/label";
 
 interface ProjectMembersManagerProps {
   project: Project;
@@ -231,8 +232,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                       key={projectMemberRole}
                       value={projectMemberRole}
                     >
-                      {projectMemberRole[0] +
-                        projectMemberRole.slice(1).toLowerCase()}
+                      {formatEnumLabel(projectMemberRole)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -300,8 +300,7 @@ export function ProjectMembersManager({ project }: ProjectMembersManagerProps) {
                           : "secondary"
                       }
                     >
-                      {member.roleInProject[0] +
-                        member.roleInProject.slice(1).toLowerCase()}
+                      {formatEnumLabel(member.roleInProject)}
                     </Badge>
 
                     <p className="text-xs text-slate-500">

@@ -43,9 +43,9 @@ export function ProjectRowActions({ project }: ProjectRowActionsProps) {
 
   async function handleArchive() {
     try {
-      await archiveProject(project.id).unwrap();
+      const res = await archiveProject(project.id).unwrap();
       router.refresh();
-      toast.success("Project archived successfully");
+      toast.success(res.message);
     } catch (error) {
       toast.error(formatApiError(error));
     }

@@ -31,7 +31,7 @@ import {
   getDateInputValue,
   formatDateInputValue,
   parseDateInputValue,
-} from "@/lib/utils/index";
+} from "@/lib/utils/dateInput";
 
 interface TaskFormProps {
   mode: "create" | "update";

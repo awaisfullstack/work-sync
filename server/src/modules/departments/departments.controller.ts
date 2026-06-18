@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
@@ -22,6 +23,8 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/auth.types';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('departments')
@@ -35,8 +38,11 @@ export class DepartmentsController {
   @Post()
   @ApiOperation({ summary: 'Create a department' })
   @ResponseMessage('Department created successfully')
-  create(@Body() createDepartmentDto: CreateDepartmentDto) {
-    return this.departmentsService.create(createDepartmentDto);
+  create(
+    @Body() createDepartmentDto: CreateDepartmentDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.departmentsService.create(createDepartmentDto, user.id);
   }
 
   @Roles(Role.ADMIN)
@@ -49,7 +55,7 @@ export class DepartmentsController {
   @Roles(Role.ADMIN)
   @Get(':id')
   @ApiOperation({ summary: 'Get one department by id' })
-  findOne(@Param('id') id: string): Promise<Department> {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Department> {
     return this.departmentsService.findOne(id);
   }
 
@@ -58,9 +64,14 @@ export class DepartmentsController {
   @ApiOperation({ summary: 'Update a department' })
   @ResponseMessage('Department updated successfully')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<null> {
-    return await this.departmentsService.update(id, updateDepartmentDto);
+    return await this.departmentsService.update(
+      id,
+      updateDepartmentDto,
+      user.id,
+    );
   }
 }

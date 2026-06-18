@@ -12,20 +12,22 @@ const LOG_LEVELS = ["debug", "info", "warn", "error"] as const;
 
 type LogLevel = (typeof LOG_LEVELS)[number];
 
+type LogBody = {
+  level?: unknown;
+  message?: unknown;
+  source?: unknown;
+  details?: unknown;
+};
+
 type StoredLog = {
-  id: string;
+  createdAt: string;
   level: LogLevel;
   message: string;
   source?: string;
-  route?: string;
-  userId?: string;
-  sessionId?: string;
-  metadata?: Record<string, unknown>;
-  createdAt: string;
-  userAgent: string | null;
+  details?: Record<string, unknown>;
 };
 
-function response(data: unknown, status = 200) {
+function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status });
 }
 
@@ -37,7 +39,7 @@ function isLogLevel(value: unknown): value is LogLevel {
   return typeof value === "string" && LOG_LEVELS.includes(value as LogLevel);
 }
 
-function cleanString(value: unknown) {
+function cleanText(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
@@ -46,21 +48,14 @@ async function saveLog(log: StoredLog) {
   await appendFile(LOG_FILE, `${JSON.stringify(log)}\n`, "utf8");
 }
 
-async function getRecentLogs(limit: number) {
+async function readLogs(limit: number) {
   try {
     const file = await readFile(LOG_FILE, "utf8");
 
     return file
       .split("\n")
       .filter(Boolean)
-      .map((line) => {
-        try {
-          return JSON.parse(line) as StoredLog;
-        } catch {
-          return null;
-        }
-      })
-      .filter((log): log is StoredLog => Boolean(log))
+      .map((line) => JSON.parse(line) as StoredLog)
       .slice(-limit)
       .reverse();
   } catch (error) {
@@ -73,82 +68,49 @@ async function getRecentLogs(limit: number) {
 }
 
 export async function POST(request: NextRequest) {
-  let body: unknown;
+  let body: LogBody;
 
   try {
-    body = await request.json();
+    const data = await request.json();
+    body = isObject(data) ? data : {};
   } catch {
-    return response({ success: false, message: "Invalid JSON body." }, 400);
+    return json({ success: false, message: "Invalid JSON body." }, 400);
   }
 
-  if (!isObject(body)) {
-    return response({ success: false, message: "Body must be an object." }, 400);
-  }
+  const message = cleanText(body.message);
 
-  const level = body.level;
-  const message = cleanString(body.message);
-
-  if (!isLogLevel(level)) {
-    return response(
-      { success: false, message: "Level must be debug, info, warn, or error." },
-      400,
-    );
+  if (!isLogLevel(body.level)) {
+    return json({ success: false, message: "Invalid log level." }, 400);
   }
 
   if (!message) {
-    return response({ success: false, message: "Message is required." }, 400);
+    return json({ success: false, message: "Message is required." }, 400);
   }
 
   const log: StoredLog = {
-    id: crypto.randomUUID(),
-    level,
-    message,
-    source: cleanString(body.source),
-    route: cleanString(body.route),
-    userId: cleanString(body.userId),
-    sessionId: cleanString(body.sessionId),
-    metadata: isObject(body.metadata) ? body.metadata : undefined,
     createdAt: new Date().toISOString(),
-    userAgent: request.headers.get("user-agent"),
+    level: body.level,
+    message,
+    source: cleanText(body.source),
+    details: isObject(body.details) ? body.details : undefined,
   };
 
   try {
     await saveLog(log);
+    return json({ success: true, message: "Log saved." }, 201);
   } catch {
-    return response({ success: false, message: "Could not save log." }, 500);
+    return json({ success: false, message: "Could not save log." }, 500);
   }
-
-  return response(
-    {
-      success: true,
-      message: "Log saved.",
-      data: {
-        id: log.id,
-        createdAt: log.createdAt,
-      },
-    },
-    201,
-  );
 }
 
 export async function GET(request: NextRequest) {
-  const limitValue = Number(request.nextUrl.searchParams.get("limit") ?? 25);
-  const limit = Number.isFinite(limitValue)
-    ? Math.min(Math.max(limitValue, 1), 100)
-    : 25;
+  const limit = Number(request.nextUrl.searchParams.get("limit") ?? 25);
+  const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(limit, 1), 100) : 25;
 
   try {
-    const logs = await getRecentLogs(limit);
-
-    return response({
-      success: true,
-      message: "Logs fetched.",
-      data: {
-        items: logs,
-        count: logs.length,
-      },
-    });
+    const logs = await readLogs(safeLimit);
+    return json({ success: true, data: logs });
   } catch {
-    return response({ success: false, message: "Could not read logs." }, 500);
+    return json({ success: false, message: "Could not read logs." }, 500);
   }
 }

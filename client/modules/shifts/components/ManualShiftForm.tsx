@@ -25,7 +25,10 @@ import {
   type ManualShiftFormValues,
 } from "@/validators/shift.schema";
 import { useCreateManualShiftMutation } from "@/store/api/shiftsApi";
-import { formatDateInputValue, parseDateInputValue } from "@/lib/utils/index";
+import {
+  formatDateInputValue,
+  parseDateInputValue,
+} from "@/lib/utils/dateInput";
 import type { ManualShiftPayload } from "@/types/shift.types";
 
 function toIsoDateTime(date: string, time: string) {

@@ -1,3 +1,9 @@
+import type {
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+  NonAttribute,
+} from 'sequelize';
 import {
   BelongsTo,
   Column,
@@ -6,50 +12,29 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Project } from '../../projects/entities/project.entity';
 import { User } from '../../users/entities/user.entity';
+import { ActivityAction } from '../enums/activity-action.enum';
+import { ActivityEntityType } from '../enums/activity-entity-type.enum';
 
-export enum ActivityAction {
-  PROJECT_CREATED = 'PROJECT_CREATED',
-  PROJECT_UPDATED = 'PROJECT_UPDATED',
-  PROJECT_ARCHIVED = 'PROJECT_ARCHIVED',
-  PROJECT_MEMBER_ADDED = 'PROJECT_MEMBER_ADDED',
-  PROJECT_MEMBER_REMOVED = 'PROJECT_MEMBER_REMOVED',
-
-  TASK_CREATED = 'TASK_CREATED',
-  TASK_UPDATED = 'TASK_UPDATED',
-  TASK_DELETED = 'TASK_DELETED',
-  TASK_STATUS_UPDATED = 'TASK_STATUS_UPDATED',
-  TASK_ASSIGNED = 'TASK_ASSIGNED',
-  TASK_UNASSIGNED = 'TASK_UNASSIGNED',
-  TASK_COMMENT_ADDED = 'TASK_COMMENT_ADDED',
-  TASK_COMMENT_DELETED = 'TASK_COMMENT_DELETED',
-
-  SHIFT_CLOCKED_IN = 'SHIFT_CLOCKED_IN',
-  SHIFT_CLOCKED_OUT = 'SHIFT_CLOCKED_OUT',
-}
-
-export enum ActivityEntityType {
-  PROJECT = 'PROJECT',
-  TASK = 'TASK',
-  TASK_COMMENT = 'TASK_COMMENT',
-  TASK_ASSIGNMENT = 'TASK_ASSIGNMENT',
-  SHIFT = 'SHIFT',
-  USER = 'USER',
-}
+export { ActivityAction } from '../enums/activity-action.enum';
+export { ActivityEntityType } from '../enums/activity-entity-type.enum';
 
 @Table({
   tableName: 'activity_logs',
   timestamps: true,
+  updatedAt: false,
   underscored: true,
 })
-export class ActivityLog extends Model<ActivityLog> {
+export class ActivityLog extends Model<
+  InferAttributes<ActivityLog>,
+  InferCreationAttributes<ActivityLog>
+> {
   @Column({
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
     primaryKey: true,
   })
-  declare id: string;
+  declare id: CreationOptional<string>;
 
   @ForeignKey(() => User)
   @Column({
@@ -59,16 +44,16 @@ export class ActivityLog extends Model<ActivityLog> {
   declare actorId: string | null;
 
   @BelongsTo(() => User, 'actorId')
-  declare actor?: User;
+  declare actor?: NonAttribute<User>;
 
   @Column({
-    type: DataType.ENUM(...Object.values(ActivityAction)),
+    type: DataType.STRING(80),
     allowNull: false,
   })
   declare action: ActivityAction;
 
   @Column({
-    type: DataType.ENUM(...Object.values(ActivityEntityType)),
+    type: DataType.STRING(50),
     allowNull: false,
   })
   declare entityType: ActivityEntityType;
@@ -79,25 +64,9 @@ export class ActivityLog extends Model<ActivityLog> {
   })
   declare entityId: string | null;
 
-  @ForeignKey(() => Project)
-  @Column({
-    type: DataType.UUID,
-    allowNull: true,
-  })
-  declare projectId: string | null;
-
-  @BelongsTo(() => Project)
-  declare project?: Project;
-
   @Column({
     type: DataType.TEXT,
     allowNull: false,
   })
   declare message: string;
-
-  @Column({
-    type: DataType.JSONB,
-    allowNull: true,
-  })
-  declare metadata: Record<string, unknown> | null;
 }

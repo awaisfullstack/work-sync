@@ -40,20 +40,9 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('departments', {
-      [Sequelize.Op.or]: [
-        {
-          id: {
-            [Sequelize.Op.in]: departments.map((department) => department.id),
-          },
-        },
-        {
-          name: {
-            [Sequelize.Op.in]: departments.map(
-              (department) => department.name,
-            ),
-          },
-        },
-      ],
+      id: {
+        [Sequelize.Op.in]: departments.map((department) => department.id),
+      },
     });
   },
 };

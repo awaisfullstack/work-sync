@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
 import { DataTable } from "@/components/common/data-table";
@@ -20,7 +20,7 @@ import type { ShiftSortBy, ShiftStatus, SortOrder } from "@/types/shift.types";
 import { formatShiftDuration } from "../utils";
 import { ShiftClockCard } from "./ShiftClockCard";
 import { ShiftsTableToolbar } from "./ShiftsTableToolbar";
-import { formatDateInputValue } from "@/lib/utils/index";
+import { formatDateInputValue } from "@/lib/utils/dateInput";
 
 const ShiftsPageClient = () => {
   const currentUser = useAppSelector((state) => state.auth.user);
@@ -37,19 +37,16 @@ const ShiftsPageClient = () => {
   const fromDate = formatDateInputValue(dateRange?.from);
   const toDate = formatDateInputValue(dateRange?.to);
 
-  const queryArgs = useMemo(
-    () => ({
-      page,
-      limit,
-      userId: employeeId === "all" ? undefined : employeeId,
-      status: status === "ALL" ? undefined : status,
-      sortBy,
-      sortOrder,
-      fromDate: fromDate || undefined,
-      toDate: toDate || undefined,
-    }),
-    [page, limit, employeeId, status, sortBy, sortOrder, fromDate, toDate],
-  );
+  const queryArgs = {
+    page,
+    limit,
+    userId: employeeId === "all" ? undefined : employeeId,
+    status: status === "ALL" ? undefined : status,
+    sortBy,
+    sortOrder,
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+  };
 
   const { data, isLoading, isFetching, isError, refetch } =
     useGetShiftsQuery(queryArgs);
@@ -128,43 +125,41 @@ const ShiftsPageClient = () => {
   return (
     <section className="flex flex-col gap-6 py-6">
       <ShiftClockCard />
+      {isAdmin && (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border bg-white p-5 shadow-sm">
+            <p className="text-sm text-slate-500">Total Shifts</p>
+            <h3 className="mt-2 text-2xl font-bold text-slate-900">
+              {totalItems}
+            </h3>
+          </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Total Shifts</p>
-          <h3 className="mt-2 text-2xl font-bold text-slate-900">
-            {totalItems}
-          </h3>
-        </div>
+          <div className="rounded-2xl border bg-white p-5 shadow-sm">
+            <p className="text-sm text-slate-500">Current Page</p>
+            <h3 className="mt-2 text-2xl font-bold text-blue-700">
+              {shifts.length}
+            </h3>
+          </div>
 
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Current Page</p>
-          <h3 className="mt-2 text-2xl font-bold text-blue-700">
-            {shifts.length}
-          </h3>
-        </div>
+          <div className="rounded-2xl border bg-white p-5 shadow-sm">
+            <p className="text-sm text-slate-500">Active Shifts</p>
+            <h3 className="mt-2 text-2xl font-bold text-green-700">
+              {totalActiveShifts}
+            </h3>
+          </div>
 
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Active Shifts</p>
-          <h3 className="mt-2 text-2xl font-bold text-green-700">
-            {totalActiveShifts}
-          </h3>
-        </div>
-
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">
-            {isAdmin
-              ? employeeId === "all"
+          <div className="rounded-2xl border bg-white p-5 shadow-sm">
+            <p className="text-sm text-slate-500">
+              {isAdmin && employeeId === "all"
                 ? "All Employees Total Hours"
-                : "Selected Employee Total Hours"
-              : "Total Worked Hours"}
-          </p>
-          <h3 className="mt-2 text-2xl font-bold text-slate-700">
-            {formatShiftDuration(workedHoursMinutes)}
-          </h3>
+                : "Selected Employee Total Hours"}
+            </p>
+            <h3 className="mt-2 text-2xl font-bold text-slate-700">
+              {formatShiftDuration(workedHoursMinutes)}
+            </h3>
+          </div>
         </div>
-      </div>
-
+      )}
       <ShiftsTableToolbar
         user={currentUser}
         employeeId={employeeId}

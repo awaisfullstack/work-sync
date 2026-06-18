@@ -9,7 +9,7 @@ import type {
   ProjectStatus,
   SortOrder,
 } from "@/types/project.types";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { TablePagination } from "@/components/common/TablePagination";
 import { useDebounce } from "@/hooks/useDebounce";
 import LoadTableError from "@/components/common/LoadTableError";
@@ -25,17 +25,14 @@ const ProjectsPageClient = () => {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const queryArgs = useMemo<ProjectQuery>(
-    () => ({
-      page,
-      limit,
-      search: debouncedSearch.trim() || undefined,
-      status: status === "ALL" ? undefined : status,
-      sortBy,
-      sortOrder
-    }),
-    [page, limit, debouncedSearch, status, sortBy, sortOrder],
-  );
+  const queryArgs: ProjectQuery = {
+    page,
+    limit,
+    search: debouncedSearch.trim() || undefined,
+    status: status === "ALL" ? undefined : status,
+    sortBy,
+    sortOrder,
+  };
 
   const { data, isLoading, isFetching, isError, refetch } =
     useGetProjectsQuery(queryArgs);

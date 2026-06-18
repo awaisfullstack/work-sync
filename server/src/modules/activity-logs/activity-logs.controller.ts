@@ -5,8 +5,6 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../users/enums/users.enum';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import type { AuthenticatedUser } from '../../common/types/auth.types';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
@@ -23,12 +21,9 @@ export class ActivityLogsController {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
   @Get()
-  @Roles(Role.ADMIN, Role.EMPLOYEE)
-  @ApiOperation({ summary: 'List activity logs visible to current user' })
-  findAll(
-    @Query() query: GetActivityLogsQueryDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    return this.activityLogsService.findAll(query, user);
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'List activity logs for admins' })
+  findAll(@Query() query: GetActivityLogsQueryDto) {
+    return this.activityLogsService.findAll(query);
   }
 }

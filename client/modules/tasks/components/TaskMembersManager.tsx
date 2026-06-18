@@ -39,7 +39,7 @@ import { formatApiError } from "@/lib/utils/formatError";
 import { cn } from "@/lib/utils";
 import { Task } from "@/types/task.types";
 import { useAssignTaskMutation, useUnassignTaskMutation } from "@/store/api/tasksApi";
-import { getInitials } from "@/lib/utils/index";
+import { getInitials } from "@/lib/utils/avatar";
 
 interface TaskMembersManagerProps {
   task: Task;

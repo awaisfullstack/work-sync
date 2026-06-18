@@ -1,4 +1,5 @@
 import { ShiftStatus } from "@/types/shift.types";
+import { formatMinutesDuration } from "@/lib/utils/duration";
 
 export function getShiftDurationMinutes(
   clockInAt: string,
@@ -19,16 +20,5 @@ export function getShiftDurationMinutes(
 }
 
 export function formatShiftDuration(minutes: number) {
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-
-  if (hours === 0) {
-    return `${remainingMinutes}m`;
-  }
-
-  if (remainingMinutes === 0) {
-    return `${hours}h`;
-  }
-
-  return `${hours}h ${remainingMinutes}m`;
+  return formatMinutesDuration(minutes);
 }

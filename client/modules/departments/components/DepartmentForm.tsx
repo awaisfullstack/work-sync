@@ -52,16 +52,16 @@ export function DepartmentForm({
   async function onSubmit(values: DepartmentFormValues) {
     try {
       if (mode === "create") {
-        await createDepartment(values).unwrap();
-        toast.success("Department created successfully");
+        const res = await createDepartment(values).unwrap();
+        toast.success(res.message);
       }
 
       if (mode === "update" && department) {
-        await updateDepartment({
+        const res = await updateDepartment({
           id: department.id,
           body: values,
         }).unwrap();
-        toast.success("Department updated successfully");
+        toast.success(res.message);
       }
 
       router.push("/departments");

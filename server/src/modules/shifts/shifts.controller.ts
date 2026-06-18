@@ -38,7 +38,7 @@ export class ShiftsController {
   @ResponseMessage('Clock in successful')
   @Roles(Role.EMPLOYEE)
   @ApiOperation({ summary: 'Clock in current employee' })
-  clockIn(@CurrentUser() user: AuthenticatedUser) {
+  clockIn(@CurrentUser() user: AuthenticatedUser): Promise<null> {
     return this.shiftsService.clockIn(user.id);
   }
 
@@ -46,7 +46,7 @@ export class ShiftsController {
   @ResponseMessage('Clock out successful')
   @Roles(Role.EMPLOYEE)
   @ApiOperation({ summary: 'Clock out current employee' })
-  clockOut(@CurrentUser() user: AuthenticatedUser) {
+  clockOut(@CurrentUser() user: AuthenticatedUser): Promise<null> {
     return this.shiftsService.clockOut(user.id);
   }
 
@@ -85,8 +85,11 @@ export class ShiftsController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a manual shift record' })
   @ResponseMessage('Manual shift created successfully')
-  createManualShift(@Body() dto: ManualShiftDto) {
-    return this.shiftsService.createManualShift(dto);
+  createManualShift(
+    @Body() dto: ManualShiftDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.shiftsService.createManualShift(dto, user.id);
   }
 
   @Get('worked-hours')
@@ -106,7 +109,7 @@ export class ShiftsController {
   @Get('user/:userId/worked-hours')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get worked hours for one employee' })
-  getEmployeeWorkedHours(@Param('userId') userId: string) {
+  getEmployeeWorkedHours(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.shiftsService.getEmployeeWorkedHours(userId);
   }
 
@@ -121,7 +124,10 @@ export class ShiftsController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Delete one shift by id' })
   @ResponseMessage('Shift deleted successfully')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.shiftsService.remove(id);
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.shiftsService.remove(id, user.id);
   }
 }

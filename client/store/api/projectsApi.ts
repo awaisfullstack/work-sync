@@ -4,7 +4,6 @@ import type {
   AssignProjectMemberPayload,
   CreateProjectPayload,
   Project,
-  ProjectMember,
   ProjectOption,
   ProjectQuery,
   RemoveProjectMemberPayload,
@@ -20,46 +19,26 @@ export const projectsApi = baseApi.injectEndpoints({
       query: (params) => ({
         url: "/projects",
         method: "GET",
-        params
+        params,
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.data.items.map((project) => ({
-                type: "Projects" as const,
-                id: project.id,
-              })),
-              { type: "Projects" as const, id: "LIST" },
-            ]
-          : [{ type: "Projects" as const, id: "LIST" }],
+      providesTags: ["Projects"],
     }),
     getProjectById: builder.query<SuccessResponse<Project>, string>({
       query: (id) => ({
         url: `/projects/${id}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, id) => [
-        { type: "Projects" as const, id },
-      ],
+      providesTags: ["Projects"],
     }),
     getProjectOptions: builder.query<SuccessResponse<ProjectOption[]>, void>({
       query: () => ({
         url: "/projects/options",
         method: "GET",
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.data.map((project) => ({
-                type: "Projects" as const,
-                id: project.id,
-              })),
-              { type: "Projects" as const, id: "LIST" },
-            ]
-          : [{ type: "Projects" as const, id: "LIST" }],
+      providesTags: ["Projects"],
     }),
     createProject: builder.mutation<
-      SuccessResponse<Project>,
+      SuccessResponse<null>,
       CreateProjectPayload
     >({
       query: (body) => ({
@@ -67,14 +46,10 @@ export const projectsApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: [
-        { type: "Projects", id: "LIST" },
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Projects", "Dashboard", "ActivityLogs"],
     }),
     updateProject: builder.mutation<
-      SuccessResponse<Project>,
+      SuccessResponse<null>,
       UpdateProjectRequest
     >({
       query: ({ id, body }) => ({
@@ -82,27 +57,17 @@ export const projectsApi = baseApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Projects", id },
-        { type: "Projects", id: "LIST" },
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Projects", "Dashboard", "ActivityLogs"],
     }),
-    archiveProject: builder.mutation<SuccessResponse<Project>, string>({
+    archiveProject: builder.mutation<SuccessResponse<null>, string>({
       query: (id) => ({
         url: `/projects/${id}/archive`,
         method: "PATCH",
       }),
-      invalidatesTags: (_result, _error, id) => [
-        { type: "Projects", id },
-        { type: "Projects", id: "LIST" },
-        "Dashboard",
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Projects", "Dashboard", "ActivityLogs"],
     }),
     assignProjectMember: builder.mutation<
-      SuccessResponse<ProjectMember>,
+      SuccessResponse<null>,
       AssignProjectMemberPayload
     >({
       query: ({ projectId, userId, roleInProject }) => ({
@@ -110,25 +75,17 @@ export const projectsApi = baseApi.injectEndpoints({
         method: "POST",
         body: { userId, roleInProject },
       }),
-      invalidatesTags: (_result, _error, { projectId }) => [
-        { type: "Projects", id: projectId },
-        { type: "Projects", id: "LIST" },
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Projects", "Dashboard", "ActivityLogs"],
     }),
     removeProjectMember: builder.mutation<
-      SuccessResponse<Project>,
+      SuccessResponse<null>,
       RemoveProjectMemberPayload
     >({
       query: ({ projectId, userId }) => ({
         url: `/projects/${projectId}/members/${userId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_result, _error, { projectId }) => [
-        { type: "Projects", id: projectId },
-        { type: "Projects", id: "LIST" },
-        "ActivityLogs",
-      ],
+      invalidatesTags: ["Projects", "Dashboard", "ActivityLogs"],
     }),
   }),
 });

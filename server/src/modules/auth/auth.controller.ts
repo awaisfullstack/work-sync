@@ -64,6 +64,7 @@ export class AuthController {
   @ApiCookieAuth('access_token')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Logout and clear access token cookie' })
+  @ResponseMessage('Logged out successfully')
   logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('access_token');
     return this.authService.logout();

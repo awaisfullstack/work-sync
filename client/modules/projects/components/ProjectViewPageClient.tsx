@@ -53,8 +53,8 @@ export default function ProjectViewPageClient({
     if (!project) return;
 
     try {
-      await archiveProject(project.id).unwrap();
-      toast.success("Project archived successfully");
+      const res = await archiveProject(project.id).unwrap();
+      toast.success(res.message);
     } catch (error) {
       toast.error(formatApiError(error));
     }

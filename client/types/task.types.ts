@@ -1,4 +1,5 @@
 import type { Role } from "@/types/auth.types";
+import type { ProjectMemberRole } from "@/types/project.types";
 
 export enum TaskStatus {
   TODO = "TODO",
@@ -36,6 +37,19 @@ export interface TaskComment {
 export interface TaskProjectSummary {
   id: string;
   title: string;
+  members?: TaskProjectMember[];
+}
+
+export interface TaskProjectMember {
+  id: string;
+  userId: string;
+  roleInProject: ProjectMemberRole;
+  joinedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export interface TaskAssignment {
@@ -73,8 +87,8 @@ export interface TaskQuery {
   limit?: number;
   search?: string;
   projectId?: string;
-  startDate?: string;
-  endDate?: string;
+  fromDate?: string;
+  toDate?: string;
   status?: TaskStatus;
   sortBy?: TaskSortBy;
   sortOrder?: SortOrder;

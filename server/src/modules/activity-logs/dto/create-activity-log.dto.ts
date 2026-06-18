@@ -1,10 +1,4 @@
-import {
-  IsEnum,
-  IsObject,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import {
   ActivityAction,
   ActivityEntityType,
@@ -25,14 +19,6 @@ export class CreateActivityLogDto {
   @IsOptional()
   entityId?: string | null;
 
-  @IsUUID()
-  @IsOptional()
-  projectId?: string | null;
-
   @IsString()
   message!: string;
-
-  @IsObject()
-  @IsOptional()
-  metadata?: Record<string, unknown> | null;
 }

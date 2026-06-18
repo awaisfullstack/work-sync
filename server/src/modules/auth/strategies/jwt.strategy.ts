@@ -4,7 +4,10 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { UsersService } from '../../users/users.service';
-import { AuthenticatedUser, JwtPayload } from '../../../common/types/auth.types';
+import {
+  AuthenticatedUser,
+  JwtPayload,
+} from '../../../common/types/auth.types';
 import type { Request } from 'express';
 
 const cookieExtractor = (request: Request): string | null => {

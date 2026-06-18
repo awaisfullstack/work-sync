@@ -8,7 +8,6 @@ import { ProjectMember } from '../projects/entities/project-member.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { Shift } from '../shifts/entities/shift.entity';
 import { TaskStatus } from '../tasks/entities/task-status.entity';
-import { TaskComment } from '../tasks/entities/task-comment';
 import { TaskAssignment } from '../tasks/entities/task-assignment.entity';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 
@@ -20,7 +19,6 @@ import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
       ProjectMember,
       Task,
       TaskStatus,
-      TaskComment,
       TaskAssignment,
       Shift,
     ]),

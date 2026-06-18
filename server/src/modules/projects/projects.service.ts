@@ -16,6 +16,11 @@ import { ProjectQueryDto } from './dto/project-query.dto';
 import { Includeable, literal, Op, WhereOptions } from 'sequelize';
 import { AddProjectMemberDto } from './dto/add-project-member.dto';
 import { AuthenticatedUser } from '../../common/types/auth.types';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
+import {
+  ActivityAction,
+  ActivityEntityType,
+} from '../activity-logs/entities/activity-log.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -28,16 +33,27 @@ export class ProjectsService {
 
     @InjectModel(User)
     private readonly userModel: typeof User,
+
+    private readonly activityLogsService: ActivityLogsService,
   ) {}
 
   async create(dto: CreateProjectDto, createdById: string): Promise<null> {
-    await this.projectModel.create({
+    const project = await this.projectModel.create({
       title: dto.title,
       description: dto.description ?? null,
       createdById,
       status: dto.status ?? ProjectStatus.ACTIVE,
       deadline: dto.deadline ? new Date(dto.deadline) : null,
     });
+
+    await this.activityLogsService.create({
+      actorId: createdById,
+      action: ActivityAction.PROJECT_CREATED,
+      entityType: ActivityEntityType.PROJECT,
+      entityId: project.id,
+      message: `Project "${project.title}" was created.`,
+    });
+
     return null;
   }
 
@@ -181,7 +197,11 @@ export class ProjectsService {
     return project;
   }
 
-  async update(id: string, dto: UpdateProjectDto): Promise<Project> {
+  async update(
+    id: string,
+    dto: UpdateProjectDto,
+    actorId: string,
+  ): Promise<null> {
     const project = await this.findOne(id);
 
     await project.update({
@@ -191,10 +211,18 @@ export class ProjectsService {
       deadline: dto.deadline ? new Date(dto.deadline) : project.deadline,
     });
 
-    return project;
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.PROJECT_UPDATED,
+      entityType: ActivityEntityType.PROJECT,
+      entityId: project.id,
+      message: `Project "${project.title}" was updated.`,
+    });
+
+    return null;
   }
 
-  async archive(id: string): Promise<Project> {
+  async archive(id: string, actorId: string): Promise<null> {
     const project = await this.findOne(id);
 
     await project.update({
@@ -202,13 +230,22 @@ export class ProjectsService {
       archivedAt: new Date(),
     });
 
-    return project;
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.PROJECT_ARCHIVED,
+      entityType: ActivityEntityType.PROJECT,
+      entityId: project.id,
+      message: `Project "${project.title}" was archived.`,
+    });
+
+    return null;
   }
 
   async addMember(
     projectId: string,
     dto: AddProjectMemberDto,
-  ): Promise<ProjectMember> {
+    actorId: string,
+  ): Promise<null> {
     const project = await this.projectModel.findByPk(projectId);
 
     if (!project) {
@@ -238,27 +275,60 @@ export class ProjectsService {
       throw new ConflictException('User is already a member of this project');
     }
 
-    return this.projectMemberModel.create({
+    await this.projectMemberModel.create({
       projectId,
       userId: dto.userId,
       roleInProject: dto.roleInProject,
       joinedAt: new Date(),
     });
+
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.PROJECT_MEMBER_ADDED,
+      entityType: ActivityEntityType.PROJECT,
+      entityId: project.id,
+      message: `A member was added to project "${project.title}".`,
+    });
+
+    return null;
   }
 
-  async removeMember(projectId: string, userId: string): Promise<void> {
+  async removeMember(
+    projectId: string,
+    userId: string,
+    actorId: string,
+  ): Promise<null> {
     const member = await this.projectMemberModel.findOne({
       where: {
         projectId,
         userId,
       },
+      include: [
+        {
+          model: Project,
+          as: 'project',
+          attributes: ['id', 'title'],
+        },
+      ],
     });
 
     if (!member) {
       throw new NotFoundException('Project member not found');
     }
 
+    const projectTitle = member.project?.title ?? 'Unknown project';
+
     await member.destroy();
+
+    await this.activityLogsService.create({
+      actorId,
+      action: ActivityAction.PROJECT_MEMBER_REMOVED,
+      entityType: ActivityEntityType.PROJECT,
+      entityId: projectId,
+      message: `A member was removed from project "${projectTitle}".`,
+    });
+
+    return null;
   }
 
   async ensureEmployeeCanAccessProject(

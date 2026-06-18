@@ -29,7 +29,12 @@ import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
-import { getDateInputValue,formatDateInputValue,parseDateInputValue } from "@/lib/utils/index";
+import {
+  formatDateInputValue,
+  getDateInputValue,
+  parseDateInputValue,
+} from "@/lib/utils/dateInput";
+import { formatEnumLabel } from "@/lib/utils/label";
 
 interface ProjectFormProps {
   mode: "create" | "update";
@@ -154,7 +159,7 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
                 <SelectContent>
                   {Object.values(ProjectStatus).map((projectStatus) => (
                     <SelectItem key={projectStatus} value={projectStatus}>
-                      {projectStatus[0] + projectStatus.slice(1).toLowerCase()}
+                      {formatEnumLabel(projectStatus)}
                     </SelectItem>
                   ))}
                 </SelectContent>

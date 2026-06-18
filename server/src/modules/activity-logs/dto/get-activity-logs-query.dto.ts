@@ -28,20 +28,12 @@ export class GetActivityLogsQueryDto {
   actorId?: string;
 
   @IsOptional()
-  @IsUUID()
-  projectId?: string;
-
-  @IsOptional()
   @IsDateString()
   fromDate?: string;
 
   @IsOptional()
   @IsDateString()
   toDate?: string;
-
-  @IsOptional()
-  @IsIn(['createdAt', 'updatedAt'])
-  sortBy?: 'createdAt' | 'updatedAt' = 'createdAt';
 
   @IsOptional()
   @IsIn(['ASC', 'DESC'])

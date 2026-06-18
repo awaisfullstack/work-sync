@@ -2,11 +2,9 @@ import type {
   CreationOptional,
   InferAttributes,
   InferCreationAttributes,
-  NonAttribute,
 } from 'sequelize';
 
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
-import { User } from '../../users/entities/user.entity';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 @Table({
   tableName: 'departments',
   timestamps: true,
@@ -29,8 +27,4 @@ export class Department extends Model<
     unique: true,
   })
   declare name: string;
-
-  // the foreign key in the target model
-  @HasMany(() => User)
-  declare users?: NonAttribute<User[]>;
 }

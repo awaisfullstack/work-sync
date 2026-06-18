@@ -36,18 +36,9 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('task_statuses', {
-      [Sequelize.Op.or]: [
-        {
-          id: {
-            [Sequelize.Op.in]: taskStatuses.map((status) => status.id),
-          },
-        },
-        {
-          name: {
-            [Sequelize.Op.in]: taskStatuses.map((status) => status.name),
-          },
-        },
-      ],
+      id: {
+        [Sequelize.Op.in]: taskStatuses.map((status) => status.id),
+      },
     });
   },
 };

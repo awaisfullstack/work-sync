@@ -40,7 +40,6 @@ export function LoginForm({
   const {
     register,
     handleSubmit,
-  
     reset,
     formState: { errors },
   } = useForm<LoginFormValues>({

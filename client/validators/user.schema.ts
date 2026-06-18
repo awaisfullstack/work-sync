@@ -25,16 +25,9 @@ export const createUserSchema = z.object({
   departmentId: z.string().nullable(),
 });
 
-export const updateUserSchema = createUserSchema.extend({
-  password: z
-    .string()
-    .optional()
-    .or(z.literal(""))
-    .refine((value) => !value || value.length >= 8, {
-      message: "Password must be at least 8 characters",
-    }),
+export const updateUserSchema = createUserSchema.omit({
+  password: true,
 });
 
 export type CreateUserFormValues = z.infer<typeof createUserSchema>;
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
-export type UserFormValues = CreateUserFormValues | UpdateUserFormValues;

@@ -3,11 +3,8 @@ import { InjectModel } from '@nestjs/sequelize';
 import { ActivityLog } from './entities/activity-log.entity';
 import { CreateActivityLogDto } from './dto/create-activity-log.dto';
 import { User } from '../users/entities/user.entity';
-import { Role } from '../users/enums/users.enum';
-import { Project } from '../projects/entities/project.entity';
 import { GetActivityLogsQueryDto } from './dto/get-activity-logs-query.dto';
 import { Op, WhereOptions } from 'sequelize';
-import type { AuthenticatedUser } from '../../common/types/auth.types';
 
 @Injectable()
 export class ActivityLogsService {
@@ -22,13 +19,11 @@ export class ActivityLogsService {
       action: dto.action,
       entityType: dto.entityType,
       entityId: dto.entityId ?? null,
-      projectId: dto.projectId ?? null,
       message: dto.message,
-      metadata: dto.metadata ?? null,
-    } as ActivityLog);
+    });
   }
 
-  async findAll(query: GetActivityLogsQueryDto, user: AuthenticatedUser) {
+  async findAll(query: GetActivityLogsQueryDto) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const offset = (page - 1) * limit;
@@ -43,14 +38,8 @@ export class ActivityLogsService {
       where.entityType = query.entityType;
     }
 
-    if (user.role === Role.EMPLOYEE) {
-      where.actorId = user.id;
-    } else if (query.actorId) {
+    if (query.actorId) {
       where.actorId = query.actorId;
-    }
-
-    if (query.projectId) {
-      where.projectId = query.projectId;
     }
 
     if (query.fromDate || query.toDate) {
@@ -71,15 +60,11 @@ export class ActivityLogsService {
           as: 'actor',
           attributes: ['id', 'name', 'email', 'role'],
         },
-        {
-          model: Project,
-          attributes: ['id', 'title', 'status'],
-        },
       ],
       distinct: true,
       limit,
       offset,
-      order: [[query.sortBy ?? 'createdAt', query.sortOrder ?? 'DESC']],
+      order: [['createdAt', query.sortOrder ?? 'DESC']],
     });
 
     return {
@@ -101,46 +86,22 @@ export class ActivityLogsService {
           as: 'actor',
           attributes: ['id', 'name', 'email', 'role'],
         },
-        {
-          model: Project,
-          attributes: ['id', 'title', 'status'],
-        },
       ],
       limit,
       order: [['createdAt', 'DESC']],
     });
   }
 
-  async findRecentForUser(
-    userId: string,
-    projectIds: string[],
-    limit = 10,
-  ): Promise<ActivityLog[]> {
-    const activityScope =
-      projectIds.length > 0
-        ? {
-            [Op.or]: [
-              { actorId: userId },
-              {
-                projectId: {
-                  [Op.in]: projectIds,
-                },
-              },
-            ],
-          }
-        : { actorId: userId };
-
+  async findRecentForUser(userId: string, limit = 10): Promise<ActivityLog[]> {
     return this.activityLogModel.findAll({
-      where: activityScope,
+      where: {
+        actorId: userId,
+      },
       include: [
         {
           model: User,
           as: 'actor',
           attributes: ['id', 'name', 'email', 'role'],
-        },
-        {
-          model: Project,
-          attributes: ['id', 'title', 'status'],
         },
       ],
       limit,

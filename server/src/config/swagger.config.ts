@@ -24,7 +24,8 @@ export function setupSwagger(app: INestApplication): void {
         scheme: 'bearer',
         bearerFormat: 'JWT',
         name: 'Authorization',
-        description: 'Optional bearer token auth. Cookie auth is also supported.',
+        description:
+          'Optional bearer token auth. Cookie auth is also supported.',
         in: 'header',
       },
       'access-token',

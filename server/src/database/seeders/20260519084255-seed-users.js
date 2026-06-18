@@ -1,25 +1,6 @@
 'use strict';
 const bcrypt = require('bcrypt');
 
-const departments = [
-  {
-    id: '10000000-0000-4000-8000-000000000001',
-    name: 'Development',
-  },
-  {
-    id: '10000000-0000-4000-8000-000000000002',
-    name: 'Human Resources',
-  },
-  {
-    id: '10000000-0000-4000-8000-000000000003',
-    name: 'Operations',
-  },
-  {
-    id: '10000000-0000-4000-8000-000000000004',
-    name: 'Design',
-  },
-];
-
 const users = [
   {
     id: '20000000-0000-4000-8000-000000000001',
@@ -213,18 +194,9 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('users', {
-      [Sequelize.Op.or]: [
-        {
-          id: {
-            [Sequelize.Op.in]: users.map((user) => user.id),
-          },
-        },
-        {
-          email: {
-            [Sequelize.Op.in]: users.map((user) => user.email),
-          },
-        },
-      ],
+      id: {
+        [Sequelize.Op.in]: users.map((user) => user.id),
+      },
     });
   },
 };

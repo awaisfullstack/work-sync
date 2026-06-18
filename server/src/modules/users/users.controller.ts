@@ -25,6 +25,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/auth.types';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
@@ -38,8 +40,11 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create a user' })
   @ResponseMessage('User created successfully')
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  create(
+    @Body() createUserDto: CreateUserDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.usersService.create(createUserDto, user.id);
   }
 
   @Roles(Role.ADMIN)
@@ -78,31 +83,41 @@ export class UsersController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersService.update(id, updateUserDto);
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.usersService.update(id, updateUserDto, user.id);
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id/deactivate')
   @ApiOperation({ summary: 'Deactivate a user' })
   @ResponseMessage('User deactivated successfully')
-  deactivate(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.deactivate(id);
+  deactivate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.usersService.deactivate(id, user.id);
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id/activate')
   @ApiOperation({ summary: 'Activate a user' })
   @ResponseMessage('User activated successfully')
-  activate(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.activate(id);
+  activate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.usersService.activate(id, user.id);
   }
 
   @Roles(Role.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a user' })
   @ResponseMessage('User deleted successfully')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.remove(id);
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<null> {
+    return this.usersService.remove(id, user.id);
   }
 }
