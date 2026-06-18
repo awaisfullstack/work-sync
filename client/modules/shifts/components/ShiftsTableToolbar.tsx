@@ -69,7 +69,7 @@ export function ShiftsTableToolbar({
         </p>
       </div>
 
-      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:flex xl:w-auto xl:flex-wrap xl:items-center xl:justify-end">
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:flex xl:w-auto xl:flex-wrap xl:items-center">
         {isAdmin && (
           <Select
             disabled={isUsersLoading}
@@ -129,7 +129,7 @@ export function ShiftsTableToolbar({
         <DateRangePicker
           value={dateRange}
           onChange={onDateRangeChange}
-          className="w-full sm:col-span-2 lg:col-span-1 xl:w-[260px]"
+          className="w-full xl:w-[260px]"
           placeholder="Filter by shift date"
         />
 
@@ -137,7 +137,7 @@ export function ShiftsTableToolbar({
           <Button
             variant="outline"
             onClick={onReset}
-            className="w-full sm:col-span-2 lg:col-span-1 xl:w-auto"
+            className="w-full xl:w-auto"
           >
             <X className="mr-2 h-4 w-4" />
             Reset

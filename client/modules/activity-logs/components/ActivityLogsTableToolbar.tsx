@@ -143,7 +143,7 @@ export function ActivityLogsTableToolbar({
         <DateRangePicker
           value={dateRange}
           onChange={onDateRangeChange}
-          className="w-full sm:col-span-2 lg:col-span-1 xl:w-[260px]"
+          className="w-full xl:w-[260px]"
           placeholder="Filter by log date"
         />
 
@@ -151,7 +151,7 @@ export function ActivityLogsTableToolbar({
           <Button
             variant="outline"
             onClick={onReset}
-            className="w-full sm:col-span-2 lg:col-span-1 xl:w-auto"
+            className="w-full xl:w-auto"
           >
             <X className="mr-2 h-4 w-4" />
             Reset
