@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 
 import { AppController } from './app.controller';
@@ -24,8 +24,23 @@ import {
       load: [configuration],
       envFilePath: '.env',
     }),
-
-    SequelizeModule.forRoot(databaseConfig()),
+    SequelizeModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        dialect: 'postgres',
+        uri: config.get<string>('DATABASE_URL'),
+        autoLoadModels: true,
+        synchronize: false, // keep false in production, use migrations instead
+        dialectOptions: {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false, // Neon requires SSL
+          },
+        },
+      }),
+    }),
+    // SequelizeModule.forRoot(databaseConfig()),
     UsersModule,
     AuthModule,
     DepartmentsModule,
