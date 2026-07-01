@@ -39,7 +39,7 @@ export class AuthController {
     // Set the access token in a cookie
     response.cookie('access_token', result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
