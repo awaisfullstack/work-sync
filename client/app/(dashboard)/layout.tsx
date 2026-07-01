@@ -22,6 +22,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (isLoading) return;
     if (!userData) {
+      document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax; Secure";
       dispatch(logout());
       router.replace("/login");
       return;

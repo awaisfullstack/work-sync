@@ -9,11 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
@@ -56,6 +52,9 @@ export function LoginForm({
       const response = await login(values).unwrap();
       if (response.success) {
         dispatch(setUser(response.data.user));
+        // ✅ Set a client-accessible cookie on the NEXT.JS domain
+        // so middleware can read it
+        document?.cookie = "access_token=true; path=/; max-age=86400; SameSite=Lax; Secure";
         router.replace("/dashboard");
         toast.success(response.message || "Login successful!");
         reset();

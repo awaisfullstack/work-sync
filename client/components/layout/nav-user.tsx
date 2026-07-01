@@ -51,6 +51,7 @@ export function NavUser({
       // Local logout should still complete if the session is already expired.
     } finally {
       dispatch(logoutState());
+      document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax; Secure";
       dispatch(baseApi.util.resetApiState());
       router.replace("/login");
       toast.success(successMessage);
