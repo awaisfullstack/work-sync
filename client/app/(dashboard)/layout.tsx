@@ -12,6 +12,7 @@ import { logout, setUser } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
+import { deleteCookie } from "cookies-next";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const isAuth = useAppSelector((state) => state.auth.isAuthenticated);
@@ -22,13 +23,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (isLoading) return;
     if (!userData) {
-      document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax; Secure";
+      deleteCookie("access_token");
       dispatch(logout());
       router.replace("/login");
       return;
     }
     dispatch(setUser(userData.data));
-  }, [userData, isLoading, router, dispatch]);  
+  }, [userData, isLoading, router, dispatch]);
 
   if (isLoading || !isAuth) {
     return <AppLoader />;

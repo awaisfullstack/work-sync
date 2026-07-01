@@ -21,6 +21,7 @@ export interface LoginRequest {
 
 export interface AuthResponseData {
   user: AuthUser;
+  accessToken: string
 }
 
 

@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { formatApiError } from "@/lib/utils/formatError";
 import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
+import { setCookie } from "cookies-next";
 
 export function LoginForm({
   className,
@@ -51,10 +52,14 @@ export function LoginForm({
     try {
       const response = await login(values).unwrap();
       if (response.success) {
+        setCookie("access_token", response.data.accessToken, {
+          maxAge: 24 * 60 * 60, // 24 hours
+          path: "/",
+          sameSite: "lax",
+          secure: true,
+          // ❌ Don't use httpOnly here — client-side JS can't set httpOnly cookies
+        });
         dispatch(setUser(response.data.user));
-        // ✅ Set a client-accessible cookie on the NEXT.JS domain
-        // so middleware can read it
-        document?.cookie = "access_token=true; path=/; max-age=86400; SameSite=Lax; Secure";
         router.replace("/dashboard");
         toast.success(response.message || "Login successful!");
         reset();

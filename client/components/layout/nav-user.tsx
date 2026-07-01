@@ -24,6 +24,7 @@ import { logout as logoutState } from "@/store/slices/authSlice";
 import { baseApi } from "@/store/api/baseApi";
 import { useAppDispatch } from "@/store/hooks";
 import { getInitials } from "@/lib/utils/avatar";
+import { deleteCookie } from "cookies-next";
 
 export function NavUser({
   user,
@@ -50,8 +51,8 @@ export function NavUser({
     } catch {
       // Local logout should still complete if the session is already expired.
     } finally {
+      deleteCookie("access_token"); 
       dispatch(logoutState());
-      document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax; Secure";
       dispatch(baseApi.util.resetApiState());
       router.replace("/login");
       toast.success(successMessage);

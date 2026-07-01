@@ -31,23 +31,8 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Login and set access token cookie' })
   @ResponseMessage('User login successfully')
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const result = await this.authService.login(loginDto);
-    // Set the access token in a cookie
-    response.cookie('access_token', result.accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      domain: 'https://work-sync-kohl.vercel.app',
-    });
-
-    return {
-      user: result.user,
-    };
+  async login(@Body() loginDto: LoginDto) {
+    return await this.authService.login(loginDto);
   }
 
   @UseGuards(JwtAuthGuard)
