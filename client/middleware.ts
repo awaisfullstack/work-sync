@@ -12,7 +12,7 @@ const protectedRoutes = [
   "/activity-logs",
 ];
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const token = request.cookies.get(ACCESS_TOKEN_KEY)?.value;
