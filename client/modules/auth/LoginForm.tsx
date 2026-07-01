@@ -18,12 +18,12 @@ import { useLoginMutation } from "@/store/api/authApi";
 import { FieldErrors, useForm } from "react-hook-form";
 import { LoginFormValues, loginSchema } from "@/validators/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { setCookie } from "cookies-next";
 import { setUser } from "@/store/slices/authSlice";
 import { toast } from "sonner";
 import { formatApiError } from "@/lib/utils/formatError";
 import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
-import { setCookie } from "cookies-next";
 
 export function LoginForm({
   className,
@@ -53,11 +53,10 @@ export function LoginForm({
       const response = await login(values).unwrap();
       if (response.success) {
         setCookie("access_token", response.data.accessToken, {
-          maxAge: 24 * 60 * 60, // 24 hours
+          maxAge: 24 * 60 * 60,
           path: "/",
           sameSite: "lax",
           secure: true,
-          // ❌ Don't use httpOnly here — client-side JS can't set httpOnly cookies
         });
         dispatch(setUser(response.data.user));
         router.replace("/dashboard");
