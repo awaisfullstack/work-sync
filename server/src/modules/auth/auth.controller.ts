@@ -42,6 +42,7 @@ export class AuthController {
       secure: true,
       sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      domain: 'https://work-sync-kohl.vercel.app',
     });
 
     return {
