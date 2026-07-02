@@ -96,9 +96,9 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem disabled={isLoading} onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleLogout}>
               <SignOutIcon />
-              {isLoading ? "Logging out..." : "Log out"}
+              {"Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
