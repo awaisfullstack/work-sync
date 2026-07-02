@@ -59,9 +59,9 @@ export function LoginForm({
           secure: true,
         });
         dispatch(setUser(response.data.user));
-        router.replace("/dashboard");
         toast.success(response.message || "Login successful!");
         reset();
+        router.replace("/dashboard");
       }
     } catch (error: unknown) {
       const message = formatApiError(error);

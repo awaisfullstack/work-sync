@@ -12,13 +12,16 @@ import { logout, setUser } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
-import { deleteCookie } from "cookies-next";
+import { deleteCookie, getCookie } from "cookies-next";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const isAuth = useAppSelector((state) => state.auth.isAuthenticated);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { data: userData, isLoading } = useGetMeQuery();
+  const token = getCookie("access_token");
+  const { data: userData, isLoading } = useGetMeQuery(undefined, {
+    skip: !token, // 
+  });
 
   useEffect(() => {
     if (isLoading) return;

@@ -12,6 +12,13 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   credentials: "include",
   timeout: 10000,
+  prepareHeaders: (headers) => {
+    const token = getCookie("access_token");
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
 });
 
 const baseQueryWithAuth: BaseQueryFn<
@@ -19,31 +26,15 @@ const baseQueryWithAuth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  if (typeof window !== "undefined") {
-    const accessToken = getCookie("access_token") as string | undefined;
-
-    if (accessToken) {
-      const request: FetchArgs =
-        typeof args === "string"
-          ? { url: args, headers: { Authorization: `Bearer ${accessToken}` } }
-          : {
-              ...args,
-              headers: {
-                ...(args.headers ?? {}),
-                Authorization: `Bearer ${accessToken}`,
-              },
-            };
-
-      args = request;
-    }
-  }
-
   const result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
     api.dispatch(logout());
 
-    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/login"
+    ) {
       window.location.replace("/login");
     }
   }
