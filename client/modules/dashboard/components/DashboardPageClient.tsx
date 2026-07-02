@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import {
   Activity,
   BriefcaseBusiness,
@@ -16,7 +16,6 @@ import {
 import LoadTableError from "@/components/common/LoadTableError";
 import { formatDateTime } from "@/lib/utils/formatDate";
 import { formatDecimalHoursDuration } from "@/lib/utils/duration";
-import { logFrontendError } from "@/lib/logger/frontendLogger";
 import { DashboardRecentActivity } from "@/modules/dashboard/components/DashboardRecentActivity";
 import { useGetDashboardQuery } from "@/store/api/dashboardApi";
 import { useAppSelector } from "@/store/hooks";
@@ -155,29 +154,13 @@ export default function DashboardPageClient({
   initialDashboard,
 }: DashboardPageClientProps) {
   const currentUser = useAppSelector((state) => state.auth.user);
-  const { data, isLoading, isError, error, refetch } = useGetDashboardQuery(
+  const { data, isLoading, isError, refetch } = useGetDashboardQuery(
     undefined,
     {
       skip: !!initialDashboard,
     },
   );
-  const loggedDashboardError = useRef(false);
   const dashboard = data?.data ?? initialDashboard;
-
-  useEffect(() => {
-    if (!isError || loggedDashboardError.current) {
-      return;
-    }
-
-    loggedDashboardError.current = true;
-    void logFrontendError("Dashboard fetch error", error, {
-      source: "dashboard.fetch",
-      metadata: {
-        userId: currentUser?.id ?? null,
-        role: currentUser?.role ?? null,
-      },
-    });
-  }, [currentUser?.id, currentUser?.role, error, isError]);
 
   if (isLoading && !dashboard) {
     return <DashboardLoading />;

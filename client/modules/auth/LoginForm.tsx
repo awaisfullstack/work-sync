@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,17 +14,14 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
-import { useLoginMutation } from "@/store/api/authApi";
 
-import { FieldErrors, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { LoginFormValues, loginSchema } from "@/validators/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { setCookie } from "cookies-next";
 import { setUser } from "@/store/slices/authSlice";
 import { toast } from "sonner";
 import { formatApiError } from "@/lib/utils/formatError";
-import { logFrontendError } from "@/lib/logger/frontendLogger";
-import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
+import { loginAction } from "@/app/actions/auth.actions";
 
 export function LoginForm({
   className,
@@ -31,8 +29,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-
-  const [login, { isLoading }] = useLoginMutation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -49,35 +46,26 @@ export function LoginForm({
   });
 
   async function onSubmit(values: LoginFormValues) {
+    setIsSubmitting(true);
+
     try {
-      const response = await login(values).unwrap();
-      if (response.success) {
-        setCookie("access_token", response.data.accessToken, {
-          maxAge: 24 * 60 * 60,
-          path: "/",
-          sameSite: "lax",
-          secure: true,
-        });
-        dispatch(setUser(response.data.user));
-        toast.success(response.message || "Login successful!");
+      // Call server action — sets httpOnly cookie server-side
+      const result = await loginAction(values);
+
+      if (result.success) {
+        dispatch(setUser(result.user)); // update Redux
+        toast.success(result.message || "Login successful!");
         reset();
-        router.replace("/dashboard");
+        router.replace("/dashboard"); // middleware sees cookie 
+      } else {
+        toast.error(result.message);
       }
     } catch (error: unknown) {
       const message = formatApiError(error);
-      void logFrontendError("Login error", error, {
-        source: "auth.login",
-        metadata: {
-          email: values.email,
-          message,
-        },
-      });
       toast.error(message);
+    } finally {
+      setIsSubmitting(false);
     }
-  }
-
-  function onInvalid(errors: FieldErrors<LoginFormValues>) {
-    void logFormValidationIssue("Login", errors, "auth.login.form");
   }
 
   return (
@@ -87,7 +75,7 @@ export function LoginForm({
         <CardDescription>Login to continue to WorkSync</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -118,8 +106,8 @@ export function LoginForm({
               )}
             </Field>
             <Field>
-              <Button disabled={isLoading} type="submit">
-                {isLoading ? "Logging in..." : "Login"}
+              <Button disabled={isSubmitting} type="submit">
+                {isSubmitting ? "Logging in..." : "Login"}
               </Button>
             </Field>
           </FieldGroup>

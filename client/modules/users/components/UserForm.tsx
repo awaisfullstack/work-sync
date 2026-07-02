@@ -23,8 +23,6 @@ import {
   type CreateUserFormValues,
   type UpdateUserFormValues,
 } from "@/validators/user.schema";
-import { logFrontendError } from "@/lib/logger/frontendLogger";
-import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
 import {
   useCreateUserMutation,
@@ -95,28 +93,15 @@ export function UserForm({ mode, user }: UserFormProps) {
       router.push("/users");
     } catch (error) {
       const message = formatApiError(error);
-      void logFrontendError("User form submit error", error, {
-        source: "users.form.submit",
-        metadata: {
-          mode,
-          userId: user?.id ?? null,
-          email: values.email,
-          message,
-        },
-      });
       setError("root", {
         message,
       });
     }
   }
 
-  function onInvalid(errors: FieldErrors<UserFormFields>) {
-    void logFormValidationIssue("User", errors, "users.form.validation");
-  }
-
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, onInvalid)}
+      onSubmit={handleSubmit(onSubmit)}
       className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
     >
       {errors.root?.message && (

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, FieldErrors, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetUserOptionsQuery } from "@/store/api/usersApi";
-import { logFrontendError } from "@/lib/logger/frontendLogger";
-import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
 import {
   manualShiftSchema,
@@ -81,28 +79,13 @@ export function ManualShiftForm() {
       router.push("/shifts");
     } catch (error) {
       const message = formatApiError(error);
-      void logFrontendError("Manual shift form submit error", error, {
-        source: "shifts.manual.form.submit",
-        metadata: {
-          userId: values.userId,
-          message,
-        },
-      });
       setError("root", { message });
     }
   }
 
-  function onInvalid(errors: FieldErrors<ManualShiftFormValues>) {
-    void logFormValidationIssue(
-      "Manual shift",
-      errors,
-      "shifts.manual.form.validation",
-    );
-  }
-
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, onInvalid)}
+      onSubmit={handleSubmit(onSubmit)}
       className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
     >
       {errors.root?.message && (

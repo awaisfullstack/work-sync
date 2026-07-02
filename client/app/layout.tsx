@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { ReduxProvider } from "@/providers/ReduxProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { FrontendErrorLogger } from "@/components/common/FrontendErrorLogger";
 
 const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -43,7 +42,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <FrontendErrorLogger />
         <ReduxProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </ReduxProvider>

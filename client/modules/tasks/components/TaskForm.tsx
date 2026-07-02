@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, FieldErrors, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useGetProjectOptionsQuery } from "@/store/api/projectsApi";
-import { logFrontendError } from "@/lib/logger/frontendLogger";
-import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { formatApiError } from "@/lib/utils/formatError";
 import { taskSchema, type TaskFormValues } from "@/validators/task.schema";
 import { TaskStatus, type Task } from "@/types/task.types";
@@ -99,27 +97,15 @@ export function TaskForm({ mode, task }: TaskFormProps) {
       router.push("/tasks");
     } catch (error) {
       const message = formatApiError(error);
-      void logFrontendError("Task form submit error", error, {
-        source: "tasks.form.submit",
-        metadata: {
-          mode,
-          taskId: task?.id ?? null,
-          message,
-        },
-      });
       setError("root", {
         message,
       });
     }
   }
 
-  function onInvalid(errors: FieldErrors<TaskFormValues>) {
-    void logFormValidationIssue("Task", errors, "tasks.form.validation");
-  }
-
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, onInvalid)}
+      onSubmit={handleSubmit(onSubmit)}
       className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
     >
       {errors.root?.message && (

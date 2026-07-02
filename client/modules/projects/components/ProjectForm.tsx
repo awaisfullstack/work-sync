@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, FieldErrors, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,6 @@ import {
   projectSchema,
 } from "@/validators/project.schema";
 import { formatApiError } from "@/lib/utils/formatError";
-import { logFrontendError } from "@/lib/logger/frontendLogger";
-import { logFormValidationIssue } from "@/lib/logger/formValidationLogger";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -89,27 +87,15 @@ export function ProjectForm({ mode, project }: ProjectFormProps) {
       router.push("/projects");
     } catch (error) {
       const message = formatApiError(error);
-      void logFrontendError("Project form submit error", error, {
-        source: "projects.form.submit",
-        metadata: {
-          mode,
-          projectId: project?.id ?? null,
-          message,
-        },
-      });
       setError("root", {
         message,
       });
     }
   }
 
-  function onInvalid(errors: FieldErrors<ProjectFormValues>) {
-    void logFormValidationIssue("Project", errors, "projects.form.validation");
-  }
-
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, onInvalid)}
+      onSubmit={handleSubmit(onSubmit)}
       className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
     >
       {errors.root?.message && (

@@ -19,12 +19,11 @@ import { CaretUpDownIcon, SignOutIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { useLogoutMutation } from "@/store/api/authApi";
 import { logout as logoutState } from "@/store/slices/authSlice";
 import { baseApi } from "@/store/api/baseApi";
 import { useAppDispatch } from "@/store/hooks";
 import { getInitials } from "@/lib/utils/avatar";
-import { deleteCookie } from "cookies-next";
+import { logoutAction } from "@/app/actions/auth.actions";
 
 export function NavUser({
   user,
@@ -38,25 +37,15 @@ export function NavUser({
   const { isMobile } = useSidebar();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [logout, { isLoading }] = useLogoutMutation();
 
   async function handleLogout() {
-    let successMessage = "Logged out successfully";
+    const successMessage = "Logged out successfully";
 
-    try {
-      const res = await logout().unwrap();
-      successMessage = Array.isArray(res.message)
-        ? res.message.join(", ")
-        : res.message;
-    } catch {
-      // Local logout should still complete if the session is already expired.
-    } finally {
-      deleteCookie("access_token"); 
-      dispatch(logoutState());
-      dispatch(baseApi.util.resetApiState());
-      router.replace("/login");
-      toast.success(successMessage);
-    }
+    await logoutAction();
+    dispatch(logoutState());
+    // dispatch(baseApi.util.resetApiState());
+    router.replace("/login");
+    toast.success(successMessage);
   }
 
   return (
